@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { Link } from "react-router-dom";
 import {
   demoIntro,
   scaleStats,
@@ -26,6 +27,7 @@ export type ThreadItem =
       kind: "searching";
       id: string;
       stepMs: number;
+      steps?: readonly string[];
     };
 
 interface QueryThreadProps {
@@ -434,6 +436,18 @@ function DemoGuide({
         )}
       </div>
 
+      <div className="flex flex-wrap items-center gap-2">
+        <Link
+          to="/ai"
+          className="rounded-lg border-2 border-navy bg-white px-4 py-2.5 text-sm font-bold text-navy transition-colors hover:bg-navy hover:text-white"
+        >
+          AI Mode を試す
+        </Link>
+        <p className="text-[11px] text-muted">
+          登録ナレッジを検索して根拠付きで回答します
+        </p>
+      </div>
+
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
         {stats.map((s) => (
           <div
@@ -534,7 +548,11 @@ export function QueryThread({
               >
                 {presentation ? "登録ナレッジを検索中" : "GembaShift"}
               </p>
-              <SearchSteps stepMs={item.stepMs} large={presentation} />
+              <SearchSteps
+                stepMs={item.stepMs}
+                large={presentation}
+                steps={item.steps}
+              />
             </div>
           );
         }

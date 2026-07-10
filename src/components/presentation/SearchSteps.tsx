@@ -6,30 +6,29 @@ interface SearchStepsProps {
   onComplete?: () => void;
   /** Presentation / 動画用の大きめ表示 */
   large?: boolean;
+  steps?: readonly string[];
 }
 
 export function SearchSteps({
   stepMs = 450,
   onComplete,
   large = false,
+  steps = presentationSearchSteps,
 }: SearchStepsProps) {
   const [index, setIndex] = useState(0);
 
   useEffect(() => {
     setIndex(0);
     const timers: number[] = [];
-    presentationSearchSteps.forEach((_, i) => {
+    steps.forEach((_, i) => {
       if (i === 0) return;
       timers.push(window.setTimeout(() => setIndex(i), stepMs * i));
     });
     timers.push(
-      window.setTimeout(
-        () => onComplete?.(),
-        stepMs * presentationSearchSteps.length,
-      ),
+      window.setTimeout(() => onComplete?.(), stepMs * steps.length),
     );
     return () => timers.forEach((t) => window.clearTimeout(t));
-  }, [stepMs, onComplete]);
+  }, [stepMs, onComplete, steps]);
 
   return (
     <div
@@ -37,7 +36,7 @@ export function SearchSteps({
         large ? "text-base sm:text-lg" : "text-sm"
       }`}
     >
-      {presentationSearchSteps.map((step, i) => {
+      {steps.map((step, i) => {
         const done = i < index;
         const active = i === index;
         return (

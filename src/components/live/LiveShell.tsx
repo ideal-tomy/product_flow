@@ -1,11 +1,14 @@
 import type { ReactNode } from "react";
+import { Link } from "react-router-dom";
 import { scaleStats } from "../../data/gembashift-demo";
+import { knowledgeStats } from "../../ai/knowledge";
 
 interface LiveShellProps {
   onOpenDocs: () => void;
   onOpenQueries?: () => void;
   presentation?: boolean;
   autoplay?: boolean;
+  mode?: "sample" | "ai";
   onTogglePresentation?: () => void;
   onWatchVideo?: () => void;
   onExitVideo?: () => void;
@@ -18,12 +21,15 @@ export function LiveShell({
   onOpenQueries,
   presentation = false,
   autoplay = false,
+  mode = "sample",
   onTogglePresentation,
   onWatchVideo,
   onExitVideo,
   hideChrome = false,
   children,
 }: LiveShellProps) {
+  const isAi = mode === "ai";
+
   return (
     <div className="relative flex h-dvh flex-col overflow-hidden bg-surface/40">
       <header className="flex h-12 shrink-0 items-center gap-2 border-b border-line bg-white px-3 sm:gap-3 sm:px-4">
@@ -54,7 +60,14 @@ export function LiveShell({
         </span>
         <span className="hidden h-4 w-px bg-line sm:block" aria-hidden="true" />
         <div className="min-w-0 flex-1 truncate text-sm text-navy-muted">
-          {presentation ? (
+          {isAi ? (
+            <span className="tabular-nums">
+              {knowledgeStats.documents} docs · {knowledgeStats.chunks} chunks
+              <span className="ml-2 rounded bg-navy px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white">
+                AI
+              </span>
+            </span>
+          ) : presentation ? (
             <span className="tabular-nums">
               {scaleStats.documents} docs · {scaleStats.pages.toLocaleString()}{" "}
               pages
@@ -69,7 +82,7 @@ export function LiveShell({
           )}
         </div>
 
-        {!presentation && onWatchVideo && (
+        {!isAi && !presentation && onWatchVideo && (
           <button
             type="button"
             onClick={onWatchVideo}
@@ -89,7 +102,32 @@ export function LiveShell({
           </button>
         )}
 
-        {onTogglePresentation && !autoplay && (
+        {!autoplay && (
+          <div className="flex shrink-0 rounded-md border border-line p-0.5 text-[11px]">
+            <Link
+              to="/"
+              className={`rounded px-2 py-1 font-medium transition-colors ${
+                !isAi
+                  ? "bg-navy text-white"
+                  : "text-muted hover:text-navy"
+              }`}
+            >
+              Sample
+            </Link>
+            <Link
+              to="/ai"
+              className={`rounded px-2 py-1 font-bold transition-colors ${
+                isAi
+                  ? "bg-navy text-white"
+                  : "text-muted hover:text-navy"
+              }`}
+            >
+              AI Mode
+            </Link>
+          </div>
+        )}
+
+        {onTogglePresentation && !autoplay && !isAi && (
           <div className="hidden shrink-0 rounded-md border border-line p-0.5 text-[11px] sm:flex">
             <button
               type="button"
@@ -115,7 +153,7 @@ export function LiveShell({
             </button>
           </div>
         )}
-        {!presentation && (
+        {!presentation && !isAi && (
           <span
             className="hidden text-xs text-muted lg:inline"
             title="比較対象（表示のみ）"

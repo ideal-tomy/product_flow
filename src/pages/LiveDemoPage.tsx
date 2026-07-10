@@ -7,12 +7,12 @@ import {
   type SourceReference,
 } from "../data/gembashift-demo";
 import {
-  matchScenario,
   nextPresetAfter,
   scenarioSuggestions,
   unmatchedSuggestions,
   type ScenarioId,
 } from "../data/question-aliases";
+import { sampleEngine } from "../engines";
 import type { QueryCatalogItem } from "../data/query-catalog";
 import { presentationSearchSteps } from "../data/presentation-script";
 import { usePresentationMode } from "../hooks/usePresentationMode";
@@ -206,11 +206,9 @@ export function LiveDemoPage() {
       const trimmed = text.trim();
       if (!trimmed || loading) return;
 
-      const matchedId = matchScenario(trimmed);
       const loadingId = nextId();
 
       setLoading(true);
-      setActiveQueryId(matchedId);
       setFocusActive(presentation);
       setShowTagline(false);
       setShowIntro(false);
@@ -231,44 +229,43 @@ export function LiveDemoPage() {
           timings.stepMs * presentationSearchSteps.length + 80;
 
         window.setTimeout(() => {
-          setThread((prev) => {
-            const withoutSearching = prev.filter((i) => i.id !== loadingId);
-            if (!matchedId) {
+          void sampleEngine.ask({ question: trimmed, mode: "sample" }).then((result) => {
+            const matchedId = result.scenarioId ?? null;
+            setActiveQueryId(matchedId);
+            setThread((prev) => {
+              const withoutSearching = prev.filter((i) => i.id !== loadingId);
+              if (!matchedId) {
+                return [
+                  ...withoutSearching,
+                  {
+                    kind: "assistant",
+                    id: nextId(),
+                    unmatched: true,
+                    answer: result.answer,
+                    suggestions: unmatchedSuggestions,
+                  },
+                ];
+              }
+
+              lastAnswerSources.current = result.answer.sources;
               return [
                 ...withoutSearching,
                 {
                   kind: "assistant",
                   id: nextId(),
-                  unmatched: true,
-                  answer: {
-                    summary:
-                      "このサンプルでは、変更点・影響範囲・再試験・文書矛盾・類似不具合などに回答できます。近い質問を選んでください。",
-                    sources: [],
-                  },
-                  suggestions: unmatchedSuggestions,
+                  answer: result.answer,
+                  scenarioId: matchedId,
+                  presentation: true,
                 },
               ];
+            });
+
+            if (matchedId) {
+              setInput(nextPresetAfter[matchedId] ?? "");
             }
-
-            const scenario = byId(matchedId);
-            lastAnswerSources.current = scenario.answer.sources;
-            return [
-              ...withoutSearching,
-              {
-                kind: "assistant",
-                id: nextId(),
-                answer: scenario.answer,
-                scenarioId: matchedId,
-                presentation: true,
-              },
-            ];
+            setLoading(false);
+            window.setTimeout(() => setFocusActive(false), 400);
           });
-
-          if (matchedId) {
-            setInput(nextPresetAfter[matchedId] ?? "");
-          }
-          setLoading(false);
-          window.setTimeout(() => setFocusActive(false), 400);
         }, delay);
         return;
       }
@@ -281,42 +278,41 @@ export function LiveDemoPage() {
       setInput("");
 
       window.setTimeout(() => {
-        setThread((prev) => {
-          const withoutLoading = prev.filter((i) => i.id !== loadingId);
-          if (!matchedId) {
+        void sampleEngine.ask({ question: trimmed, mode: "sample" }).then((result) => {
+          const matchedId = result.scenarioId ?? null;
+          setActiveQueryId(matchedId);
+          setThread((prev) => {
+            const withoutLoading = prev.filter((i) => i.id !== loadingId);
+            if (!matchedId) {
+              return [
+                ...withoutLoading,
+                {
+                  kind: "assistant",
+                  id: nextId(),
+                  unmatched: true,
+                  answer: result.answer,
+                  suggestions: unmatchedSuggestions,
+                },
+              ];
+            }
+
+            lastAnswerSources.current = result.answer.sources;
             return [
               ...withoutLoading,
               {
                 kind: "assistant",
                 id: nextId(),
-                unmatched: true,
-                answer: {
-                  summary:
-                    "このサンプルでは、変更点・影響範囲・再試験・文書矛盾・類似不具合などに回答できます。近い質問を選んでください。",
-                  sources: [],
-                },
-                suggestions: unmatchedSuggestions,
+                answer: result.answer,
+                scenarioId: matchedId,
               },
             ];
+          });
+
+          if (matchedId) {
+            setInput(nextPresetAfter[matchedId] ?? "");
           }
-
-          const scenario = byId(matchedId);
-          lastAnswerSources.current = scenario.answer.sources;
-          return [
-            ...withoutLoading,
-            {
-              kind: "assistant",
-              id: nextId(),
-              answer: scenario.answer,
-              scenarioId: matchedId,
-            },
-          ];
+          setLoading(false);
         });
-
-        if (matchedId) {
-          setInput(nextPresetAfter[matchedId] ?? "");
-        }
-        setLoading(false);
       }, 850);
     },
     [loading, presentation, timings.stepMs],
@@ -391,6 +387,7 @@ export function LiveDemoPage() {
       onOpenQueries={() => openSidebar("queries")}
       presentation={presentation}
       autoplay={autoplay}
+      mode="sample"
       onTogglePresentation={() => setPresentation(!presentation)}
       onWatchVideo={watchVideo}
       onExitVideo={exitVideo}
