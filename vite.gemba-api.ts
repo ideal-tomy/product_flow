@@ -35,10 +35,18 @@ async function handleAsk(req: IncomingMessage, res: ServerResponse) {
   }
 
   let question = "";
+  let packId: "work-procedure" | "inspection" | "tcu-480" | undefined;
   try {
     const raw = await readBody(req);
-    const body = JSON.parse(raw) as { question?: string };
+    const body = JSON.parse(raw) as { question?: string; packId?: string };
     question = body.question?.trim() ?? "";
+    if (
+      body.packId === "work-procedure" ||
+      body.packId === "inspection" ||
+      body.packId === "tcu-480"
+    ) {
+      packId = body.packId;
+    }
   } catch {
     res.statusCode = 400;
     res.setHeader("Content-Type", "application/json");
@@ -46,7 +54,7 @@ async function handleAsk(req: IncomingMessage, res: ServerResponse) {
     return;
   }
 
-  const result = await askGemba(question, { allowLlm: true });
+  const result = await askGemba(question, { allowLlm: true, packId });
   res.statusCode = 200;
   res.setHeader("Content-Type", "application/json");
   res.end(JSON.stringify(result));

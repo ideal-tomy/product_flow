@@ -46,6 +46,8 @@ export function detectIntent(question: string): AskIntent {
   if (
     n.includes("再試験") ||
     n.includes("再検証") ||
+    n.includes("再教育") ||
+    n.includes("再検査") ||
     n.includes("試験が必要") ||
     n.includes("どの試験")
   ) {
@@ -56,6 +58,7 @@ export function detectIntent(question: string): AskIntent {
     n.includes("不具合") ||
     n.includes("過去事例") ||
     n.includes("類似") ||
+    n.includes("ヒヤリハット") ||
     n.includes("事例") ||
     n.includes("case-")
   ) {
@@ -67,6 +70,7 @@ export function detectIntent(question: string): AskIntent {
     n.includes("大丈夫") ||
     n.includes("量産") ||
     n.includes("gate") ||
+    n.includes("適用して") ||
     n.includes("承認して")
   ) {
     return "approval";
@@ -76,7 +80,9 @@ export function detectIntent(question: string): AskIntent {
     n.includes("影響") ||
     n.includes("波及") ||
     n.includes("どこが変わる") ||
-    n.includes("影響範囲")
+    n.includes("影響範囲") ||
+    n.includes("誰が影響") ||
+    n.includes("誰に影響")
   ) {
     return "impact";
   }
@@ -97,7 +103,7 @@ export function detectIntent(question: string): AskIntent {
     n.includes("tcu-480") ||
     n.includes("tcu480") ||
     n.includes("製品概要") ||
-    n.includes("出荷")
+    n.includes("累計出荷")
   ) {
     return "company";
   }
@@ -110,6 +116,10 @@ export function detectIntent(question: string): AskIntent {
     n.includes("v3.4") ||
     n.includes("3.2") ||
     n.includes("3.4") ||
+    n.includes("v2.1") ||
+    n.includes("v3.0") ||
+    n.includes("rev.b") ||
+    n.includes("rev.c") ||
     n.includes("何が変")
   ) {
     return "version_diff";
@@ -120,15 +130,35 @@ export function detectIntent(question: string): AskIntent {
 
 /** 意図に応じて加点する category */
 export const intentCategoryBoost: Record<AskIntent, string[]> = {
-  version_diff: ["control_specification", "change_history"],
+  version_diff: [
+    "control_specification",
+    "change_history",
+    "change_notice",
+    "sop",
+    "inspection",
+  ],
   contradiction: [
     "control_specification",
     "component_specification",
     "test_specification",
     "quality_audit",
+    "checklist",
+    "criteria",
   ],
-  retest: ["test_specification", "compliance_matrix", "change_history"],
-  similar_case: ["defect_cases", "fmea", "control_specification"],
+  retest: [
+    "test_specification",
+    "compliance_matrix",
+    "change_history",
+    "training",
+    "retest",
+  ],
+  similar_case: [
+    "defect_cases",
+    "fmea",
+    "control_specification",
+    "incident",
+    "nonconformance",
+  ],
   approval: [
     "work_instruction",
     "design_review",
@@ -136,9 +166,18 @@ export const intentCategoryBoost: Record<AskIntent, string[]> = {
     "fmea",
     "test_specification",
     "compliance_matrix",
+    "approval",
   ],
-  impact: ["fmea", "control_specification", "test_specification", "change_history"],
-  qms: ["compliance_matrix", "work_instruction", "quality_audit"],
+  impact: [
+    "fmea",
+    "control_specification",
+    "test_specification",
+    "change_history",
+    "sop",
+    "inspection",
+    "training",
+  ],
+  qms: ["compliance_matrix", "work_instruction", "quality_audit", "qms"],
   company: ["company_profile"],
   general: [],
   refuse: [],

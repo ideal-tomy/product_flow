@@ -1,4 +1,5 @@
 import type { AskResult } from "../engines/types";
+import type { KnowledgePackId } from "../packs/types";
 import { detectIntent } from "./intent";
 import { askWithOpenAI } from "./openai";
 import { retrieveChunks } from "./retrieve";
@@ -7,6 +8,7 @@ import { synthesizeAnswer } from "./synthesize";
 export type AskGembaOptions = {
   /** true のときだけ OpenAI を試す（サーバ側） */
   allowLlm?: boolean;
+  packId?: KnowledgePackId;
 };
 
 /**
@@ -19,6 +21,8 @@ export async function askGemba(
   options: AskGembaOptions = {},
 ): Promise<AskResult> {
   const trimmed = question.trim();
+  const packId = options.packId;
+
   if (!trimmed) {
     return {
       answer: {
@@ -32,6 +36,7 @@ export async function askGemba(
         refused: true,
         engine: "rag",
         intent: "refuse",
+        packId,
       },
       scenarioId: null,
     };
@@ -39,16 +44,21 @@ export async function askGemba(
 
   const intent = detectIntent(trimmed);
   if (intent === "refuse") {
-    return synthesizeAnswer(trimmed);
+    return synthesizeAnswer(trimmed, packId);
   }
 
   if (options.allowLlm) {
-    const { hits } = retrieveChunks(trimmed, { intent, topK: 10 });
+    const { hits } = retrieveChunks(trimmed, { intent, topK: 10, packId });
     if (hits.length > 0) {
       const llm = await askWithOpenAI(trimmed, intent, hits);
-      if (llm) return llm;
+      if (llm) {
+        return {
+          ...llm,
+          meta: { ...llm.meta, packId },
+        };
+      }
     }
   }
 
-  return synthesizeAnswer(trimmed);
+  return synthesizeAnswer(trimmed, packId);
 }

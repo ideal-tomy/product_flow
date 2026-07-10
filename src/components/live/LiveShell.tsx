@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
-import { knowledgeStats } from "../../ai/knowledge";
-import { scaleStats } from "../../data/gembashift-demo";
+import type { KnowledgePackId } from "../../packs/types";
+import { PackSwitcher } from "./PackSwitcher";
 
 interface LiveShellProps {
   onOpenDocs: () => void;
@@ -13,6 +13,12 @@ interface LiveShellProps {
   onWatchVideo?: () => void;
   onExitVideo?: () => void;
   hideChrome?: boolean;
+  /** ヘッダー中央の案件名 */
+  packTitle?: string;
+  packId?: KnowledgePackId;
+  onPackChange?: (id: KnowledgePackId) => void;
+  versionLabel?: string;
+  aiSubtitle?: string;
   children: ReactNode;
 }
 
@@ -26,9 +32,19 @@ export function LiveShell({
   onWatchVideo,
   onExitVideo,
   hideChrome = false,
+  packTitle = "作業手順の改定",
+  packId,
+  onPackChange,
+  versionLabel,
+  aiSubtitle,
   children,
 }: LiveShellProps) {
   const isAi = mode === "ai";
+  const showPackSwitcher =
+    Boolean(packId && onPackChange) && !presentation && !autoplay;
+
+  const sampleLink = packId ? `/?pack=${packId}` : "/";
+  const aiLink = packId ? `/ai?pack=${packId}` : "/ai";
 
   return (
     <div className="relative flex h-dvh flex-col overflow-hidden bg-surface/40">
@@ -62,23 +78,19 @@ export function LiveShell({
         <div className="min-w-0 flex-1 truncate text-sm text-navy-muted">
           {isAi ? (
             <span className="tabular-nums">
-              {knowledgeStats.company.split("株式会社")[0]} ·{" "}
-              {knowledgeStats.product}
+              <span className="text-navy">{packTitle}</span>
               <span className="ml-2 rounded bg-navy px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white">
                 AI
               </span>
-              <span className="ml-2 text-[11px] text-muted">
-                {knowledgeStats.chunks} chunks
-              </span>
+              {aiSubtitle && (
+                <span className="ml-2 text-[11px] text-muted">{aiSubtitle}</span>
+              )}
             </span>
           ) : presentation ? (
-            <span className="tabular-nums">
-              {scaleStats.documents} docs · {scaleStats.pages.toLocaleString()}{" "}
-              pages
-            </span>
+            <span className="tabular-nums">{aiSubtitle ?? packTitle}</span>
           ) : (
             <>
-              <span className="text-navy">温度制御ユニット改訂</span>
+              <span className="text-navy">{packTitle}</span>
               <span className="ml-2 rounded bg-surface px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-muted">
                 Sample
               </span>
@@ -109,21 +121,17 @@ export function LiveShell({
         {!autoplay && (
           <div className="flex shrink-0 rounded-md border border-line p-0.5 text-[11px]">
             <Link
-              to="/"
+              to={sampleLink}
               className={`rounded px-2 py-1 font-medium transition-colors ${
-                !isAi
-                  ? "bg-navy text-white"
-                  : "text-muted hover:text-navy"
+                !isAi ? "bg-navy text-white" : "text-muted hover:text-navy"
               }`}
             >
               Sample
             </Link>
             <Link
-              to="/ai"
+              to={aiLink}
               className={`rounded px-2 py-1 font-bold transition-colors ${
-                isAi
-                  ? "bg-navy text-white"
-                  : "text-muted hover:text-navy"
+                isAi ? "bg-navy text-white" : "text-muted hover:text-navy"
               }`}
             >
               AI Mode
@@ -157,12 +165,12 @@ export function LiveShell({
             </button>
           </div>
         )}
-        {!presentation && !isAi && (
+        {!presentation && versionLabel && (
           <span
             className="hidden text-xs text-muted lg:inline"
             title="比較対象（表示のみ）"
           >
-            v3.2 → v3.4
+            {versionLabel}
           </span>
         )}
         <span className="flex items-center gap-1.5 text-xs text-success">
@@ -173,6 +181,9 @@ export function LiveShell({
           Ready
         </span>
       </header>
+      {showPackSwitcher && packId && onPackChange && (
+        <PackSwitcher packId={packId} onChange={onPackChange} />
+      )}
       {children}
     </div>
   );

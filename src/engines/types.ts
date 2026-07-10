@@ -1,11 +1,13 @@
 import type { DemoAnswer } from "../data/gembashift-demo";
 import type { ScenarioId } from "../data/question-aliases";
+import type { KnowledgePackId } from "../packs/types";
 
 export type DemoMode = "sample" | "ai";
 
 export type AskRequest = {
   question: string;
   mode: DemoMode;
+  packId?: KnowledgePackId;
 };
 
 export type AskMeta = {
@@ -16,6 +18,7 @@ export type AskMeta = {
   engine: "sample" | "rag" | "llm";
   scenarioId?: ScenarioId | null;
   intent?: string;
+  packId?: KnowledgePackId;
 };
 
 export type AskResult = {

@@ -1,0 +1,202 @@
+[
+  {
+    "chunkId": "INS-OLD:1",
+    "documentId": "INS-OLD",
+    "documentName": "出荷検査手順 INS-出荷-03 Rev.B",
+    "version": "Rev.B",
+    "category": "inspection",
+    "clauseId": "§2.1",
+    "page": "3",
+    "text": "§2.1 外観判定\nキズの長さが 3mm 未満であれば合格とする。"
+  },
+  {
+    "chunkId": "INS-OLD:2",
+    "documentId": "INS-OLD",
+    "documentName": "出荷検査手順 INS-出荷-03 Rev.B",
+    "version": "Rev.B",
+    "category": "inspection",
+    "clauseId": "§3.2",
+    "page": "6",
+    "text": "§3.2 寸法測定\n測定はノギスで行い、記録は紙帳票へ手書きする。"
+  },
+  {
+    "chunkId": "INS-OLD:3",
+    "documentId": "INS-OLD",
+    "documentName": "出荷検査手順 INS-出荷-03 Rev.B",
+    "version": "Rev.B",
+    "category": "inspection",
+    "clauseId": "§4.1",
+    "page": "8",
+    "text": "§4.1 抜取数\n1ロットあたり 5個を抜取検査する。"
+  },
+  {
+    "chunkId": "INS-NEW:1",
+    "documentId": "INS-NEW",
+    "documentName": "出荷検査手順 INS-出荷-03 Rev.C",
+    "version": "Rev.C",
+    "category": "inspection",
+    "clauseId": "§2.1",
+    "page": "3-4",
+    "text": "§2.1 外観判定\nキズの長さが 2mm 未満であれば合格とする。2mm以上は不適合。"
+  },
+  {
+    "chunkId": "INS-NEW:2",
+    "documentId": "INS-NEW",
+    "documentName": "出荷検査手順 INS-出荷-03 Rev.C",
+    "version": "Rev.C",
+    "category": "inspection",
+    "clauseId": "§3.2",
+    "page": "6-7",
+    "text": "§3.2 寸法測定\n測定はデジタルノギスで行い、結果は検査システムへ電子記録する。紙帳票のみの記録は不可。"
+  },
+  {
+    "chunkId": "INS-NEW:3",
+    "documentId": "INS-NEW",
+    "documentName": "出荷検査手順 INS-出荷-03 Rev.C",
+    "version": "Rev.C",
+    "category": "inspection",
+    "clauseId": "§4.1",
+    "page": "9",
+    "text": "§4.1 抜取数\n1ロットあたり 8個を抜取検査する。不適合・是正後ロットには全数確認を追加する。"
+  },
+  {
+    "chunkId": "INS-NEW:4",
+    "documentId": "INS-NEW",
+    "documentName": "出荷検査手順 INS-出荷-03 Rev.C",
+    "version": "Rev.C",
+    "category": "inspection",
+    "clauseId": "§5.3",
+    "page": "11",
+    "text": "§5.3 不適合時の処置\n不適合品は赤タグを付け、隔離棚へ移動する。再検査合格まで出荷してはならない。"
+  },
+  {
+    "chunkId": "CRIT:1",
+    "documentId": "CRIT",
+    "documentName": "判定基準表 CR-出荷-03",
+    "version": "Rev.C",
+    "category": "criteria",
+    "clauseId": "CR-01",
+    "page": "1",
+    "text": "CR-01 キズ判定\n合格: 2mm未満。不適合: 2mm以上。旧基準（3mm未満）は失効。"
+  },
+  {
+    "chunkId": "CRIT:2",
+    "documentId": "CRIT",
+    "documentName": "判定基準表 CR-出荷-03",
+    "version": "Rev.B",
+    "category": "criteria",
+    "clauseId": "CR-01-OLD",
+    "page": "1",
+    "text": "CR-01（旧）キズ判定\n合格: 3mm未満。※Rev.C適用後は使用禁止。"
+  },
+  {
+    "chunkId": "CHG-INS:1",
+    "documentId": "CHG-INS",
+    "documentName": "検査手順改訂通知 2026-04",
+    "version": "1.0",
+    "category": "change_notice",
+    "clauseId": "CHG-I1",
+    "page": "1",
+    "text": "CHG-I1 キズ判定の厳格化\n変更前: 3mm。変更後: 2mm。理由: 顧客クレーム低減。"
+  },
+  {
+    "chunkId": "CHG-INS:2",
+    "documentId": "CHG-INS",
+    "documentName": "検査手順改訂通知 2026-04",
+    "version": "1.0",
+    "category": "change_notice",
+    "clauseId": "CHG-I2",
+    "page": "1",
+    "text": "CHG-I2 記録の電子化\n変更前: 紙帳票。変更後: 検査システム必須。理由: 追跡性向上。"
+  },
+  {
+    "chunkId": "CHG-INS:3",
+    "documentId": "CHG-INS",
+    "documentName": "検査手順改訂通知 2026-04",
+    "version": "1.0",
+    "category": "change_notice",
+    "clauseId": "CHG-I3",
+    "page": "2",
+    "text": "CHG-I3 抜取数増加\n変更前: 5個。変更後: 8個。不適合・是正後は全数追加。"
+  },
+  {
+    "chunkId": "NC:1",
+    "documentId": "NC",
+    "documentName": "不適合・再発防止記録",
+    "version": "2025",
+    "category": "nonconformance",
+    "clauseId": "NC-2025-44",
+    "page": "2",
+    "text": "NC-2025-44 キズ見逃し\n事象: 顧客で3mm弱のキズが指摘。原因: 判定基準が緩い。対策: Rev.Cで2mmへ厳格化。"
+  },
+  {
+    "chunkId": "NC:2",
+    "documentId": "NC",
+    "documentName": "不適合・再発防止記録",
+    "version": "2025",
+    "category": "nonconformance",
+    "clauseId": "NC-2024-19",
+    "page": "4",
+    "text": "NC-2024-19 記録欠落\n事象: 紙帳票の紛失で追跡不能。対策: 電子記録必須化。"
+  },
+  {
+    "chunkId": "CAL:1",
+    "documentId": "CAL",
+    "documentName": "測定器校正記録",
+    "version": "2026-Q1",
+    "category": "calibration",
+    "clauseId": "CAL-DN-02",
+    "page": "1",
+    "text": "CAL-DN-02 デジタルノギス\nRev.C適用には校正期限内のデジタルノギスが必須。アナログノギスのみの班は器具更新が必要。"
+  },
+  {
+    "chunkId": "RETEST:1",
+    "documentId": "RETEST",
+    "documentName": "再検査・教育チェックリスト",
+    "version": "1.0",
+    "category": "retest",
+    "clauseId": "RI-01",
+    "page": "1",
+    "text": "RI-01 必須の再検査項目\nキズ判定訓練、電子記録操作、抜取数変更の実技確認。未完了者は単独検査不可。priority:必須"
+  },
+  {
+    "chunkId": "RETEST:2",
+    "documentId": "RETEST",
+    "documentName": "再検査・教育チェックリスト",
+    "version": "1.0",
+    "category": "retest",
+    "clauseId": "RI-02",
+    "page": "1",
+    "text": "RI-02 実施状況\n日勤完了。遅番2名が電子記録操作未完了。"
+  },
+  {
+    "chunkId": "GATE-I:1",
+    "documentId": "GATE-I",
+    "documentName": "検査改訂承認ゲート",
+    "version": "1.0",
+    "category": "approval",
+    "clauseId": "GATE-I",
+    "page": "1",
+    "text": "GATE-I 承認条件\n再教育未完了、旧判定基準表の残存、校正切れ測定器がある場合は Rev.C 適用を承認しない。"
+  },
+  {
+    "chunkId": "QMS-I:1",
+    "documentId": "QMS-I",
+    "documentName": "検査品質要求メモ",
+    "version": "1.0",
+    "category": "qms",
+    "clauseId": "QMS-INS-01",
+    "page": "1",
+    "text": "QMS-INS-01 判定基準の一元管理\n現場掲示・手順書・システムマスタの判定値が一致していること。"
+  },
+  {
+    "chunkId": "QMS-I:2",
+    "documentId": "QMS-I",
+    "documentName": "検査品質要求メモ",
+    "version": "1.0",
+    "category": "qms",
+    "clauseId": "QMS-INS-02",
+    "page": "1",
+    "text": "QMS-INS-02 記録の追跡性\n検査結果は製品番号と紐づけて検索できること。紙のみは不可。"
+  }
+]

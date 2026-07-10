@@ -1,0 +1,202 @@
+[
+  {
+    "chunkId": "SOP-OLD:1",
+    "documentId": "SOP-OLD",
+    "documentName": "標準作業手順書 SOP-組立-07 v2.1",
+    "version": "2.1",
+    "category": "sop",
+    "clauseId": "§3.1",
+    "page": "4-5",
+    "text": "§3.1 保護具\n組立作業時は安全メガネを着用する。手袋の着用は任意とする。"
+  },
+  {
+    "chunkId": "SOP-OLD:2",
+    "documentId": "SOP-OLD",
+    "documentName": "標準作業手順書 SOP-組立-07 v2.1",
+    "version": "2.1",
+    "category": "sop",
+    "clauseId": "§4.2",
+    "page": "8",
+    "text": "§4.2 トルク締め\nボルトAの締付トルクは 8 N·m とする。トルクレンチは共用棚のものを使用する。"
+  },
+  {
+    "chunkId": "SOP-OLD:3",
+    "documentId": "SOP-OLD",
+    "documentName": "標準作業手順書 SOP-組立-07 v2.1",
+    "version": "2.1",
+    "category": "sop",
+    "clauseId": "§5.1",
+    "page": "11",
+    "text": "§5.1 確認サイン\n工程完了後、作業者本人のサインのみで次工程へ送る。"
+  },
+  {
+    "chunkId": "SOP-NEW:1",
+    "documentId": "SOP-NEW",
+    "documentName": "標準作業手順書 SOP-組立-07 v3.0",
+    "version": "3.0",
+    "category": "sop",
+    "clauseId": "§3.1",
+    "page": "4-5",
+    "text": "§3.1 保護具\n組立作業時は安全メガネおよび耐切創手袋を必ず着用する。未着用の場合は作業を開始してはならない。"
+  },
+  {
+    "chunkId": "SOP-NEW:2",
+    "documentId": "SOP-NEW",
+    "documentName": "標準作業手順書 SOP-組立-07 v3.0",
+    "version": "3.0",
+    "category": "sop",
+    "clauseId": "§4.2",
+    "page": "8-9",
+    "text": "§4.2 トルク締め\nボルトAの締付トルクは 10 N·m とする。専用トルクレンチ TL-07 を使用し、使用前に校正ラベルを確認する。"
+  },
+  {
+    "chunkId": "SOP-NEW:3",
+    "documentId": "SOP-NEW",
+    "documentName": "標準作業手順書 SOP-組立-07 v3.0",
+    "version": "3.0",
+    "category": "sop",
+    "clauseId": "§4.5",
+    "page": "10",
+    "text": "§4.5 二重確認\n安全上重要な締付は、作業者に加えリーダーの目視確認を行う。確認後はチェック欄に記録する。"
+  },
+  {
+    "chunkId": "SOP-NEW:4",
+    "documentId": "SOP-NEW",
+    "documentName": "標準作業手順書 SOP-組立-07 v3.0",
+    "version": "3.0",
+    "category": "sop",
+    "clauseId": "§5.1",
+    "page": "12",
+    "text": "§5.1 確認サイン\n工程完了後、作業者サインに加えリーダー確認印が揃ってから次工程へ送る。"
+  },
+  {
+    "chunkId": "SOP-NEW:5",
+    "documentId": "SOP-NEW",
+    "documentName": "標準作業手順書 SOP-組立-07 v3.0",
+    "version": "3.0",
+    "category": "sop",
+    "clauseId": "§6.2",
+    "page": "14",
+    "text": "§6.2 異常時の停止\n異音・異臭を感じた場合は直ちにラインを停止し、班長へ報告する。自己判断で再開してはならない。"
+  },
+  {
+    "chunkId": "CHG-SOP:1",
+    "documentId": "CHG-SOP",
+    "documentName": "作業手順改訂通知 2026-03",
+    "version": "1.0",
+    "category": "change_notice",
+    "clauseId": "CHG-01",
+    "page": "1",
+    "text": "CHG-01 保護具の必須化\n変更前: 手袋は任意。変更後: 耐切創手袋必須。理由: 切創ヒヤリハットの再発防止。"
+  },
+  {
+    "chunkId": "CHG-SOP:2",
+    "documentId": "CHG-SOP",
+    "documentName": "作業手順改訂通知 2026-03",
+    "version": "1.0",
+    "category": "change_notice",
+    "clauseId": "CHG-02",
+    "page": "1",
+    "text": "CHG-02 トルク値変更\n変更前: 8 N·m。変更後: 10 N·m。理由: ゆるみ不良の低減。影響: 組立・検査・教育。"
+  },
+  {
+    "chunkId": "CHG-SOP:3",
+    "documentId": "CHG-SOP",
+    "documentName": "作業手順改訂通知 2026-03",
+    "version": "1.0",
+    "category": "change_notice",
+    "clauseId": "CHG-03",
+    "page": "2",
+    "text": "CHG-03 リーダー確認の追加\n変更前: 本人サインのみ。変更後: リーダー確認印必須。理由: 抜け防止。"
+  },
+  {
+    "chunkId": "TRAIN:1",
+    "documentId": "TRAIN",
+    "documentName": "教育実施記録 組立ラインA",
+    "version": "2026-03",
+    "category": "training",
+    "clauseId": "TR-01",
+    "page": "1",
+    "text": "TR-01 再教育対象\nSOP v3.0 適用前に、ラインAの全作業者へ保護具・トルク・二重確認の再教育を実施すること。未受講者は単独作業不可。priority:必須"
+  },
+  {
+    "chunkId": "TRAIN:2",
+    "documentId": "TRAIN",
+    "documentName": "教育実施記録 組立ラインA",
+    "version": "2026-03",
+    "category": "training",
+    "clauseId": "TR-02",
+    "page": "2",
+    "text": "TR-02 実施状況\n昼勤は完了。夜勤は3名が未受講（予定: 3/28）。未受講者リストを掲示すること。"
+  },
+  {
+    "chunkId": "HH:1",
+    "documentId": "HH",
+    "documentName": "ヒヤリハット事例集 組立",
+    "version": "2025",
+    "category": "incident",
+    "clauseId": "HH-2025-12",
+    "page": "3",
+    "text": "HH-2025-12 手袋未着用による切創寸前\n事象: バリ部で手を滑らせた。原因: 手袋任意ルール。対策: v3.0で耐切創手袋必須化。"
+  },
+  {
+    "chunkId": "HH:2",
+    "documentId": "HH",
+    "documentName": "ヒヤリハット事例集 組立",
+    "version": "2025",
+    "category": "incident",
+    "clauseId": "HH-2024-08",
+    "page": "5",
+    "text": "HH-2024-08 トルク不足による再組立\n事象: 出荷前検査でゆるみ検出。原因: 8 N·m では不足する条件があった。対策: 10 N·m へ変更。"
+  },
+  {
+    "chunkId": "CHK:1",
+    "documentId": "CHK",
+    "documentName": "工程内チェックリスト CL-組立-07",
+    "version": "3.0",
+    "category": "checklist",
+    "clauseId": "CL-03",
+    "page": "1",
+    "text": "CL-03 トルク確認欄\nボルトAは 10 N·m。旧版チェックリスト（8 N·m表記）は使用禁止。"
+  },
+  {
+    "chunkId": "CHK:2",
+    "documentId": "CHK",
+    "documentName": "工程内チェックリスト CL-組立-07",
+    "version": "2.1",
+    "category": "checklist",
+    "clauseId": "CL-03-OLD",
+    "page": "1",
+    "text": "CL-03（旧）トルク確認欄\nボルトAは 8 N·m。※v3.0適用後は本様式を使ってはならない。"
+  },
+  {
+    "chunkId": "GATE:1",
+    "documentId": "GATE",
+    "documentName": "手順改訂承認チェック",
+    "version": "1.0",
+    "category": "approval",
+    "clauseId": "GATE-A",
+    "page": "1",
+    "text": "GATE-A 承認条件\n再教育未完了、旧チェックリスト残存、保護具未配備がある場合は量産適用を承認しない。"
+  },
+  {
+    "chunkId": "QMS-W:1",
+    "documentId": "QMS-W",
+    "documentName": "現場品質要求メモ",
+    "version": "1.0",
+    "category": "qms",
+    "clauseId": "QMS-TR-01",
+    "page": "1",
+    "text": "QMS-TR-01 変更時の教育\n作業手順の変更時は、影響を受ける作業者への教育完了を適用条件とする。"
+  },
+  {
+    "chunkId": "QMS-W:2",
+    "documentId": "QMS-W",
+    "documentName": "現場品質要求メモ",
+    "version": "1.0",
+    "category": "qms",
+    "clauseId": "QMS-DOC-01",
+    "page": "1",
+    "text": "QMS-DOC-01 最新版の識別\n現場に旧版手順や旧チェックリストが残っていないことを確認する。"
+  }
+]

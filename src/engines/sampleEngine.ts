@@ -1,16 +1,31 @@
-import { demoQuestions } from "../data/gembashift-demo";
-import { matchScenario, unmatchedSuggestions } from "../data/question-aliases";
+import { getPack } from "../packs";
+import { matchScenario } from "../data/question-aliases";
 import type { AskRequest, AskResult, QueryEngine } from "./types";
 
 export const sampleEngine: QueryEngine = {
   async ask(req: AskRequest): Promise<AskResult> {
+    const pack = getPack(req.packId);
+    const questions = pack.sample.questions;
     const matchedId = matchScenario(req.question);
 
-    if (!matchedId) {
+    const byId = matchedId
+      ? questions.find((q) => q.id === matchedId)
+      : undefined;
+
+    // パック固有の質問文にも直接マッチ
+    const direct =
+      byId ??
+      questions.find(
+        (q) =>
+          q.question === req.question.trim() ||
+          q.chipLabel === req.question.trim(),
+      );
+
+    if (!direct) {
       return {
         answer: {
           summary:
-            "このサンプルでは、変更点・影響範囲・再試験・文書矛盾・類似不具合などに回答できます。近い質問を選んでください。",
+            "このサンプルでは、変更点・影響・再確認・矛盾・過去事例などに回答できます。近い質問を選んでください。",
           sources: [],
         },
         meta: {
@@ -20,25 +35,25 @@ export const sampleEngine: QueryEngine = {
           refused: true,
           engine: "sample",
           scenarioId: null,
+          packId: pack.id,
         },
         scenarioId: null,
       };
     }
 
-    const scenario = demoQuestions.find((q) => q.id === matchedId)!;
     return {
-      answer: scenario.answer,
+      answer: direct.answer,
       meta: {
-        searchedDocuments: 18,
-        sourcesFound: scenario.answer.sources.length,
+        searchedDocuments: pack.sample.stats.documents,
+        sourcesFound: direct.answer.sources.length,
         confidence: "high",
         engine: "sample",
-        scenarioId: matchedId,
+        scenarioId: direct.id as AskResult["scenarioId"],
+        packId: pack.id,
       },
-      scenarioId: matchedId,
+      scenarioId: direct.id as AskResult["scenarioId"],
     };
   },
 };
 
-/** unmatched 時のサジェスト（UI用） */
-export { unmatchedSuggestions };
+export { unmatchedSuggestions } from "../data/question-aliases";

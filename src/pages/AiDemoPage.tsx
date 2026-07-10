@@ -1,26 +1,23 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import type { DemoDocument, SourceReference } from "../data/gembashift-demo";
 import type { QueryCatalogItem } from "../data/query-catalog";
-import { aiDocuments, aiWorkspaceStats } from "../ai/documents";
-import { knowledgeStats } from "../ai/knowledge";
-import { aiRecommendedQueries, intentToScenarioId } from "../ai/recommended";
+import { intentToScenarioId } from "../ai/recommended";
 import { aiEngine, type AskMeta } from "../engines";
+import { usePack } from "../packs";
 import { LiveShell } from "../components/live/LiveShell";
 import {
   WorkspaceSidebar,
   type SidebarMode,
 } from "../components/live/WorkspaceSidebar";
-import { QueryThread, type ThreadItem } from "../components/live/QueryThread";
+import {
+  QueryThread,
+  type GuideConfig,
+  type ThreadItem,
+} from "../components/live/QueryThread";
 import { QueryComposer } from "../components/live/QueryComposer";
 import { SourceDrawer } from "../components/live/SourceDrawer";
-
-const AI_SEARCH_STEPS = [
-  `Searching ${knowledgeStats.documents} documents`,
-  `Scanning ${knowledgeStats.chunks} knowledge chunks`,
-  "Ranking relevant clauses",
-  "Building grounded answer",
-] as const;
+import { PackContextBar } from "../components/live/PackContextBar";
 
 function pickSource(
   sources: SourceReference[],
@@ -56,21 +53,34 @@ function pickSource(
     if (exact) return exact;
   }
 
-  const byDoc = sources.find(
-    (s) => s.documentName === activeDoc.name,
-  );
+  const byDoc = sources.find((s) => s.documentName === activeDoc.name);
   if (byDoc) return byDoc;
 
   return sources[0];
 }
 
 export function AiDemoPage() {
+  const { pack, packId, setPackId } = usePack();
+  const ai = pack.ai;
+
+  const searchSteps = useMemo(
+    () =>
+      [
+        `Searching ${ai.stats.documents} documents`,
+        `Scanning ${ai.stats.chunks} knowledge chunks`,
+        "Ranking relevant clauses",
+        "Building grounded answer",
+      ] as const,
+    [ai.stats.chunks, ai.stats.documents],
+  );
+
   const [activeDoc, setActiveDoc] = useState<DemoDocument>(
-    () => aiDocuments.find((d) => d.id === "CTRL-SPEC-34") ?? aiDocuments[0]!,
+    () =>
+      ai.documents.find((d) => d.id === ai.initialDocId) ?? ai.documents[0]!,
   );
   const [sidebarMode, setSidebarMode] = useState<SidebarMode>("queries");
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [input, setInput] = useState("この変更の影響範囲は？");
+  const [input, setInput] = useState("");
   const [thread, setThread] = useState<ThreadItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [sourceOpen, setSourceOpen] = useState(false);
@@ -83,7 +93,10 @@ export function AiDemoPage() {
   const [lastMeta, setLastMeta] = useState<AskMeta | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const idRef = useRef(0);
-  const bootstrapped = useRef(false);
+  const runQueryRef = useRef<
+    (text: string, queryId?: string | null) => Promise<void>
+  >(async () => {});
+  const packBootKey = useRef<string | null>(null);
 
   useEffect(() => {
     const mq = window.matchMedia("(max-width: 1023px)");
@@ -145,15 +158,20 @@ export function AiDemoPage() {
           kind: "searching",
           id: loadingId,
           stepMs: 380,
-          steps: AI_SEARCH_STEPS,
+          steps: searchSteps,
         },
       ]);
 
       const started = Date.now();
-      const minSearchMs = AI_SEARCH_STEPS.length * 380 + 80;
+      const minSearchMs = searchSteps.length * 380 + 80;
+      const queries = ai.recommendedQueries;
 
       try {
-        const result = await aiEngine.ask({ question: trimmed, mode: "ai" });
+        const result = await aiEngine.ask({
+          question: trimmed,
+          mode: "ai",
+          packId,
+        });
         const wait = Math.max(0, minSearchMs - (Date.now() - started));
         if (wait > 0) {
           await new Promise((r) => window.setTimeout(r, wait));
@@ -174,20 +192,20 @@ export function AiDemoPage() {
               presentation: true,
               unmatched: Boolean(result.meta.refused),
               suggestions: result.meta.refused
-                ? aiRecommendedQueries.slice(0, 4).map((q) => q.question)
+                ? queries.slice(0, 4).map((q) => q.question)
                 : undefined,
             },
           ];
         });
 
         const next =
-          aiRecommendedQueries.find((q) => q.id === queryId) ??
-          aiRecommendedQueries.find((q) => q.id === scenarioId);
+          queries.find((q) => q.id === queryId) ??
+          queries.find((q) => q.id === scenarioId);
         const nextIdx = next
-          ? aiRecommendedQueries.findIndex((q) => q.id === next.id)
+          ? queries.findIndex((q) => q.id === next.id)
           : -1;
-        if (nextIdx >= 0 && nextIdx < aiRecommendedQueries.length - 1) {
-          setInput(aiRecommendedQueries[nextIdx + 1]!.question);
+        if (nextIdx >= 0 && nextIdx < queries.length - 1) {
+          setInput(queries[nextIdx + 1]!.question);
         }
       } catch {
         setThread((prev) => {
@@ -203,7 +221,7 @@ export function AiDemoPage() {
                   "回答の取得に失敗しました。ネットワークまたは API を確認してください。",
                 sources: [],
               },
-              suggestions: aiRecommendedQueries.slice(0, 4).map((q) => q.question),
+              suggestions: queries.slice(0, 4).map((q) => q.question),
             },
           ];
         });
@@ -211,16 +229,26 @@ export function AiDemoPage() {
         setLoading(false);
       }
     },
-    [loading],
+    [loading, packId, ai.recommendedQueries, searchSteps],
   );
 
+  runQueryRef.current = runQuery;
+
+  // 初回およびパック切替時に代表質問を1件実行
   useEffect(() => {
-    if (bootstrapped.current) return;
-    bootstrapped.current = true;
-    const first = aiRecommendedQueries[0]!;
-    void runQuery(first.question, first.id);
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- 初回のみ
-  }, []);
+    if (packBootKey.current === packId) return;
+    packBootKey.current = packId;
+    const doc =
+      ai.documents.find((d) => d.id === ai.initialDocId) ?? ai.documents[0]!;
+    setActiveDoc(doc);
+    setThread([]);
+    setLastMeta(null);
+    setSourceOpen(false);
+    const first = ai.recommendedQueries[0];
+    if (first) {
+      void runQueryRef.current(first.question, first.id);
+    }
+  }, [packId, ai]);
 
   const handlePickQuery = (item: QueryCatalogItem) => {
     setActiveQueryId(item.id);
@@ -232,7 +260,7 @@ export function AiDemoPage() {
     setSidebarOpen(true);
   };
 
-  const quickItems = aiRecommendedQueries.slice(0, 4).map((s) => ({
+  const quickItems = ai.recommendedQueries.slice(0, 4).map((s) => ({
     label: s.label,
     onSelect: () => {
       setActiveQueryId(s.id);
@@ -240,11 +268,28 @@ export function AiDemoPage() {
     },
   }));
 
+  const guide: GuideConfig = {
+    title: pack.sample.intro.title,
+    subtitle: pack.sample.intro.subtitle,
+    context: pack.context,
+    stats: pack.sample.stats,
+    suggestions: ai.recommendedQueries.map((c) => ({
+      id: c.id,
+      label: c.label,
+    })),
+    aiLink: `/ai?pack=${packId}`,
+  };
+
   return (
     <LiveShell
       onOpenDocs={() => openSidebar("docs")}
       onOpenQueries={() => openSidebar("queries")}
       mode="ai"
+      packTitle={pack.title}
+      packId={packId}
+      onPackChange={setPackId}
+      versionLabel={pack.sample.versionLabel}
+      aiSubtitle={`${ai.stats.chunks} chunks`}
     >
       <div className="relative flex min-h-0 flex-1">
         <WorkspaceSidebar
@@ -257,40 +302,43 @@ export function AiDemoPage() {
           activeQueryId={activeQueryId}
           mobileOpen={sidebarOpen}
           onCloseMobile={() => setSidebarOpen(false)}
-          documents={aiDocuments}
-          docsStatLabel={`${aiWorkspaceStats.documents}文書 · ${aiWorkspaceStats.chunks}チャンク`}
-          queries={aiRecommendedQueries}
+          documents={ai.documents}
+          docsStatLabel={`${ai.stats.documents}文書 · ${ai.stats.chunks}チャンク`}
+          queries={ai.recommendedQueries}
         />
 
         <div className="relative flex min-w-0 flex-1 flex-col">
           <div className="border-b border-line bg-white px-4 py-2.5 sm:px-6">
-            <div className="mx-auto flex max-w-3xl flex-wrap items-center justify-between gap-2 lg:max-w-4xl">
-              <div>
-                <p className="text-xs font-bold tracking-[0.12em] text-navy">
-                  AI Mode · {aiWorkspaceStats.company}
-                </p>
-                <p className="mt-0.5 text-[11px] text-muted">
-                  {aiWorkspaceStats.product} · {knowledgeStats.chunks} chunks ·
-                  根拠がある場合のみ回答
-                </p>
+            <div className="mx-auto max-w-3xl space-y-3 lg:max-w-4xl">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <div>
+                  <p className="text-xs font-bold tracking-[0.12em] text-navy">
+                    AI Mode · {ai.stats.company}
+                  </p>
+                  <p className="mt-0.5 text-[11px] text-muted">
+                    {ai.stats.product} · {ai.stats.chunks} chunks ·
+                    根拠がある場合のみ回答
+                  </p>
+                </div>
+                <Link
+                  to={`/?pack=${packId}`}
+                  className="rounded-md border border-line px-3 py-1.5 text-xs font-semibold text-navy transition-colors hover:border-navy/40"
+                >
+                  Sample に戻る
+                </Link>
               </div>
-              <Link
-                to="/"
-                className="rounded-md border border-line px-3 py-1.5 text-xs font-semibold text-navy transition-colors hover:border-navy/40"
-              >
-                Sample に戻る
-              </Link>
+              <PackContextBar context={pack.context} />
+              {lastMeta && (
+                <p className="font-mono text-[11px] text-navy-muted">
+                  {lastMeta.searchedDocuments} documents searched ·{" "}
+                  {lastMeta.sourcesFound} sources found · confidence{" "}
+                  {lastMeta.confidence}
+                  {lastMeta.intent ? ` · intent ${lastMeta.intent}` : ""}
+                  {lastMeta.refused ? " · refused" : ""} · engine{" "}
+                  {lastMeta.engine}
+                </p>
+              )}
             </div>
-            {lastMeta && (
-              <p className="mx-auto mt-2 max-w-3xl font-mono text-[11px] text-navy-muted lg:max-w-4xl">
-                {lastMeta.searchedDocuments} documents searched ·{" "}
-                {lastMeta.sourcesFound} sources found · confidence{" "}
-                {lastMeta.confidence}
-                {lastMeta.intent ? ` · intent ${lastMeta.intent}` : ""}
-                {lastMeta.refused ? " · refused" : ""} · engine{" "}
-                {lastMeta.engine}
-              </p>
-            )}
           </div>
 
           <div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto">
@@ -306,6 +354,7 @@ export function AiDemoPage() {
               countUpMs={600}
               hideGuide
               wide
+              guide={guide}
             />
           </div>
 

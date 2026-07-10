@@ -22,11 +22,16 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
     const body =
       typeof req.body === "string"
-        ? (JSON.parse(req.body) as { question?: string })
-        : ((req.body ?? {}) as { question?: string });
+        ? (JSON.parse(req.body) as { question?: string; packId?: string })
+        : ((req.body ?? {}) as { question?: string; packId?: string });
 
     const question = body.question?.trim() ?? "";
-    const result = await askGemba(question, { allowLlm: true });
+    const packId = body.packId as
+      | "work-procedure"
+      | "inspection"
+      | "tcu-480"
+      | undefined;
+    const result = await askGemba(question, { allowLlm: true, packId });
     res.status(200).json(result);
   } catch (err) {
     const message = err instanceof Error ? err.message : "Internal error";

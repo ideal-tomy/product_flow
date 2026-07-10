@@ -1,14 +1,11 @@
-import { useCallback, useEffect, useRef, useState } from "react";
-import {
-  demoDocuments,
-  demoQuestions,
-  type DemoDocument,
-  type DemoQuestion,
-  type SourceReference,
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import type {
+  DemoDocument,
+  DemoQuestion,
+  SourceReference,
 } from "../data/gembashift-demo";
 import {
   nextPresetAfter,
-  scenarioSuggestions,
   unmatchedSuggestions,
   type ScenarioId,
 } from "../data/question-aliases";
@@ -16,6 +13,7 @@ import { sampleEngine } from "../engines";
 import type { QueryCatalogItem } from "../data/query-catalog";
 import { presentationSearchSteps } from "../data/presentation-script";
 import { usePresentationMode } from "../hooks/usePresentationMode";
+import { getPack, usePack } from "../packs";
 import { LiveShell } from "../components/live/LiveShell";
 import {
   WorkspaceSidebar,
@@ -31,10 +29,6 @@ import {
   AutoplayController,
   presentationTagline,
 } from "../components/presentation/AutoplayController";
-
-function byId(id: ScenarioId): DemoQuestion {
-  return demoQuestions.find((q) => q.id === id)!;
-}
 
 function pickSource(
   sources: SourceReference[],
@@ -82,19 +76,14 @@ function pickSource(
   return sources[0];
 }
 
-function createInitialThread(): ThreadItem[] {
-  const first = byId("version-diff");
+function createThreadFromQuestion(q: DemoQuestion): ThreadItem[] {
   return [
-    {
-      kind: "user",
-      id: "init-user",
-      text: first.question,
-    },
+    { kind: "user", id: "init-user", text: q.question },
     {
       kind: "assistant",
       id: "init-assistant",
-      answer: first.answer,
-      scenarioId: "version-diff",
+      answer: q.answer,
+      scenarioId: q.id as ScenarioId,
     },
   ];
 }
@@ -116,14 +105,28 @@ export function LiveDemoPage() {
     isNarrow,
   } = usePresentationMode();
 
+  const { pack: selectedPack, packId, setPackId } = usePack();
+  // Presentation / 動画は当面 TCU 固定
+  const pack = presentation || autoplay ? getPack("tcu-480") : selectedPack;
+  const sample = pack.sample;
+
+  const initialQ = useMemo(() => {
+    return (
+      sample.questions.find((q) => q.id === sample.initialQuestionId) ??
+      sample.questions[0]!
+    );
+  }, [sample]);
+
   const [activeDoc, setActiveDoc] = useState<DemoDocument>(
-    () => demoDocuments.find((d) => d.id === "DOC-CTRL-034")!,
+    () =>
+      sample.documents.find((d) => d.id === sample.initialDocId) ??
+      sample.documents[0]!,
   );
   const [sidebarMode, setSidebarMode] = useState<SidebarMode>("queries");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [input, setInput] = useState("この変更の影響範囲は？");
   const [thread, setThread] = useState<ThreadItem[]>(() =>
-    isPresentationEntry() ? [] : createInitialThread(),
+    isPresentationEntry() ? [] : createThreadFromQuestion(initialQ),
   );
   const [loading, setLoading] = useState(false);
   const [sourceOpen, setSourceOpen] = useState(false);
@@ -131,7 +134,9 @@ export function LiveDemoPage() {
   const [selectedSource, setSelectedSource] = useState<SourceReference | null>(
     null,
   );
-  const [activeQueryId, setActiveQueryId] = useState<string | null>("version-diff");
+  const [activeQueryId, setActiveQueryId] = useState<string | null>(
+    sample.initialQuestionId,
+  );
   const [focusActive, setFocusActive] = useState(false);
   const [sourceCueActive, setSourceCueActive] = useState(false);
   const [showIntro, setShowIntro] = useState(false);
@@ -141,6 +146,29 @@ export function LiveDemoPage() {
   const lastAnswerSources = useRef<SourceReference[]>([]);
   const runQueryRef = useRef<(text: string) => void>(() => {});
   const sourceOpenTimerRef = useRef<number | null>(null);
+  const packIdForAsk = pack.id;
+
+  // パック切替時（Presentation 以外）に文書・スレッドを初期化
+  useEffect(() => {
+    if (presentation || autoplay) return;
+    const doc =
+      selectedPack.sample.documents.find(
+        (d) => d.id === selectedPack.sample.initialDocId,
+      ) ?? selectedPack.sample.documents[0]!;
+    const q =
+      selectedPack.sample.questions.find(
+        (x) => x.id === selectedPack.sample.initialQuestionId,
+      ) ?? selectedPack.sample.questions[0]!;
+    setActiveDoc(doc);
+    setThread(createThreadFromQuestion(q));
+    setActiveQueryId(q.id);
+    setInput(
+      selectedPack.sample.questions.find((x) => x.id === "impact-scope")
+        ?.question ?? "この変更の影響範囲は？",
+    );
+    setSourceOpen(false);
+    setLoading(false);
+  }, [selectedPack, presentation, autoplay]);
 
   useEffect(() => {
     if (!sourceOpen) return;
@@ -180,7 +208,6 @@ export function LiveDemoPage() {
       }
 
       if (presentation) {
-        // 条項強調 → SourceCue → Drawer（cue 完了タイミングで開く）
         setSourceCueActive(true);
         sourceOpenTimerRef.current = window.setTimeout(() => {
           setSourceOpen(true);
@@ -200,6 +227,11 @@ export function LiveDemoPage() {
       }
     };
   }, []);
+
+  const packUnmatched = useMemo(
+    () => sample.catalog.slice(0, 4).map((q) => q.question),
+    [sample.catalog],
+  );
 
   const runQuery = useCallback(
     (text: string) => {
@@ -225,47 +257,50 @@ export function LiveDemoPage() {
         ]);
         setInput("");
 
-        const delay =
-          timings.stepMs * presentationSearchSteps.length + 80;
+        const delay = timings.stepMs * presentationSearchSteps.length + 80;
 
         window.setTimeout(() => {
-          void sampleEngine.ask({ question: trimmed, mode: "sample" }).then((result) => {
-            const matchedId = result.scenarioId ?? null;
-            setActiveQueryId(matchedId);
-            setThread((prev) => {
-              const withoutSearching = prev.filter((i) => i.id !== loadingId);
-              if (!matchedId) {
+          void sampleEngine
+            .ask({ question: trimmed, mode: "sample", packId: packIdForAsk })
+            .then((result) => {
+              const matchedId = result.scenarioId ?? null;
+              setActiveQueryId(matchedId);
+              setThread((prev) => {
+                const withoutSearching = prev.filter((i) => i.id !== loadingId);
+                if (!matchedId) {
+                  return [
+                    ...withoutSearching,
+                    {
+                      kind: "assistant",
+                      id: nextId(),
+                      unmatched: true,
+                      answer: result.answer,
+                      suggestions: packUnmatched.length
+                        ? packUnmatched
+                        : unmatchedSuggestions,
+                    },
+                  ];
+                }
+
+                lastAnswerSources.current = result.answer.sources;
                 return [
                   ...withoutSearching,
                   {
                     kind: "assistant",
                     id: nextId(),
-                    unmatched: true,
                     answer: result.answer,
-                    suggestions: unmatchedSuggestions,
+                    scenarioId: matchedId,
+                    presentation: true,
                   },
                 ];
+              });
+
+              if (matchedId) {
+                setInput(nextPresetAfter[matchedId] ?? "");
               }
-
-              lastAnswerSources.current = result.answer.sources;
-              return [
-                ...withoutSearching,
-                {
-                  kind: "assistant",
-                  id: nextId(),
-                  answer: result.answer,
-                  scenarioId: matchedId,
-                  presentation: true,
-                },
-              ];
+              setLoading(false);
+              window.setTimeout(() => setFocusActive(false), 400);
             });
-
-            if (matchedId) {
-              setInput(nextPresetAfter[matchedId] ?? "");
-            }
-            setLoading(false);
-            window.setTimeout(() => setFocusActive(false), 400);
-          });
         }, delay);
         return;
       }
@@ -278,49 +313,52 @@ export function LiveDemoPage() {
       setInput("");
 
       window.setTimeout(() => {
-        void sampleEngine.ask({ question: trimmed, mode: "sample" }).then((result) => {
-          const matchedId = result.scenarioId ?? null;
-          setActiveQueryId(matchedId);
-          setThread((prev) => {
-            const withoutLoading = prev.filter((i) => i.id !== loadingId);
-            if (!matchedId) {
+        void sampleEngine
+          .ask({ question: trimmed, mode: "sample", packId: packIdForAsk })
+          .then((result) => {
+            const matchedId = result.scenarioId ?? null;
+            setActiveQueryId(matchedId);
+            setThread((prev) => {
+              const withoutLoading = prev.filter((i) => i.id !== loadingId);
+              if (!matchedId) {
+                return [
+                  ...withoutLoading,
+                  {
+                    kind: "assistant",
+                    id: nextId(),
+                    unmatched: true,
+                    answer: result.answer,
+                    suggestions: packUnmatched.length
+                      ? packUnmatched
+                      : unmatchedSuggestions,
+                  },
+                ];
+              }
+
+              lastAnswerSources.current = result.answer.sources;
               return [
                 ...withoutLoading,
                 {
                   kind: "assistant",
                   id: nextId(),
-                  unmatched: true,
                   answer: result.answer,
-                  suggestions: unmatchedSuggestions,
+                  scenarioId: matchedId,
                 },
               ];
+            });
+
+            if (matchedId) {
+              setInput(nextPresetAfter[matchedId] ?? "");
             }
-
-            lastAnswerSources.current = result.answer.sources;
-            return [
-              ...withoutLoading,
-              {
-                kind: "assistant",
-                id: nextId(),
-                answer: result.answer,
-                scenarioId: matchedId,
-              },
-            ];
+            setLoading(false);
           });
-
-          if (matchedId) {
-            setInput(nextPresetAfter[matchedId] ?? "");
-          }
-          setLoading(false);
-        });
       }, 850);
     },
-    [loading, presentation, timings.stepMs],
+    [loading, presentation, timings.stepMs, packIdForAsk, packUnmatched],
   );
 
   runQueryRef.current = runQuery;
 
-  // Presentation 入口: SearchSteps → Hero。Demo 復帰時は従来の即表示。
   useEffect(() => {
     if (autoplay) {
       setThread([]);
@@ -337,22 +375,15 @@ export function LiveDemoPage() {
       setShowTagline(false);
       setShowIntro(false);
       setActiveQueryId("version-diff");
-      const question = byId("version-diff").question;
+      const tcu = getPack("tcu-480");
+      const question =
+        tcu.sample.questions.find((q) => q.id === "version-diff")?.question ??
+        "";
       const t = window.setTimeout(() => {
         runQueryRef.current(question);
       }, 0);
       return () => window.clearTimeout(t);
     }
-
-    setLoading(false);
-    setThread(createInitialThread());
-    setActiveQueryId("version-diff");
-    setInput("この変更の影響範囲は？");
-    setShowTagline(false);
-    setShowIntro(false);
-    setSourceOpen(false);
-    setSourceCueActive(false);
-    setFocusActive(false);
   }, [presentation, autoplay]);
 
   const handleSubmit = () => runQuery(input);
@@ -367,12 +398,11 @@ export function LiveDemoPage() {
     setSidebarOpen(true);
   };
 
-  const quickItems = scenarioSuggestions.slice(0, 4).map((s) => ({
+  const quickItems = sample.catalog.slice(0, 4).map((s) => ({
     label: s.label,
     onSelect: () => {
-      const q = byId(s.id);
       setActiveQueryId(s.id);
-      runQuery(q.question);
+      runQuery(s.question);
     },
   }));
 
@@ -380,6 +410,15 @@ export function LiveDemoPage() {
 
   const watchVideo = () => setAutoplay(true);
   const exitVideo = () => setPresentation(false);
+
+  const guide = {
+    title: sample.intro.title,
+    subtitle: sample.intro.subtitle,
+    context: pack.context,
+    stats: sample.stats,
+    suggestions: sample.catalog.map((c) => ({ id: c.id, label: c.label })),
+    aiLink: `/ai?pack=${packId}`,
+  };
 
   return (
     <LiveShell
@@ -392,6 +431,15 @@ export function LiveDemoPage() {
       onWatchVideo={watchVideo}
       onExitVideo={exitVideo}
       hideChrome={presentation && autoplay}
+      packTitle={pack.title}
+      packId={packId}
+      onPackChange={setPackId}
+      versionLabel={sample.versionLabel}
+      aiSubtitle={
+        presentation
+          ? `${sample.stats.documents} docs · ${sample.stats.pages.toLocaleString()} pages`
+          : undefined
+      }
     >
       <PresentationOverlay active={presentation && focusActive} />
       <SourceCue
@@ -439,6 +487,9 @@ export function LiveDemoPage() {
             activeQueryId={activeQueryId}
             mobileOpen={sidebarOpen}
             onCloseMobile={() => setSidebarOpen(false)}
+            documents={sample.sidebarDocuments}
+            docsStatLabel={`${sample.stats.documents}文書 · ${sample.stats.pages.toLocaleString()}ページ`}
+            queries={sample.catalog}
           />
         </div>
 
@@ -454,7 +505,10 @@ export function LiveDemoPage() {
                 onOpenSources={openSources}
                 onSuggest={(text) => {
                   if (autoplay) return;
-                  runQuery(text);
+                  const hit = sample.catalog.find(
+                    (c) => c.label === text || c.question === text,
+                  );
+                  runQuery(hit?.question ?? text);
                 }}
                 onWatchVideo={watchVideo}
                 presentation={presentation}
@@ -463,6 +517,7 @@ export function LiveDemoPage() {
                 sourceCueActive={sourceCueActive}
                 hideGuide={presentation}
                 wide={presentation}
+                guide={guide}
               />
             )}
 

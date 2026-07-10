@@ -8,9 +8,11 @@ import type {
   ImpactGroup,
 } from "../data/gembashift-demo";
 import type { AskResult } from "../engines/types";
-import { chunkToSource, knowledgeChunks, knowledgeStats } from "./knowledge";
+import { DEFAULT_PACK_ID, getPack, type KnowledgePackId } from "../packs";
+import { chunkToSource, knowledgeChunks } from "./knowledge";
 import { detectIntent, type AskIntent } from "./intent";
 import { retrieveChunks, type ScoredChunk } from "./retrieve";
+import { synthesizeGenericPackAnswer } from "./packs/generic";
 
 function sourcesFrom(chunks: KnowledgeChunkLike[]): SourceReference[] {
   const map = new Map<string, SourceReference>();
@@ -387,76 +389,106 @@ function synthesizeGeneral(question: string, hits: ScoredChunk[]): DemoAnswer {
   };
 }
 
+function withPackMeta(result: AskResult, packId: KnowledgePackId): AskResult {
+  return {
+    ...result,
+    meta: { ...result.meta, packId },
+  };
+}
+
 /**
  * パック由来チャンクのみで構造化回答を合成する（Sample 固定回答は使わない）。
  */
-export function synthesizeAnswer(question: string): AskResult {
+export function synthesizeAnswer(
+  question: string,
+  packId?: KnowledgePackId,
+): AskResult {
+  const pack = getPack(packId ?? DEFAULT_PACK_ID);
   const intent = detectIntent(question);
-  const searchedDocuments = knowledgeStats.documents;
+  const searchedDocuments = pack.ai.stats.documents;
 
   if (intent === "refuse") {
-    return refuseAnswer(
-      "この質問に回答できる根拠資料がありません。\n現在のナレッジには、売上・販売実績・価格に関する文書は含まれていません。",
-      [
-        "TCU-480 の累計出荷・対象車種（会社概要）",
-        "制御仕様・試験・FMEA・変更管理",
-      ],
-      searchedDocuments,
-      intent,
+    return withPackMeta(
+      refuseAnswer(
+        "この質問に回答できる根拠資料がありません。\n現在のナレッジには、売上・販売実績・価格に関する文書は含まれていません。",
+        [
+          pack.context.actions,
+          "差分・影響・再確認・矛盾・承認について質問してください",
+        ],
+        searchedDocuments,
+        intent,
+      ),
+      pack.id,
     );
   }
 
-  const { hits } = retrieveChunks(question, { intent, topK: 10 });
+  const { hits } = retrieveChunks(question, {
+    intent,
+    topK: 10,
+    packId: pack.id,
+  });
 
   if (hits.length === 0 && intent === "general") {
-    return refuseAnswer(
-      "関連度の高い根拠が見つかりませんでした。TCU-480 の仕様変更・試験・FMEA・不具合・承認・品質要求について質問してください。",
-      [
-        "v3.2 と v3.4 の差分",
-        "文書間の矛盾",
-        "再試験・承認可否",
-      ],
-      searchedDocuments,
-      intent,
+    return withPackMeta(
+      refuseAnswer(
+        `関連度の高い根拠が見つかりませんでした。「${pack.title}」の差分・影響・再確認・矛盾・承認について質問してください。`,
+        ["何が変わった？", "影響は？", "再確認は必要？"],
+        searchedDocuments,
+        intent,
+      ),
+      pack.id,
     );
   }
 
   let answer: DemoAnswer;
-  switch (intent) {
-    case "version_diff":
-      answer = synthesizeVersionDiff(hits);
-      break;
-    case "contradiction":
-      answer = synthesizeContradiction(hits);
-      break;
-    case "retest":
-      answer = synthesizeRetest(hits);
-      break;
-    case "similar_case":
-      answer = synthesizeSimilarCase(hits);
-      break;
-    case "approval":
-      answer = synthesizeApproval(hits);
-      break;
-    case "impact":
-      answer = synthesizeImpact(hits);
-      break;
-    case "qms":
-      answer = synthesizeQms(hits);
-      break;
-    case "company":
-      answer = synthesizeCompany(hits);
-      break;
-    default:
-      answer = synthesizeGeneral(question, hits);
+
+  if (pack.id !== "tcu-480") {
+    answer = synthesizeGenericPackAnswer(
+      question,
+      intent,
+      pack.ai.chunks,
+      hits,
+    );
+  } else {
+    switch (intent) {
+      case "version_diff":
+        answer = synthesizeVersionDiff(hits);
+        break;
+      case "contradiction":
+        answer = synthesizeContradiction(hits);
+        break;
+      case "retest":
+        answer = synthesizeRetest(hits);
+        break;
+      case "similar_case":
+        answer = synthesizeSimilarCase(hits);
+        break;
+      case "approval":
+        answer = synthesizeApproval(hits);
+        break;
+      case "impact":
+        answer = synthesizeImpact(hits);
+        break;
+      case "qms":
+        answer = synthesizeQms(hits);
+        break;
+      case "company":
+        answer = synthesizeCompany(hits);
+        break;
+      default:
+        answer = synthesizeGeneral(question, hits);
+    }
   }
 
   if (answer.sources.length === 0) {
-    return refuseAnswer(
-      "根拠チャンクを特定できませんでした。質問を具体化するか、推奨質問から選んでください。",
-      ["差分", "矛盾", "再試験", "過去不具合", "承認"],
-      searchedDocuments,
-      intent,
+    return withPackMeta(
+      refuseAnswer(
+        "根拠チャンクを特定できませんでした。質問を具体化するか、推奨質問から選んでください。",
+        ["差分", "矛盾", "再確認", "過去事例", "承認"],
+        searchedDocuments,
+        intent,
+      ),
+      pack.id,
     );
   }
 
@@ -473,6 +505,7 @@ export function synthesizeAnswer(question: string): AskResult {
       confidence: confidenceFor(intent, answer.sources.length, special),
       engine: "rag",
       intent,
+      packId: pack.id,
     },
     scenarioId: null,
   };

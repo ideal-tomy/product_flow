@@ -1,15 +1,12 @@
 import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
-import {
-  demoIntro,
-  scaleStats,
-  type DemoAnswer,
-  type SourceReference,
-} from "../../data/gembashift-demo";
-import { scenarioSuggestions, type ScenarioId } from "../../data/question-aliases";
+import type { DemoAnswer, SourceReference } from "../../data/gembashift-demo";
+import type { ScenarioId } from "../../data/question-aliases";
+import type { PackContext } from "../../packs/types";
 import { ResultHero } from "../presentation/ResultHero";
 import { SearchSteps } from "../presentation/SearchSteps";
 import { StaggerReveal } from "../presentation/StaggerReveal";
+import { PackContextBar } from "./PackContextBar";
 
 export type ThreadItem =
   | { kind: "user"; id: string; text: string }
@@ -30,6 +27,21 @@ export type ThreadItem =
       steps?: readonly string[];
     };
 
+export type GuideConfig = {
+  title: string;
+  subtitle: string;
+  context: PackContext;
+  stats: {
+    documents: number;
+    pages: number;
+    majorChanges: number;
+    retestCandidates: number;
+    contradictions: number;
+  };
+  suggestions: { id: string; label: string }[];
+  aiLink?: string;
+};
+
 interface QueryThreadProps {
   items: ThreadItem[];
   onOpenSources: (sources: SourceReference[], focus?: SourceReference) => void;
@@ -41,6 +53,7 @@ interface QueryThreadProps {
   sourceCueActive?: boolean;
   hideGuide?: boolean;
   wide?: boolean;
+  guide?: GuideConfig;
 }
 
 const severityLabel = {
@@ -390,25 +403,31 @@ function AnswerBody({
 function DemoGuide({
   onSuggest,
   onWatchVideo,
+  guide,
 }: {
   onSuggest?: (text: string) => void;
   onWatchVideo?: () => void;
+  guide: GuideConfig;
 }) {
   const stats = [
-    { value: String(scaleStats.documents), unit: "文書", label: "検索対象" },
+    { value: String(guide.stats.documents), unit: "文書", label: "検索対象" },
     {
-      value: scaleStats.pages.toLocaleString(),
+      value: guide.stats.pages.toLocaleString(),
       unit: "ページ",
       label: "横断検索可能",
     },
-    { value: String(scaleStats.majorChanges), unit: "件", label: "主要な仕様変更" },
     {
-      value: String(scaleStats.retestCandidates),
+      value: String(guide.stats.majorChanges),
       unit: "件",
-      label: "再試験候補",
+      label: "主要な変更",
     },
     {
-      value: String(scaleStats.contradictions),
+      value: String(guide.stats.retestCandidates),
+      unit: "件",
+      label: "再確認候補",
+    },
+    {
+      value: String(guide.stats.contradictions),
       unit: "件",
       label: "文書不整合候補",
     },
@@ -419,10 +438,10 @@ function DemoGuide({
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0">
           <h1 className="text-lg font-semibold text-navy sm:text-xl">
-            {demoIntro.title}
+            {guide.title}
           </h1>
           <p className="mt-1.5 text-sm leading-relaxed text-navy-muted">
-            {demoIntro.subtitle}
+            {guide.subtitle}
           </p>
         </div>
         {onWatchVideo && (
@@ -436,9 +455,11 @@ function DemoGuide({
         )}
       </div>
 
+      <PackContextBar context={guide.context} />
+
       <div className="flex flex-wrap items-center gap-2">
         <Link
-          to="/ai"
+          to={guide.aiLink ?? "/ai"}
           className="rounded-lg border-2 border-navy bg-white px-4 py-2.5 text-sm font-bold text-navy transition-colors hover:bg-navy hover:text-white"
         >
           AI Mode を試す
@@ -471,7 +492,7 @@ function DemoGuide({
             質問例（タップで入力）
           </p>
           <div className="flex flex-wrap gap-2">
-            {scenarioSuggestions.map((s) => (
+            {guide.suggestions.map((s) => (
               <button
                 key={s.id}
                 type="button"
@@ -499,6 +520,7 @@ export function QueryThread({
   sourceCueActive = false,
   hideGuide = false,
   wide = false,
+  guide,
 }: QueryThreadProps) {
   return (
     <div
@@ -506,8 +528,12 @@ export function QueryThread({
         wide ? "max-w-3xl gap-8 lg:max-w-4xl" : "max-w-2xl gap-6"
       }`}
     >
-      {!hideGuide && !presentation && (
-        <DemoGuide onSuggest={onSuggest} onWatchVideo={onWatchVideo} />
+      {!hideGuide && !presentation && guide && (
+        <DemoGuide
+          onSuggest={onSuggest}
+          onWatchVideo={onWatchVideo}
+          guide={guide}
+        />
       )}
 
       {items.map((item) => {
