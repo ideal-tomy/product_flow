@@ -18,7 +18,8 @@ export const presentationBeats: PresentationBeat[] = [
   { at: 3.2, type: "ask", scenarioId: "version-diff" },
   { at: 10, type: "ask", scenarioId: "impact-scope" },
   { at: 18, type: "ask", scenarioId: "contradiction" },
-  { at: 22.5, type: "open-source" },
+  // SourceCue（~0.5s）の後に Drawer が開くため、少し早めに発火
+  { at: 22, type: "open-source" },
   { at: 26, type: "tagline" },
   { at: 30, type: "done" },
 ];

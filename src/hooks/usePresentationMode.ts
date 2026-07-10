@@ -16,9 +16,18 @@ export function usePrefersReducedMotion(): boolean {
 export function usePresentationMode() {
   const [params, setParams] = useSearchParams();
   const reducedMotion = usePrefersReducedMotion();
+  const [isNarrow, setIsNarrow] = useState(false);
 
   const presentation = params.get("presentation") === "1";
   const autoplay = presentation && params.get("autoplay") === "1";
+
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 1023px)");
+    const update = () => setIsNarrow(mq.matches);
+    update();
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
+  }, []);
 
   const setPresentation = useCallback(
     (on: boolean) => {
@@ -58,8 +67,11 @@ export function usePresentationMode() {
     [setParams],
   );
 
+  /** reduced-motion、または Presentation 中の狭幅画面は演出を短縮 */
+  const compactMotion = reducedMotion || (presentation && isNarrow);
+
   const timings = useMemo(() => {
-    if (reducedMotion) {
+    if (compactMotion) {
       return {
         stepMs: 120,
         searchTotalMs: 360,
@@ -75,7 +87,7 @@ export function usePresentationMode() {
       countUpMs: 700,
       sourceCueMs: 500,
     };
-  }, [reducedMotion]);
+  }, [compactMotion]);
 
   return {
     presentation,
@@ -83,6 +95,7 @@ export function usePresentationMode() {
     setPresentation,
     setAutoplay,
     reducedMotion,
+    isNarrow,
     timings,
   };
 }

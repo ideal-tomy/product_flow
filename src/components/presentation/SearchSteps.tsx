@@ -4,9 +4,15 @@ import { presentationSearchSteps } from "../../data/presentation-script";
 interface SearchStepsProps {
   stepMs?: number;
   onComplete?: () => void;
+  /** Presentation / 動画用の大きめ表示 */
+  large?: boolean;
 }
 
-export function SearchSteps({ stepMs = 450, onComplete }: SearchStepsProps) {
+export function SearchSteps({
+  stepMs = 450,
+  onComplete,
+  large = false,
+}: SearchStepsProps) {
   const [index, setIndex] = useState(0);
 
   useEffect(() => {
@@ -26,21 +32,39 @@ export function SearchSteps({ stepMs = 450, onComplete }: SearchStepsProps) {
   }, [stepMs, onComplete]);
 
   return (
-    <div className="space-y-2 py-2 font-mono text-sm text-navy-muted">
+    <div
+      className={`space-y-2.5 py-2 font-mono text-navy-muted ${
+        large ? "text-base sm:text-lg" : "text-sm"
+      }`}
+    >
       {presentationSearchSteps.map((step, i) => {
         const done = i < index;
         const active = i === index;
         return (
           <p
             key={step}
-            className={`flex items-center gap-2 transition-opacity ${
+            className={`flex items-center gap-2.5 transition-opacity ${
               active || done ? "opacity-100" : "opacity-25"
             }`}
           >
-            <span className="w-3 text-center text-xs">
+            <span
+              className={`w-4 text-center ${large ? "text-sm font-bold" : "text-xs"}`}
+            >
               {done ? "✓" : active ? "·" : ""}
             </span>
-            <span className={active ? "text-navy" : undefined}>{step}</span>
+            <span
+              className={
+                active
+                  ? large
+                    ? "font-semibold text-navy"
+                    : "text-navy"
+                  : done && large
+                    ? "font-medium text-navy"
+                    : undefined
+              }
+            >
+              {step}
+            </span>
           </p>
         );
       })}

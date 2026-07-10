@@ -27,9 +27,9 @@ export function SourceCue({ active, durationMs = 500, onDone }: SourceCueProps) 
 
   return (
     <div
-      className="pointer-events-none absolute inset-y-0 right-0 z-20 hidden w-px bg-navy/40 lg:block"
+      className="pointer-events-none absolute inset-y-0 right-0 z-20 hidden w-0.5 bg-navy/55 lg:block"
       style={{
-        boxShadow: "0 0 12px 2px rgba(11, 31, 58, 0.25)",
+        boxShadow: "0 0 14px 3px rgba(11, 31, 58, 0.28)",
       }}
       aria-hidden="true"
     />

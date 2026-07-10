@@ -299,42 +299,73 @@ function AnswerBody({
 
   const sourcesBlock =
     answer.sources.length > 0 ? (
-      <div className="flex flex-wrap items-center gap-2 pt-1">
-        {answer.sources.map((s) => (
+      <div
+        className={
+          presentation
+            ? "space-y-3 rounded-lg border border-navy/15 bg-surface/60 px-4 py-4"
+            : "flex flex-wrap items-center gap-2 pt-1"
+        }
+      >
+        {presentation && (
+          <p className="text-xs font-bold tracking-[0.12em] text-navy">
+            根拠 · 登録ナレッジ
+          </p>
+        )}
+        <div className="flex flex-wrap items-center gap-2">
+          {answer.sources.map((s) => (
+            <button
+              key={`${s.documentName}-${s.version}-${s.clauseId}-${s.page}`}
+              type="button"
+              onClick={() => onOpenSources(answer.sources, s)}
+              className={`rounded border font-mono text-navy transition-colors hover:border-navy/40 ${
+                presentation
+                  ? "border-navy/25 bg-white px-3 py-2 text-sm font-semibold"
+                  : "border-line px-2 py-1 text-xs"
+              } ${
+                sourceCueActive
+                  ? "border-navy bg-navy/[0.06] ring-2 ring-navy/20"
+                  : ""
+              }`}
+            >
+              {presentation ? (
+                <span className="flex flex-col items-start gap-0.5 text-left">
+                  <span>§{s.clauseId}</span>
+                  <span className="max-w-[14rem] truncate font-sans text-[11px] font-medium text-muted">
+                    {s.documentName}
+                  </span>
+                </span>
+              ) : (
+                <>§{s.clauseId}</>
+              )}
+            </button>
+          ))}
           <button
-            key={`${s.documentName}-${s.version}-${s.clauseId}-${s.page}`}
             type="button"
-            onClick={() => onOpenSources(answer.sources, s)}
-            className={`rounded border px-2 py-1 font-mono text-xs text-navy transition-colors hover:border-navy/40 ${
-              sourceCueActive
-                ? "border-navy bg-navy/[0.06] ring-2 ring-navy/20"
-                : "border-line"
+            onClick={() => onOpenSources(answer.sources, answer.sources[0])}
+            className={`font-semibold text-navy underline-offset-2 hover:underline ${
+              presentation ? "text-base" : "text-sm font-medium"
             }`}
           >
-            §{s.clauseId}
+            {answer.sources.length}件の根拠を確認 →
           </button>
-        ))}
-        <button
-          type="button"
-          onClick={() => onOpenSources(answer.sources, answer.sources[0])}
-          className="text-sm font-medium text-navy underline-offset-2 hover:underline"
-        >
-          {answer.sources.length}件の根拠を確認 →
-        </button>
+        </div>
       </div>
     ) : null;
 
   if (presentation) {
     return (
-      <div className="space-y-5">
-        <ResultHero
-          scenarioId={scenarioId}
-          answer={answer}
-          countUpMs={countUpMs}
-        />
-        <p className="whitespace-pre-line text-[15px] leading-relaxed text-navy-muted">
-          {answer.summary}
-        </p>
+      <div className="space-y-6">
+        <div className="space-y-3">
+          <p className="text-xs font-bold tracking-[0.14em] text-navy">回答</p>
+          <ResultHero
+            scenarioId={scenarioId}
+            answer={answer}
+            countUpMs={countUpMs}
+          />
+          <p className="whitespace-pre-line text-xl font-semibold leading-snug tracking-tight text-navy sm:text-2xl">
+            {answer.summary}
+          </p>
+        </div>
         <StaggerReveal stepMs={staggerMs} className="space-y-4">
           {[...detailBlocks, sourcesBlock].filter(Boolean)}
         </StaggerReveal>
@@ -438,21 +469,32 @@ export function QueryThread({
 }: QueryThreadProps) {
   return (
     <div
-      className={`mx-auto flex w-full flex-col gap-6 px-4 py-6 sm:px-6 ${
-        wide ? "max-w-3xl lg:max-w-4xl" : "max-w-2xl"
+      className={`mx-auto flex w-full flex-col px-4 py-6 sm:px-6 ${
+        wide ? "max-w-3xl gap-8 lg:max-w-4xl" : "max-w-2xl gap-6"
       }`}
     >
       {!hideGuide && !presentation && <DemoGuide onSuggest={onSuggest} />}
 
       {items.map((item) => {
         if (item.kind === "user") {
+          if (presentation) {
+            return (
+              <div
+                key={item.id}
+                className="fade-in space-y-2 rounded-xl border-2 border-navy bg-navy px-5 py-5 sm:px-6 sm:py-6"
+              >
+                <p className="text-xs font-bold tracking-[0.14em] text-white/70">
+                  質問
+                </p>
+                <p className="text-xl font-bold leading-snug tracking-tight text-white sm:text-2xl lg:text-3xl">
+                  {item.text}
+                </p>
+              </div>
+            );
+          }
           return (
             <div key={item.id} className="fade-in flex justify-end">
-              <div
-                className={`max-w-[90%] rounded-lg bg-navy px-4 py-3 leading-relaxed text-white ${
-                  presentation ? "text-base sm:text-lg" : "text-sm"
-                }`}
-              >
+              <div className="max-w-[90%] rounded-lg bg-navy px-4 py-3 text-sm leading-relaxed text-white">
                 {item.text}
               </div>
             </div>
@@ -461,11 +503,17 @@ export function QueryThread({
 
         if (item.kind === "searching") {
           return (
-            <div key={item.id} className="fade-in">
-              <p className="mb-2 text-[11px] font-semibold tracking-[0.1em] text-navy-muted">
-                GembaShift
+            <div key={item.id} className="fade-in space-y-3">
+              <p
+                className={
+                  presentation
+                    ? "text-xs font-bold tracking-[0.14em] text-navy"
+                    : "text-[11px] font-semibold tracking-[0.1em] text-navy-muted"
+                }
+              >
+                {presentation ? "登録ナレッジを検索中" : "GembaShift"}
               </p>
-              <SearchSteps stepMs={item.stepMs} />
+              <SearchSteps stepMs={item.stepMs} large={presentation} />
             </div>
           );
         }
@@ -513,15 +561,25 @@ export function QueryThread({
           );
         }
 
+        const isPresentationAnswer = item.presentation ?? presentation;
         return (
-          <div key={item.id} className="fade-in space-y-2">
-            <p className="text-[11px] font-semibold tracking-[0.1em] text-navy-muted">
-              GembaShift
-            </p>
+          <div
+            key={item.id}
+            className={
+              isPresentationAnswer
+                ? "fade-in space-y-4 rounded-xl border border-line bg-white px-5 py-6 sm:px-6 sm:py-7"
+                : "fade-in space-y-2"
+            }
+          >
+            {!isPresentationAnswer && (
+              <p className="text-[11px] font-semibold tracking-[0.1em] text-navy-muted">
+                GembaShift
+              </p>
+            )}
             <AnswerBody
               answer={item.answer}
               onOpenSources={onOpenSources}
-              presentation={item.presentation ?? presentation}
+              presentation={isPresentationAnswer}
               scenarioId={item.scenarioId}
               staggerMs={staggerMs}
               countUpMs={countUpMs}

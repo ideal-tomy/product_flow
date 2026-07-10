@@ -99,12 +99,20 @@ function createInitialThread(): ThreadItem[] {
   ];
 }
 
+/** Presentation（autoplay なし）は入口で SearchSteps から始めるため空で開始 */
+function isPresentationEntry(): boolean {
+  if (typeof window === "undefined") return false;
+  const p = new URLSearchParams(window.location.search);
+  return p.get("presentation") === "1" && p.get("autoplay") !== "1";
+}
+
 export function LiveDemoPage() {
   const {
     presentation,
     autoplay,
     setPresentation,
     timings,
+    isNarrow,
   } = usePresentationMode();
 
   const [activeDoc, setActiveDoc] = useState<DemoDocument>(
@@ -113,7 +121,9 @@ export function LiveDemoPage() {
   const [sidebarMode, setSidebarMode] = useState<SidebarMode>("queries");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [input, setInput] = useState("この変更の影響範囲は？");
-  const [thread, setThread] = useState<ThreadItem[]>(createInitialThread);
+  const [thread, setThread] = useState<ThreadItem[]>(() =>
+    isPresentationEntry() ? [] : createInitialThread(),
+  );
   const [loading, setLoading] = useState(false);
   const [sourceOpen, setSourceOpen] = useState(false);
   const [drawerSources, setDrawerSources] = useState<SourceReference[]>([]);
@@ -121,7 +131,6 @@ export function LiveDemoPage() {
     null,
   );
   const [activeQueryId, setActiveQueryId] = useState<string | null>("version-diff");
-  const [isMobile, setIsMobile] = useState(false);
   const [focusActive, setFocusActive] = useState(false);
   const [sourceCueActive, setSourceCueActive] = useState(false);
   const [showIntro, setShowIntro] = useState(false);
@@ -129,14 +138,8 @@ export function LiveDemoPage() {
   const scrollRef = useRef<HTMLDivElement>(null);
   const idRef = useRef(0);
   const lastAnswerSources = useRef<SourceReference[]>([]);
-
-  useEffect(() => {
-    const mq = window.matchMedia("(max-width: 1023px)");
-    const update = () => setIsMobile(mq.matches);
-    update();
-    mq.addEventListener("change", update);
-    return () => mq.removeEventListener("change", update);
-  }, []);
+  const runQueryRef = useRef<(text: string) => void>(() => {});
+  const sourceOpenTimerRef = useRef<number | null>(null);
 
   useEffect(() => {
     if (!sourceOpen) return;
@@ -169,13 +172,33 @@ export function LiveDemoPage() {
     (sources: SourceReference[], focus?: SourceReference) => {
       setDrawerSources(sources);
       setSelectedSource(pickSource(sources, activeDoc, focus));
-      setSourceOpen(true);
+
+      if (sourceOpenTimerRef.current != null) {
+        window.clearTimeout(sourceOpenTimerRef.current);
+        sourceOpenTimerRef.current = null;
+      }
+
       if (presentation) {
+        // 条項強調 → SourceCue → Drawer（cue 完了タイミングで開く）
         setSourceCueActive(true);
+        sourceOpenTimerRef.current = window.setTimeout(() => {
+          setSourceOpen(true);
+          sourceOpenTimerRef.current = null;
+        }, timings.sourceCueMs);
+      } else {
+        setSourceOpen(true);
       }
     },
-    [activeDoc, presentation],
+    [activeDoc, presentation, timings.sourceCueMs],
   );
+
+  useEffect(() => {
+    return () => {
+      if (sourceOpenTimerRef.current != null) {
+        window.clearTimeout(sourceOpenTimerRef.current);
+      }
+    };
+  }, []);
 
   const runQuery = useCallback(
     (text: string) => {
@@ -297,6 +320,43 @@ export function LiveDemoPage() {
     },
     [loading, presentation, timings.stepMs],
   );
+
+  runQueryRef.current = runQuery;
+
+  // Presentation 入口: SearchSteps → Hero。Demo 復帰時は従来の即表示。
+  useEffect(() => {
+    if (autoplay) {
+      setThread([]);
+      setSourceOpen(false);
+      setSourceCueActive(false);
+      return;
+    }
+
+    if (presentation) {
+      setLoading(false);
+      setThread([]);
+      setSourceOpen(false);
+      setSourceCueActive(false);
+      setShowTagline(false);
+      setShowIntro(false);
+      setActiveQueryId("version-diff");
+      const question = byId("version-diff").question;
+      const t = window.setTimeout(() => {
+        runQueryRef.current(question);
+      }, 0);
+      return () => window.clearTimeout(t);
+    }
+
+    setLoading(false);
+    setThread(createInitialThread());
+    setActiveQueryId("version-diff");
+    setInput("この変更の影響範囲は？");
+    setShowTagline(false);
+    setShowIntro(false);
+    setSourceOpen(false);
+    setSourceCueActive(false);
+    setFocusActive(false);
+  }, [presentation, autoplay]);
 
   const handleSubmit = () => runQuery(input);
 
@@ -427,6 +487,7 @@ export function LiveDemoPage() {
                 disabled={loading}
                 loading={loading}
                 quickItems={presentation ? undefined : quickItems}
+                prominent={presentation}
               />
             </div>
           )}
@@ -439,7 +500,7 @@ export function LiveDemoPage() {
           activeDoc={activeDoc}
           onSelectSource={setSelectedSource}
           onClose={() => setSourceOpen(false)}
-          isMobile={isMobile}
+          isMobile={isNarrow}
         />
       </div>
     </LiveShell>
