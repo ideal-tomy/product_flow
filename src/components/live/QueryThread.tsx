@@ -32,6 +32,7 @@ interface QueryThreadProps {
   items: ThreadItem[];
   onOpenSources: (sources: SourceReference[], focus?: SourceReference) => void;
   onSuggest?: (text: string) => void;
+  onWatchVideo?: () => void;
   presentation?: boolean;
   staggerMs?: number;
   countUpMs?: number;
@@ -384,7 +385,13 @@ function AnswerBody({
   );
 }
 
-function DemoGuide({ onSuggest }: { onSuggest?: (text: string) => void }) {
+function DemoGuide({
+  onSuggest,
+  onWatchVideo,
+}: {
+  onSuggest?: (text: string) => void;
+  onWatchVideo?: () => void;
+}) {
   const stats = [
     { value: String(scaleStats.documents), unit: "文書", label: "検索対象" },
     {
@@ -407,13 +414,24 @@ function DemoGuide({ onSuggest }: { onSuggest?: (text: string) => void }) {
 
   return (
     <div className="space-y-4 border-b border-line pb-5">
-      <div>
-        <h1 className="text-lg font-semibold text-navy sm:text-xl">
-          {demoIntro.title}
-        </h1>
-        <p className="mt-1.5 text-sm leading-relaxed text-navy-muted">
-          {demoIntro.subtitle}
-        </p>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div className="min-w-0">
+          <h1 className="text-lg font-semibold text-navy sm:text-xl">
+            {demoIntro.title}
+          </h1>
+          <p className="mt-1.5 text-sm leading-relaxed text-navy-muted">
+            {demoIntro.subtitle}
+          </p>
+        </div>
+        {onWatchVideo && (
+          <button
+            type="button"
+            onClick={onWatchVideo}
+            className="shrink-0 rounded-lg bg-navy px-5 py-3 text-sm font-bold tracking-wide text-white shadow-sm transition-colors hover:bg-navy-soft sm:text-base"
+          >
+            動画でdemoを見る
+          </button>
+        )}
       </div>
 
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
@@ -460,6 +478,7 @@ export function QueryThread({
   items,
   onOpenSources,
   onSuggest,
+  onWatchVideo,
   presentation = false,
   staggerMs = 200,
   countUpMs = 700,
@@ -473,7 +492,9 @@ export function QueryThread({
         wide ? "max-w-3xl gap-8 lg:max-w-4xl" : "max-w-2xl gap-6"
       }`}
     >
-      {!hideGuide && !presentation && <DemoGuide onSuggest={onSuggest} />}
+      {!hideGuide && !presentation && (
+        <DemoGuide onSuggest={onSuggest} onWatchVideo={onWatchVideo} />
+      )}
 
       {items.map((item) => {
         if (item.kind === "user") {

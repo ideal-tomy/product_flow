@@ -111,6 +111,7 @@ export function LiveDemoPage() {
     presentation,
     autoplay,
     setPresentation,
+    setAutoplay,
     timings,
     isNarrow,
   } = usePresentationMode();
@@ -381,12 +382,18 @@ export function LiveDemoPage() {
 
   const hideSidebarOnDesktop = presentation;
 
+  const watchVideo = () => setAutoplay(true);
+  const exitVideo = () => setPresentation(false);
+
   return (
     <LiveShell
       onOpenDocs={() => openSidebar("docs")}
       onOpenQueries={() => openSidebar("queries")}
       presentation={presentation}
+      autoplay={autoplay}
       onTogglePresentation={() => setPresentation(!presentation)}
+      onWatchVideo={watchVideo}
+      onExitVideo={exitVideo}
       hideChrome={presentation && autoplay}
     >
       <PresentationOverlay active={presentation && focusActive} />
@@ -452,6 +459,7 @@ export function LiveDemoPage() {
                   if (autoplay) return;
                   runQuery(text);
                 }}
+                onWatchVideo={watchVideo}
                 presentation={presentation}
                 staggerMs={timings.staggerMs}
                 countUpMs={timings.countUpMs}

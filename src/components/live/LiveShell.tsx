@@ -5,7 +5,10 @@ interface LiveShellProps {
   onOpenDocs: () => void;
   onOpenQueries?: () => void;
   presentation?: boolean;
+  autoplay?: boolean;
   onTogglePresentation?: () => void;
+  onWatchVideo?: () => void;
+  onExitVideo?: () => void;
   hideChrome?: boolean;
   children: ReactNode;
 }
@@ -14,7 +17,10 @@ export function LiveShell({
   onOpenDocs,
   onOpenQueries,
   presentation = false,
+  autoplay = false,
   onTogglePresentation,
+  onWatchVideo,
+  onExitVideo,
   hideChrome = false,
   children,
 }: LiveShellProps) {
@@ -62,8 +68,29 @@ export function LiveShell({
             </>
           )}
         </div>
-        {onTogglePresentation && (
-          <div className="flex shrink-0 rounded-md border border-line p-0.5 text-[11px]">
+
+        {!presentation && onWatchVideo && (
+          <button
+            type="button"
+            onClick={onWatchVideo}
+            className="shrink-0 rounded-md bg-navy px-3 py-1.5 text-xs font-bold tracking-wide text-white shadow-sm transition-colors hover:bg-navy-soft sm:px-4 sm:text-sm"
+          >
+            動画でdemoを見る
+          </button>
+        )}
+
+        {autoplay && onExitVideo && (
+          <button
+            type="button"
+            onClick={onExitVideo}
+            className="shrink-0 rounded-md border border-line bg-white px-3 py-1.5 text-xs font-semibold text-navy transition-colors hover:border-navy/40 sm:text-sm"
+          >
+            操作デモに戻る
+          </button>
+        )}
+
+        {onTogglePresentation && !autoplay && (
+          <div className="hidden shrink-0 rounded-md border border-line p-0.5 text-[11px] sm:flex">
             <button
               type="button"
               onClick={() => presentation && onTogglePresentation()}
@@ -89,12 +116,18 @@ export function LiveShell({
           </div>
         )}
         {!presentation && (
-          <span className="hidden text-xs text-muted sm:inline" title="比較対象（表示のみ）">
+          <span
+            className="hidden text-xs text-muted lg:inline"
+            title="比較対象（表示のみ）"
+          >
             v3.2 → v3.4
           </span>
         )}
         <span className="flex items-center gap-1.5 text-xs text-success">
-          <span className="h-1.5 w-1.5 rounded-full bg-success" aria-hidden="true" />
+          <span
+            className="h-1.5 w-1.5 rounded-full bg-success"
+            aria-hidden="true"
+          />
           Ready
         </span>
       </header>
