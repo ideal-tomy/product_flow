@@ -1,358 +1,101 @@
 import type { SourceReference } from "../data/gembashift-demo";
-import { demoDocuments, scaleStats } from "../data/gembashift-demo";
+import rawChunks from "./data/knowledge_chunks.json";
+
+export type RawKnowledgeChunk = {
+  chunkId: string;
+  documentId: string;
+  documentName: string;
+  version: string;
+  category: string;
+  clauseId: string;
+  page: string | null;
+  text: string;
+};
 
 export type KnowledgeChunk = SourceReference & {
   id: string;
+  documentId: string;
   text: string;
   category: string;
   tags: string[];
+  clauseDisplay: string;
 };
 
-/** 公開デモ用の架空ナレッジ（ISO本文は含めない） */
-const baseChunks: Omit<KnowledgeChunk, "id">[] = [
-  {
-    documentName: "制御仕様書",
-    version: "v3.4",
-    page: "214〜218",
-    clauseId: "4.1.3",
-    excerpt:
-      "温度センサーの許容範囲は、測定値に対して ±3℃ とする。異常判定閾値は本許容範囲を基準に設定すること。",
-    highlight: "±3℃",
-    text: "温度センサーの許容範囲は、測定値に対して ±3℃ とする。異常判定閾値は本許容範囲を基準に設定すること。通常運転時の判定に用いる。",
-    category: "制御",
-    tags: ["許容範囲", "センサー", "温度", "±3", "判定"],
-  },
-  {
-    documentName: "制御仕様書",
-    version: "v3.2",
-    page: "198〜201",
-    clauseId: "4.1.3",
-    excerpt:
-      "温度センサーの許容範囲は、測定値に対して ±5℃ とする。異常判定閾値は本許容範囲を基準に設定すること。",
-    highlight: "±5℃",
-    text: "温度センサーの許容範囲は、測定値に対して ±5℃ とする。v3.4 で ±3℃ に厳格化された。",
-    category: "制御",
-    tags: ["許容範囲", "センサー", "温度", "±5", "差分", "バージョン"],
-  },
-  {
-    documentName: "制御仕様書",
-    version: "v3.4",
-    page: "215〜218",
-    clauseId: "4.1.4",
-    excerpt:
-      "異常判定は条項 4.1.3 の許容範囲を逸脱した場合に成立する。許容範囲の改訂時は、判定閾値を同期して更新すること。",
-    highlight: "許容範囲を逸脱した場合",
-    text: "異常判定は条項 4.1.3 の許容範囲を逸脱した場合に成立する。許容範囲の改訂時は、判定閾値を同期して更新すること。影響は異常判定ロジックに及ぶ。",
-    category: "制御",
-    tags: ["異常判定", "影響", "閾値", "ロジック"],
-  },
-  {
-    documentName: "制御仕様書",
-    version: "v3.4",
-    page: "221〜223",
-    clauseId: "4.2.1",
-    excerpt:
-      "インターロック条件における温度監視区間は、条項 4.1.3 の許容範囲に連動する。",
-    highlight: "条項 4.1.3 の許容範囲に連動",
-    text: "インターロック条件における温度監視区間は、条項 4.1.3 の許容範囲に連動する。許容変更時はインターロック再確認が必要。",
-    category: "制御",
-    tags: ["インターロック", "影響", "監視"],
-  },
-  {
-    documentName: "制御仕様書",
-    version: "v3.4",
-    page: "220",
-    clauseId: "4.1.6",
-    excerpt: "起動後5秒間は判定を保留する。",
-    highlight: "5秒間",
-    text: "起動後5秒間は判定を保留する。低温始動直後の誤判定を防ぐための例外条件。自己診断中も異常判定を保留する場合がある。",
-    category: "制御",
-    tags: ["判定保留", "起動", "5秒", "例外", "始動"],
-  },
-  {
-    documentName: "制御仕様書",
-    version: "v3.4",
-    page: "219〜220",
-    clauseId: "4.1.5",
-    excerpt:
-      "試験運転モード中は、条項 4.1.3 に基づく通常の許容範囲判定を一時停止できる。ただし重大アラーム（許容範囲の 150% 超過）は本例外の対象外とする。",
-    highlight: "一時停止できる",
-    text: "試験運転モード中は通常の許容範囲判定を一時停止できる。重大アラームは例外の対象外。",
-    category: "制御",
-    tags: ["例外", "試験運転", "重大アラーム"],
-  },
-  {
-    documentName: "制御仕様書",
-    version: "v3.4",
-    page: "254〜255",
-    clauseId: "5.3.1",
-    excerpt: "警告アラームは 78℃ 以上で発報する。",
-    highlight: "78℃",
-    text: "警告アラームは 78℃ 以上で発報する。",
-    category: "制御",
-    tags: ["アラーム", "警告", "78", "閾値"],
-  },
-  {
-    documentName: "制御仕様書",
-    version: "v3.4",
-    page: "256〜258",
-    clauseId: "5.3.2",
-    excerpt: "重大アラームは 82℃ 以上で発報する。",
-    highlight: "82℃",
-    text: "重大アラームは 82℃ 以上で発報する。許容範囲の厳格化に伴い境界試験の見直しが必要。",
-    category: "制御",
-    tags: ["アラーム", "重大", "82", "閾値"],
-  },
-  {
-    documentName: "制御仕様書",
-    version: "v3.4",
-    page: "228",
-    clauseId: "4.3.1",
-    excerpt: "温度センサーのサンプリング周期は 100ms とする。",
-    highlight: "100ms",
-    text: "温度センサーのサンプリング周期は 100ms とする。v3.2 では 200ms だった。",
-    category: "制御",
-    tags: ["サンプリング", "100ms", "周期"],
-  },
-  {
-    documentName: "制御仕様書",
-    version: "v3.4",
-    page: "340",
-    clauseId: "8.2.1",
-    excerpt: "温度関連ログの保存期間は 90日 とする。",
-    highlight: "90日",
-    text: "温度関連ログの保存期間は 90日 とする。",
-    category: "制御",
-    tags: ["ログ", "保存", "90日"],
-  },
-  {
-    documentName: "温度センサー仕様書",
-    version: "TS-14",
-    page: "12",
-    clauseId: "3.2",
-    excerpt: "測定精度は ±4℃ とする。",
-    highlight: "±4℃",
-    text: "測定精度は ±4℃ とする。制御仕様書 v3.4 の許容 ±3℃ と数値上の不整合候補がある。",
-    category: "センサー",
-    tags: ["精度", "±4", "矛盾", "不整合", "センサー"],
-  },
-  {
-    documentName: "試験条件一覧",
-    version: "v7.3",
-    page: "44",
-    clauseId: "TC-12",
-    excerpt: "始動後3秒で判定を開始する。",
-    highlight: "3秒",
-    text: "始動後3秒で判定を開始する。制御仕様書 v3.4 の起動後5秒保留と矛盾する。再試験・条件更新が必要。",
-    category: "試験",
-    tags: ["試験", "TC-12", "再試験", "矛盾", "3秒", "始動"],
-  },
-  {
-    documentName: "試験条件一覧",
-    version: "v7.3",
-    page: "51",
-    clauseId: "TC-18",
-    excerpt: "校正後復帰試験。判定保留解除後の通常判定復帰を確認する。",
-    highlight: "校正後復帰",
-    text: "校正後復帰試験。判定保留解除後の通常判定復帰を確認する。許容変更時は必須再試験候補。",
-    category: "試験",
-    tags: ["試験", "TC-18", "再試験", "校正"],
-  },
-  {
-    documentName: "試験条件一覧",
-    version: "v7.3",
-    page: "58",
-    clauseId: "TC-24",
-    excerpt: "アラーム境界試験（78℃ / 82℃）。",
-    highlight: "78℃ / 82℃",
-    text: "アラーム境界試験（警告78℃ / 重大82℃）。閾値変更時は必須。",
-    category: "試験",
-    tags: ["試験", "TC-24", "再試験", "アラーム", "境界"],
-  },
-  {
-    documentName: "試験条件一覧",
-    version: "v7.3",
-    page: "63",
-    clauseId: "TC-31",
-    excerpt: "サンプリング周期変更に伴う応答試験。",
-    highlight: "応答試験",
-    text: "サンプリング周期 100ms への変更に伴う応答試験。推奨再試験。",
-    category: "試験",
-    tags: ["試験", "TC-31", "再試験", "サンプリング"],
-  },
-  {
-    documentName: "旧試験手順書",
-    version: "v5.1",
-    page: "71",
-    clauseId: "6.4",
-    excerpt: "重大判定は 85℃ とする。",
-    highlight: "85℃",
-    text: "重大判定は 85℃ とする。現行制御仕様の 82℃ と不整合。",
-    category: "試験",
-    tags: ["矛盾", "不整合", "85", "旧手順"],
-  },
-  {
-    documentName: "不具合事例集",
-    version: "2024版",
-    page: "88〜90",
-    clauseId: "2024-071",
-    excerpt:
-      "冬季始動時の誤アラーム。原因は低温始動直後の一時的なセンサー偏差。対策として起動後3秒の判定保留を実施。",
-    highlight: "起動後3秒の判定保留",
-    text: "冬季始動時の誤アラーム。低温始動直後のセンサー偏差が原因。対策は起動後判定保留。類似不具合の参照事例。",
-    category: "不具合",
-    tags: ["不具合", "過去事例", "冬季", "誤アラーム", "保留"],
-  },
-  {
-    documentName: "FMEA管理表",
-    version: "Rev.C",
-    page: "24",
-    clauseId: "R19",
-    excerpt:
-      "始動直後の誤アラーム。現行対策は起動後3秒保留。検出度評価は D=4。",
-    highlight: "起動後3秒保留",
-    text: "始動直後の誤アラーム。現行対策は起動後3秒保留。v3.4 の5秒保留への更新に伴い FMEA 再評価が必要。",
-    category: "FMEA",
-    tags: ["FMEA", "R19", "影響", "誤アラーム"],
-  },
-  {
-    documentName: "FMEA管理表",
-    version: "Rev.C",
-    page: "18",
-    clauseId: "R12",
-    excerpt: "センサー偏差による誤判定。許容範囲厳格化でリスク再評価が必要。",
-    highlight: "センサー偏差",
-    text: "センサー偏差による誤判定。許容範囲 ±3℃ 化でリスク再評価が必要。",
-    category: "FMEA",
-    tags: ["FMEA", "R12", "影響", "センサー"],
-  },
-  {
-    documentName: "ベテラン設計者ナレッジメモ",
-    version: "—",
-    page: "17",
-    clauseId: "K-12",
-    excerpt:
-      "冬場の初回始動はセンサーが実温より低く出やすい。保留を入れないと誤アラームが再発する。3秒では足りない現場があった。",
-    highlight: "3秒では足りない",
-    text: "冬場の初回始動はセンサーが低く出やすい。3秒保留では足りない現場があり、5秒保留の根拠になる。",
-    category: "ナレッジ",
-    tags: ["ナレッジ", "暗黙知", "冬季", "保留", "5秒"],
-  },
-  {
-    documentName: "変更管理票",
-    version: "ECR-034",
-    page: "2",
-    clauseId: "Gate-B",
-    excerpt:
-      "量産反映の前提条件: 必須再試験完了、文書不整合の是正または暫定合意、FMEA更新。",
-    highlight: "必須再試験完了",
-    text: "量産反映の前提条件は必須再試験完了、文書不整合の是正または暫定合意、FMEA更新。",
-    category: "変更管理",
-    tags: ["ECR", "承認", "Gate", "再試験"],
-  },
-  {
-    documentName: "品質監査指摘一覧",
-    version: "2025-Q1",
-    page: "9",
-    clauseId: "QA-17",
-    excerpt:
-      "試験条件と制御仕様の版不一致が未是正のまま残っている。次回監査までに突合記録を提出すること。",
-    highlight: "版不一致",
-    text: "試験条件と制御仕様の版不一致が未是正。監査対応として突合記録が必要。",
-    category: "品質",
-    tags: ["監査", "版不一致", "品質"],
-  },
-  {
-    documentName: "規制・安全要求チェックリスト",
-    version: "v1.2",
-    page: "15",
-    clauseId: "S-08",
-    excerpt:
-      "保護機能の閾値変更時は、安全要求への影響評価と再検証記録を残すこと。",
-    highlight: "再検証記録",
-    text: "保護機能の閾値変更時は安全要求への影響評価と再検証記録を残すこと。",
-    category: "規制",
-    tags: ["規制", "安全", "再検証"],
-  },
-  {
-    documentName: "規格対応マトリクス",
-    version: "内部-1.0",
-    page: "3",
-    clauseId: "QMS-7.5.3",
-    excerpt: "文書は最新版を識別可能にすること。版管理と参照整合を維持する。",
-    highlight: "最新版を識別",
-    text: "QMS-7.5.3 文書管理: 最新版を識別可能にする。社内対応は文書管理規程および制御仕様書の版管理。",
-    category: "規格対応",
-    tags: ["規格", "QMS", "文書管理", "版"],
-  },
-  {
-    documentName: "規格対応マトリクス",
-    version: "内部-1.0",
-    page: "4",
-    clauseId: "SAF-4.2.1",
-    excerpt: "異常時に安全状態へ移行すること。",
-    highlight: "安全状態へ移行",
-    text: "SAF-4.2.1 安全: 異常時に安全状態へ移行。社内対応は制御仕様書のインターロック・アラーム条項。",
-    category: "規格対応",
-    tags: ["規格", "安全", "異常", "インターロック"],
-  },
-  {
-    documentName: "規格対応マトリクス",
-    version: "内部-1.0",
-    page: "5",
-    clauseId: "TEST-8.3.2",
-    excerpt: "変更時に再検証を行うこと。",
-    highlight: "再検証",
-    text: "TEST-8.3.2 検証: 変更時に再検証を行う。社内対応は試験条件一覧および変更管理票 Gate-B。",
-    category: "規格対応",
-    tags: ["規格", "再検証", "再試験", "変更"],
-  },
-  {
-    documentName: "ソフトウェア設計書",
-    version: "v2.0",
-    page: "112〜118",
-    clauseId: "6.4.2",
-    excerpt:
-      "温度異常判定モジュール TempJudge は、許容範囲・保留時間・アラーム境界を設定ファイルから読み込む。",
-    highlight: "TempJudge",
-    text: "TempJudge は許容範囲・保留時間・アラーム境界を設定ファイルから読む。仕様改訂時は設定と単体テスト更新が必要。",
-    category: "ソフトウェア",
-    tags: ["ソフトウェア", "TempJudge", "実装"],
-  },
-  {
-    documentName: "ECUインターフェース定義書",
-    version: "v2.1",
-    page: "56",
-    clauseId: "4.2",
-    excerpt:
-      "温度異常フラグ TEMP_FAULT の立上り条件は、制御仕様書の重大アラーム判定に従う。",
-    highlight: "TEMP_FAULT",
-    text: "TEMP_FAULT の立上り条件は重大アラーム判定に従う。閾値変更時は ECU IF 確認が必要。",
-    category: "ECU",
-    tags: ["ECU", "TEMP_FAULT", "インターフェース"],
-  },
-  {
-    documentName: "サプライヤー照会回答集",
-    version: "2025-03",
-    page: "7",
-    clauseId: "SUP-03",
-    excerpt:
-      "センサー精度の保証範囲は ±4℃。制御側許容 ±3℃ 運用時は校正条件の追加確認が必要。",
-    highlight: "±4℃",
-    text: "サプライヤー回答: センサー精度保証は ±4℃。制御許容 ±3℃ 運用時は校正条件の追加確認が必要。",
-    category: "サプライヤー",
-    tags: ["サプライヤー", "精度", "確認"],
-  },
-];
+const HIGHLIGHT_RE =
+  /±\d+(?:\.\d+)?℃|\d+℃|\d+ms|\d+秒|TC-\d+|CASE-\d+-\d+|FMEA-R\d+|QMS-[A-Z]+-\d+|DTC-P\d+|SUP-ASK-\d+-\d+|CHG-\d+-\d+/;
 
-export const knowledgeChunks: KnowledgeChunk[] = baseChunks.map((c, i) => ({
-  ...c,
-  id: `CHK-${String(i + 1).padStart(3, "0")}`,
-}));
+function normalizeClauseId(clauseId: string): string {
+  return clauseId.replace(/^§/, "").trim();
+}
+
+function buildExcerpt(text: string): string {
+  const flat = text.replace(/\s+/g, " ").trim();
+  if (flat.length <= 220) return flat;
+  return `${flat.slice(0, 217)}…`;
+}
+
+function buildHighlight(text: string): string | undefined {
+  const m = text.match(HIGHLIGHT_RE);
+  return m?.[0];
+}
+
+function buildTags(
+  chunk: RawKnowledgeChunk,
+  clauseDisplay: string,
+): string[] {
+  const nameBits = chunk.documentName
+    .split(/[\s—\-_/・]+/)
+    .filter((t) => t.length >= 2);
+  return [
+    chunk.category,
+    chunk.documentId,
+    clauseDisplay,
+    chunk.clauseId,
+    ...nameBits.slice(0, 6),
+  ];
+}
+
+function adaptChunk(raw: RawKnowledgeChunk): KnowledgeChunk {
+  const clauseDisplay = normalizeClauseId(raw.clauseId);
+  return {
+    id: raw.chunkId,
+    documentId: raw.documentId,
+    documentName: raw.documentName,
+    version: raw.version,
+    page: raw.page ?? "—",
+    clauseId: clauseDisplay,
+    clauseDisplay,
+    excerpt: buildExcerpt(raw.text),
+    highlight: buildHighlight(raw.text),
+    text: raw.text,
+    category: raw.category,
+    tags: buildTags(raw, clauseDisplay),
+  };
+}
+
+const typedRaw = rawChunks as RawKnowledgeChunk[];
+
+export const knowledgeChunks: KnowledgeChunk[] = typedRaw.map(adaptChunk);
 
 export const knowledgeStats = {
-  documents: demoDocuments.length,
-  pages: scaleStats.pages,
+  documents: new Set(knowledgeChunks.map((c) => c.documentId)).size,
   chunks: knowledgeChunks.length,
-  clauses: knowledgeChunks.length,
+  categories: new Set(knowledgeChunks.map((c) => c.category)).size,
+  company: "東浜モビリティシステムズ株式会社",
+  product: "TCU-480",
 };
+
+export function chunkToSource(chunk: KnowledgeChunk): SourceReference {
+  return {
+    documentName: chunk.documentName,
+    version: chunk.version,
+    page: chunk.page,
+    clauseId: chunk.clauseId,
+    excerpt: chunk.excerpt,
+    highlight: chunk.highlight,
+  };
+}
+
+export function findChunksByDocumentId(documentId: string): KnowledgeChunk[] {
+  return knowledgeChunks.filter((c) => c.documentId === documentId);
+}

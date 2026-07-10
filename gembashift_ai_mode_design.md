@@ -8,18 +8,33 @@
 | `/ai` | AI Mode（ナレッジ検索） | `aiEngine` → `/api/ask` or ローカル RAG |
 | `/?presentation=1` | Sample + 演出 | `sampleEngine` |
 
-## 主要ファイル
+## ナレッジ
 
-- `src/engines/` — QueryEngine 抽象（sample / ai）
-- `src/ai/knowledge.ts` — 架空ナレッジチャンク
-- `src/ai/retrieve.ts` — キーワード検索
-- `src/ai/synthesize.ts` — 構造化回答 / 拒否
-- `src/ai/ask.ts` — 共通エントリ
-- `vite.gemba-api.ts` — `POST /api/ask`（dev/preview）
-- `src/pages/AiDemoPage.tsx` — AI Mode UI
+- 正: [`src/ai/data/knowledge_chunks.json`](src/ai/data/knowledge_chunks.json)（東浜モビリティ / TCU-480・66チャンク）
+- アダプタ: [`src/ai/knowledge.ts`](src/ai/knowledge.ts)
+- 文書一覧: [`src/ai/documents.ts`](src/ai/documents.ts)
 
-## LLM 接続（次ステップ）
+## パイプライン
 
-`vite.gemba-api.ts` の `handleAsk` 内で `OPENAI_API_KEY` があれば、
-retrieve 結果をコンテキストに JSON schema で LLM 呼び出しし、
-なければ現状の `askGemba`（RAG 合成）にフォールバックする。
+1. intent 判定（拒否含む）
+2. retrieve（同義語・カテゴリブースト）
+3. `OPENAI_API_KEY` あり（サーバ）→ LLM 構造化 JSON
+4. なければ意図別シンセサイザ（Sample 固定回答は使わない）
+
+## API
+
+| 環境 | `/api/ask` |
+|---|---|
+| ローカル `npm run dev` | Vite プラグイン [`vite.gemba-api.ts`](vite.gemba-api.ts) |
+| Vercel 本番 | Serverless [`api/ask.ts`](api/ask.ts) |
+
+## 環境変数
+
+`.env.example` 参照。
+
+- ローカル: `.env.local`
+- Vercel: Project Settings → Environment Variables  
+  - `OPENAI_API_KEY`
+  - `OPENAI_MODEL`（推奨: `gpt-5-nano`）
+
+Production / Preview の両方に設定し、再デプロイすること。

@@ -1,19 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import {
-  demoDocuments,
-  demoQuestions,
-  type DemoDocument,
-  type SourceReference,
-} from "../data/gembashift-demo";
-import {
-  nextPresetAfter,
-  scenarioSuggestions,
-  unmatchedSuggestions,
-  type ScenarioId,
-} from "../data/question-aliases";
+import type { DemoDocument, SourceReference } from "../data/gembashift-demo";
 import type { QueryCatalogItem } from "../data/query-catalog";
+import { aiDocuments, aiWorkspaceStats } from "../ai/documents";
 import { knowledgeStats } from "../ai/knowledge";
+import { aiRecommendedQueries, intentToScenarioId } from "../ai/recommended";
 import { aiEngine, type AskMeta } from "../engines";
 import { LiveShell } from "../components/live/LiveShell";
 import {
@@ -46,10 +37,11 @@ function pickSource(
     if (sameClausePreferred) return sameClausePreferred;
 
     if (activeDoc.controlVersion) {
+      const cv = activeDoc.controlVersion;
       const byVersion = sources.find(
         (s) =>
           s.clauseId === focus.clauseId &&
-          s.version === activeDoc.controlVersion,
+          (s.version === cv || s.version === cv.replace(/^v/, "")),
       );
       if (byVersion) return byVersion;
     }
@@ -65,21 +57,16 @@ function pickSource(
   }
 
   const byDoc = sources.find(
-    (s) => s.documentName === activeDoc.name && s.version === activeDoc.version,
+    (s) => s.documentName === activeDoc.name,
   );
   if (byDoc) return byDoc;
-
-  if (activeDoc.controlVersion) {
-    const byVersion = sources.find((s) => s.version === activeDoc.controlVersion);
-    if (byVersion) return byVersion;
-  }
 
   return sources[0];
 }
 
 export function AiDemoPage() {
   const [activeDoc, setActiveDoc] = useState<DemoDocument>(
-    () => demoDocuments.find((d) => d.id === "DOC-CTRL-034")!,
+    () => aiDocuments.find((d) => d.id === "CTRL-SPEC-34") ?? aiDocuments[0]!,
   );
   const [sidebarMode, setSidebarMode] = useState<SidebarMode>("queries");
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -143,17 +130,23 @@ export function AiDemoPage() {
   );
 
   const runQuery = useCallback(
-    async (text: string) => {
+    async (text: string, queryId?: string | null) => {
       const trimmed = text.trim();
       if (!trimmed || loading) return;
 
       const loadingId = nextId();
       setLoading(true);
       setInput("");
+      if (queryId) setActiveQueryId(queryId);
       setThread((prev) => [
         ...prev,
         { kind: "user", id: nextId(), text: trimmed },
-        { kind: "searching", id: loadingId, stepMs: 380, steps: AI_SEARCH_STEPS },
+        {
+          kind: "searching",
+          id: loadingId,
+          stepMs: 380,
+          steps: AI_SEARCH_STEPS,
+        },
       ]);
 
       const started = Date.now();
@@ -167,7 +160,7 @@ export function AiDemoPage() {
         }
 
         setLastMeta(result.meta);
-        setActiveQueryId(result.scenarioId ?? null);
+        const scenarioId = intentToScenarioId(result.meta.intent);
 
         setThread((prev) => {
           const withoutSearching = prev.filter((i) => i.id !== loadingId);
@@ -177,19 +170,24 @@ export function AiDemoPage() {
               kind: "assistant",
               id: nextId(),
               answer: result.answer,
-              scenarioId: result.scenarioId ?? undefined,
+              scenarioId: scenarioId ?? undefined,
               presentation: true,
-              unmatched: result.meta.refused && !result.scenarioId,
-              suggestions:
-                result.meta.refused && result.answer.sources.length === 0
-                  ? unmatchedSuggestions
-                  : undefined,
+              unmatched: Boolean(result.meta.refused),
+              suggestions: result.meta.refused
+                ? aiRecommendedQueries.slice(0, 4).map((q) => q.question)
+                : undefined,
             },
           ];
         });
 
-        if (result.scenarioId) {
-          setInput(nextPresetAfter[result.scenarioId as ScenarioId] ?? "");
+        const next =
+          aiRecommendedQueries.find((q) => q.id === queryId) ??
+          aiRecommendedQueries.find((q) => q.id === scenarioId);
+        const nextIdx = next
+          ? aiRecommendedQueries.findIndex((q) => q.id === next.id)
+          : -1;
+        if (nextIdx >= 0 && nextIdx < aiRecommendedQueries.length - 1) {
+          setInput(aiRecommendedQueries[nextIdx + 1]!.question);
         }
       } catch {
         setThread((prev) => {
@@ -205,7 +203,7 @@ export function AiDemoPage() {
                   "回答の取得に失敗しました。ネットワークまたは API を確認してください。",
                 sources: [],
               },
-              suggestions: unmatchedSuggestions,
+              suggestions: aiRecommendedQueries.slice(0, 4).map((q) => q.question),
             },
           ];
         });
@@ -219,14 +217,14 @@ export function AiDemoPage() {
   useEffect(() => {
     if (bootstrapped.current) return;
     bootstrapped.current = true;
-    const first = demoQuestions.find((q) => q.id === "version-diff")!;
-    void runQuery(first.question);
+    const first = aiRecommendedQueries[0]!;
+    void runQuery(first.question, first.id);
     // eslint-disable-next-line react-hooks/exhaustive-deps -- 初回のみ
   }, []);
 
   const handlePickQuery = (item: QueryCatalogItem) => {
     setActiveQueryId(item.id);
-    void runQuery(item.question);
+    void runQuery(item.question, item.id);
   };
 
   const openSidebar = (mode: SidebarMode) => {
@@ -234,13 +232,11 @@ export function AiDemoPage() {
     setSidebarOpen(true);
   };
 
-  const quickItems = scenarioSuggestions.slice(0, 4).map((s) => ({
+  const quickItems = aiRecommendedQueries.slice(0, 4).map((s) => ({
     label: s.label,
     onSelect: () => {
-      const q = demoQuestions.find((d) => d.id === s.id);
-      if (!q) return;
       setActiveQueryId(s.id);
-      void runQuery(q.question);
+      void runQuery(s.question, s.id);
     },
   }));
 
@@ -261,18 +257,21 @@ export function AiDemoPage() {
           activeQueryId={activeQueryId}
           mobileOpen={sidebarOpen}
           onCloseMobile={() => setSidebarOpen(false)}
+          documents={aiDocuments}
+          docsStatLabel={`${aiWorkspaceStats.documents}文書 · ${aiWorkspaceStats.chunks}チャンク`}
+          queries={aiRecommendedQueries}
         />
 
         <div className="relative flex min-w-0 flex-1 flex-col">
           <div className="border-b border-line bg-white px-4 py-2.5 sm:px-6">
-            <div className="mx-auto flex max-w-2xl flex-wrap items-center justify-between gap-2">
+            <div className="mx-auto flex max-w-3xl flex-wrap items-center justify-between gap-2 lg:max-w-4xl">
               <div>
                 <p className="text-xs font-bold tracking-[0.12em] text-navy">
-                  AI Mode · 登録ナレッジ参照
+                  AI Mode · {aiWorkspaceStats.company}
                 </p>
                 <p className="mt-0.5 text-[11px] text-muted">
-                  {knowledgeStats.documents}文書 · {knowledgeStats.chunks}
-                  チャンク · 根拠がある場合のみ回答
+                  {aiWorkspaceStats.product} · {knowledgeStats.chunks} chunks ·
+                  根拠がある場合のみ回答
                 </p>
               </div>
               <Link
@@ -283,10 +282,11 @@ export function AiDemoPage() {
               </Link>
             </div>
             {lastMeta && (
-              <p className="mx-auto mt-2 max-w-2xl font-mono text-[11px] text-navy-muted">
+              <p className="mx-auto mt-2 max-w-3xl font-mono text-[11px] text-navy-muted lg:max-w-4xl">
                 {lastMeta.searchedDocuments} documents searched ·{" "}
                 {lastMeta.sourcesFound} sources found · confidence{" "}
                 {lastMeta.confidence}
+                {lastMeta.intent ? ` · intent ${lastMeta.intent}` : ""}
                 {lastMeta.refused ? " · refused" : ""} · engine{" "}
                 {lastMeta.engine}
               </p>

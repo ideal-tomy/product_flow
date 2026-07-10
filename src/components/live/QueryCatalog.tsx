@@ -14,6 +14,7 @@ interface QueryCatalogProps {
   onCloseMobile?: () => void;
   /** 直近で選んだ／送信したシナリオ id（ハイライト用） */
   activeId?: string | null;
+  items?: QueryCatalogItem[];
 }
 
 export function QueryCatalog({
@@ -21,17 +22,19 @@ export function QueryCatalog({
   disabled,
   onCloseMobile,
   activeId,
+  items,
 }: QueryCatalogProps) {
+  const catalog = items ?? queryCatalog;
   const [category, setCategory] = useState<QueryCategoryId>("all");
   const [query, setQuery] = useState("");
   const [focusIndex, setFocusIndex] = useState(0);
   const searchRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLUListElement>(null);
 
-  const counts = useMemo(() => countByCategory(queryCatalog), []);
+  const counts = useMemo(() => countByCategory(catalog), [catalog]);
   const filtered = useMemo(
-    () => filterQueryCatalog(queryCatalog, category, query),
-    [category, query],
+    () => filterQueryCatalog(catalog, category, query),
+    [catalog, category, query],
   );
 
   useEffect(() => {
@@ -69,7 +72,7 @@ export function QueryCatalog({
         <div className="mb-2 flex items-center justify-between gap-2">
           <p className="text-[11px] text-muted">
             {filtered.length}
-            <span className="text-muted/80"> / {queryCatalog.length} 件</span>
+            <span className="text-muted/80"> / {catalog.length} 件</span>
           </p>
           {onCloseMobile && (
             <button

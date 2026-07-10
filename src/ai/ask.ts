@@ -1,12 +1,23 @@
 import type { AskResult } from "../engines/types";
+import { detectIntent } from "./intent";
+import { askWithOpenAI } from "./openai";
+import { retrieveChunks } from "./retrieve";
 import { synthesizeAnswer } from "./synthesize";
+
+export type AskGembaOptions = {
+  /** true のときだけ OpenAI を試す（サーバ側） */
+  allowLlm?: boolean;
+};
 
 /**
  * GembaShift AI 問い合わせのエントリ。
- * ブラウザ・API の両方から同じ実装を呼ぶ。
- * OPENAI_API_KEY があるサーバでは将来 LLM パスに差し替え可能。
+ * ブラウザ・API の両方から同じ RAG 合成を使い、
+ * サーバで allowLlm + OPENAI_API_KEY のときだけ LLM を試す。
  */
-export async function askGemba(question: string): Promise<AskResult> {
+export async function askGemba(
+  question: string,
+  options: AskGembaOptions = {},
+): Promise<AskResult> {
   const trimmed = question.trim();
   if (!trimmed) {
     return {
@@ -20,11 +31,24 @@ export async function askGemba(question: string): Promise<AskResult> {
         confidence: "low",
         refused: true,
         engine: "rag",
+        intent: "refuse",
       },
       scenarioId: null,
     };
   }
 
-  // 検索演出のためのわずかな遅延は呼び出し側で行う
+  const intent = detectIntent(trimmed);
+  if (intent === "refuse") {
+    return synthesizeAnswer(trimmed);
+  }
+
+  if (options.allowLlm) {
+    const { hits } = retrieveChunks(trimmed, { intent, topK: 10 });
+    if (hits.length > 0) {
+      const llm = await askWithOpenAI(trimmed, intent, hits);
+      if (llm) return llm;
+    }
+  }
+
   return synthesizeAnswer(trimmed);
 }

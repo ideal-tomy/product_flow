@@ -15,6 +15,7 @@ export type AskMeta = {
   refused?: boolean;
   engine: "sample" | "rag" | "llm";
   scenarioId?: ScenarioId | null;
+  intent?: string;
 };
 
 export type AskResult = {

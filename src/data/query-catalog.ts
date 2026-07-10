@@ -11,7 +11,7 @@ export type QueryCategoryId =
   | "next";
 
 export interface QueryCatalogItem {
-  id: ScenarioId;
+  id: string;
   label: string;
   question: string;
   category: Exclude<QueryCategoryId, "all">;

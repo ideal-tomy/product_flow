@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
-import { scaleStats } from "../../data/gembashift-demo";
 import { knowledgeStats } from "../../ai/knowledge";
+import { scaleStats } from "../../data/gembashift-demo";
 
 interface LiveShellProps {
   onOpenDocs: () => void;
@@ -62,9 +62,13 @@ export function LiveShell({
         <div className="min-w-0 flex-1 truncate text-sm text-navy-muted">
           {isAi ? (
             <span className="tabular-nums">
-              {knowledgeStats.documents} docs · {knowledgeStats.chunks} chunks
+              {knowledgeStats.company.split("株式会社")[0]} ·{" "}
+              {knowledgeStats.product}
               <span className="ml-2 rounded bg-navy px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white">
                 AI
+              </span>
+              <span className="ml-2 text-[11px] text-muted">
+                {knowledgeStats.chunks} chunks
               </span>
             </span>
           ) : presentation ? (
