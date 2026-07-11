@@ -15,7 +15,8 @@ const src = {
     version: "Rev.C",
     page: "3-4",
     clauseId: "2.1",
-    excerpt: "キズの長さが 2mm 未満であれば合格とする。",
+    excerpt:
+      "キズの長さが 2mm 未満であれば合格とする。2mm以上は不適合。旧基準（3mm）は失効。",
     highlight: "2mm",
   } satisfies SourceReference,
   old21: {
@@ -31,7 +32,8 @@ const src = {
     version: "Rev.C",
     page: "6-7",
     clauseId: "3.2",
-    excerpt: "結果は検査システムへ電子記録する。",
+    excerpt:
+      "結果は検査システム（製品番号紐づけ）へ電子記録する。紙帳票のみの記録は不可。",
     highlight: "電子記録",
   } satisfies SourceReference,
   critOld: {
@@ -39,7 +41,7 @@ const src = {
     version: "Rev.B",
     page: "1",
     clauseId: "CR-01-OLD",
-    excerpt: "合格: 3mm未満。",
+    excerpt: "合格: 3mm未満。Rev.C 適用後は使用禁止。",
     highlight: "3mm",
   } satisfies SourceReference,
   retest: {
@@ -47,7 +49,8 @@ const src = {
     version: "1.0",
     page: "1",
     clauseId: "RI-01",
-    excerpt: "未完了者は単独検査不可。",
+    excerpt:
+      "キズ判定訓練・電子記録操作・抜取変更の実技。未完了者は単独検査不可。",
     highlight: "単独検査不可",
   } satisfies SourceReference,
   nc: {
@@ -55,7 +58,8 @@ const src = {
     version: "2025",
     page: "2",
     clauseId: "NC-2025-44",
-    excerpt: "顧客でキズが指摘。対策は2mmへ厳格化。",
+    excerpt:
+      "顧客で約2.8mmのキズが指摘。対策: Rev.C で 2mm へ厳格化。",
     highlight: "2mm",
   } satisfies SourceReference,
   gate: {
@@ -63,7 +67,8 @@ const src = {
     version: "1.0",
     page: "1",
     clauseId: "GATE-I",
-    excerpt: "再教育未完了などがある場合は承認しない。",
+    excerpt:
+      "再教育未完了、旧判定基準表の残存、校正切れ測定器がある場合は承認しない。",
     highlight: "承認しない",
   } satisfies SourceReference,
 };
@@ -347,6 +352,7 @@ const categoryNote: Record<string, string> = {
   retest: "教育",
   approval: "承認",
   qms: "品質",
+  site: "現場",
 };
 
 export const inspectionPack: KnowledgePack = {
@@ -356,8 +362,10 @@ export const inspectionPack: KnowledgePack = {
   audience: "everyone",
   audienceLabel: "だれでもわかる",
   context: {
-    topic: "出荷検査手順の改定（Rev.B→Rev.C）",
-    sources: "旧/新検査手順・判定基準・不適合記録・校正記録・教育チェックなど",
+    topic:
+      "東浜モビリティ・出荷検査場の検査手順改定（INS-出荷-03 Rev.B→Rev.C）",
+    sources:
+      "旧/新検査手順・判定基準・不適合記録・校正記録・教育チェック・承認ゲートなど",
     actions:
       "「何が変わった？」「再検査は？」「古い基準と矛盾は？」「適用して大丈夫？」と聞く",
     outcomes: "判定差分・影響・再教育・矛盾・適用可否が根拠付きで出る",
@@ -390,8 +398,8 @@ export const inspectionPack: KnowledgePack = {
     stats: {
       documents: new Set(chunks.map((c) => c.documentId)).size,
       chunks: chunks.length,
-      company: "デモ工場（出荷検査）",
-      product: "INS-出荷-03",
+      company: "東浜モビリティシステムズ株式会社",
+      product: "出荷検査場 · INS-出荷-03",
     },
     initialDocId: "INS-NEW",
   },

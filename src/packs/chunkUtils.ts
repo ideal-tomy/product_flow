@@ -95,5 +95,42 @@ export function chunkToSource(chunk: KnowledgeChunk): SourceReference {
     clauseId: chunk.clauseId,
     excerpt: chunk.excerpt,
     highlight: chunk.highlight,
+    chunkId: chunk.id,
+    fullText: chunk.text,
+    documentId: chunk.documentId,
   };
+}
+
+/** Sample 固定根拠に、パックチャンクから全文を補完する */
+export function enrichSourcesFromChunks(
+  sources: SourceReference[],
+  chunks: KnowledgeChunk[],
+): SourceReference[] {
+  return sources.map((s) => {
+    if (s.fullText) return s;
+    const hit =
+      chunks.find(
+        (c) =>
+          c.clauseId === s.clauseId &&
+          c.version === s.version &&
+          (c.documentName === s.documentName ||
+            c.documentName.includes(s.documentName) ||
+            s.documentName.includes(c.documentName.split(" ")[0] ?? "")),
+      ) ??
+      chunks.find(
+        (c) =>
+          c.clauseId === s.clauseId &&
+          (c.version === s.version ||
+            c.version === s.version.replace(/^v/, "") ||
+            `v${c.version}` === s.version),
+      );
+    if (!hit) return s;
+    return {
+      ...s,
+      chunkId: hit.id,
+      fullText: hit.text,
+      documentId: hit.documentId,
+      highlight: s.highlight ?? hit.highlight,
+    };
+  });
 }

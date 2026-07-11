@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import type { DemoDocument, SourceReference } from "../data/gembashift-demo";
 import type { QueryCatalogItem } from "../data/query-catalog";
+import type { KnowledgeChunk } from "../ai/knowledge";
 import { intentToScenarioId } from "../ai/recommended";
 import { aiEngine, type AskMeta } from "../engines";
 import { usePack } from "../packs";
@@ -18,6 +19,9 @@ import {
 import { QueryComposer } from "../components/live/QueryComposer";
 import { SourceDrawer } from "../components/live/SourceDrawer";
 import { PackContextBar } from "../components/live/PackContextBar";
+import { KnowledgeBrowser } from "../components/live/KnowledgeBrowser";
+
+type CenterTab = "knowledge" | "answers";
 
 function pickSource(
   sources: SourceReference[],
@@ -78,7 +82,9 @@ export function AiDemoPage() {
     () =>
       ai.documents.find((d) => d.id === ai.initialDocId) ?? ai.documents[0]!,
   );
-  const [sidebarMode, setSidebarMode] = useState<SidebarMode>("queries");
+  const [centerTab, setCenterTab] = useState<CenterTab>("knowledge");
+  const [focusClauseId, setFocusClauseId] = useState<string | null>(null);
+  const [sidebarMode, setSidebarMode] = useState<SidebarMode>("docs");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [input, setInput] = useState("");
   const [thread, setThread] = useState<ThreadItem[]>([]);
@@ -93,9 +99,6 @@ export function AiDemoPage() {
   const [lastMeta, setLastMeta] = useState<AskMeta | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const idRef = useRef(0);
-  const runQueryRef = useRef<
-    (text: string, queryId?: string | null) => Promise<void>
-  >(async () => {});
   const packBootKey = useRef<string | null>(null);
 
   useEffect(() => {
@@ -116,10 +119,11 @@ export function AiDemoPage() {
   }, [sourceOpen]);
 
   useEffect(() => {
+    if (centerTab !== "answers") return;
     const el = scrollRef.current;
     if (!el) return;
     el.scrollTop = el.scrollHeight;
-  }, [thread, loading, lastMeta]);
+  }, [thread, loading, lastMeta, centerTab]);
 
   useEffect(() => {
     if (!sourceOpen || drawerSources.length === 0) return;
@@ -132,6 +136,25 @@ export function AiDemoPage() {
     idRef.current += 1;
     return `msg-${idRef.current}`;
   };
+
+  const handleSelectDoc = useCallback((doc: DemoDocument) => {
+    setActiveDoc(doc);
+    setFocusClauseId(null);
+    setCenterTab("knowledge");
+    setSidebarMode("docs");
+  }, []);
+
+  const browseDocument = useCallback(
+    (documentId: string, clauseId?: string) => {
+      const doc = ai.documents.find((d) => d.id === documentId);
+      if (doc) setActiveDoc(doc);
+      setFocusClauseId(clauseId ?? null);
+      setCenterTab("knowledge");
+      setSourceOpen(false);
+      setSidebarMode("docs");
+    },
+    [ai.documents],
+  );
 
   const openSources = useCallback(
     (sources: SourceReference[], focus?: SourceReference) => {
@@ -150,6 +173,7 @@ export function AiDemoPage() {
       const loadingId = nextId();
       setLoading(true);
       setInput("");
+      setCenterTab("answers");
       if (queryId) setActiveQueryId(queryId);
       setThread((prev) => [
         ...prev,
@@ -232,22 +256,21 @@ export function AiDemoPage() {
     [loading, packId, ai.recommendedQueries, searchSteps],
   );
 
-  runQueryRef.current = runQuery;
-
-  // 初回およびパック切替時に代表質問を1件実行
+  // パック切替時はナレッジ閲覧から開始（自動質問しない）
   useEffect(() => {
     if (packBootKey.current === packId) return;
     packBootKey.current = packId;
     const doc =
       ai.documents.find((d) => d.id === ai.initialDocId) ?? ai.documents[0]!;
     setActiveDoc(doc);
+    setFocusClauseId(null);
+    setCenterTab("knowledge");
+    setSidebarMode("docs");
     setThread([]);
     setLastMeta(null);
     setSourceOpen(false);
-    const first = ai.recommendedQueries[0];
-    if (first) {
-      void runQueryRef.current(first.question, first.id);
-    }
+    setActiveQueryId(null);
+    setInput(ai.recommendedQueries[0]?.question ?? "");
   }, [packId, ai]);
 
   const handlePickQuery = (item: QueryCatalogItem) => {
@@ -259,6 +282,14 @@ export function AiDemoPage() {
     setSidebarMode(mode);
     setSidebarOpen(true);
   };
+
+  const askAboutClause = useCallback(
+    (chunk: KnowledgeChunk) => {
+      const q = `「${chunk.documentName}」の §${chunk.clauseId} について、要点と関連する影響を教えてください。`;
+      void runQuery(q);
+    },
+    [runQuery],
+  );
 
   const quickItems = ai.recommendedQueries.slice(0, 4).map((s) => ({
     label: s.label,
@@ -296,7 +327,7 @@ export function AiDemoPage() {
           mode={sidebarMode}
           onModeChange={setSidebarMode}
           activeDocId={activeDoc.id}
-          onSelectDoc={setActiveDoc}
+          onSelectDoc={handleSelectDoc}
           onPickQuery={handlePickQuery}
           queryDisabled={loading}
           activeQueryId={activeQueryId}
@@ -328,8 +359,32 @@ export function AiDemoPage() {
                 </Link>
               </div>
               <PackContextBar context={pack.context} />
-              {lastMeta && (
-                <p className="font-mono text-[11px] text-navy-muted">
+              <div className="flex gap-1 rounded-md border border-line bg-surface/40 p-1">
+                {(
+                  [
+                    { id: "knowledge" as const, label: "登録ナレッジ" },
+                    { id: "answers" as const, label: "回答" },
+                  ] as const
+                ).map((tab) => (
+                  <button
+                    key={tab.id}
+                    type="button"
+                    onClick={() => setCenterTab(tab.id)}
+                    className={`flex-1 rounded px-3 py-1.5 text-sm font-semibold transition-colors ${
+                      centerTab === tab.id
+                        ? "bg-navy text-white"
+                        : "text-navy-muted hover:text-navy"
+                    }`}
+                  >
+                    {tab.label}
+                    {tab.id === "answers" && thread.length > 0
+                      ? ` (${thread.filter((t) => t.kind === "assistant").length})`
+                      : ""}
+                  </button>
+                ))}
+              </div>
+              {lastMeta && centerTab === "answers" && (
+                <p className="hidden break-all font-mono text-[11px] text-navy-muted sm:block">
                   {lastMeta.searchedDocuments} documents searched ·{" "}
                   {lastMeta.sourcesFound} sources found · confidence{" "}
                   {lastMeta.confidence}
@@ -342,20 +397,29 @@ export function AiDemoPage() {
           </div>
 
           <div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto">
-            <QueryThread
-              items={thread}
-              onOpenSources={openSources}
-              onSuggest={(text) => {
-                if (loading) return;
-                void runQuery(text);
-              }}
-              presentation
-              staggerMs={160}
-              countUpMs={600}
-              hideGuide
-              wide
-              guide={guide}
-            />
+            {centerTab === "knowledge" ? (
+              <KnowledgeBrowser
+                document={activeDoc}
+                chunks={ai.chunks}
+                focusClauseId={focusClauseId}
+                onAskAboutClause={askAboutClause}
+              />
+            ) : (
+              <QueryThread
+                items={thread}
+                onOpenSources={openSources}
+                onSuggest={(text) => {
+                  if (loading) return;
+                  void runQuery(text);
+                }}
+                presentation
+                staggerMs={160}
+                countUpMs={600}
+                hideGuide={thread.length > 0}
+                wide
+                guide={guide}
+              />
+            )}
           </div>
 
           <QueryComposer
@@ -378,6 +442,7 @@ export function AiDemoPage() {
           onSelectSource={setSelectedSource}
           onClose={() => setSourceOpen(false)}
           isMobile={isMobile}
+          onBrowseDocument={browseDocument}
         />
       </div>
     </LiveShell>

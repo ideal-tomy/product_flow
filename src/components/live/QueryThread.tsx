@@ -89,75 +89,130 @@ function AnswerBody({
 
   if (answer.changes && answer.changes.length > 0) {
     detailBlocks.push(
-      <div key="changes" className="overflow-hidden rounded-md border border-line">
-        <table className="w-full text-sm">
-          <thead className="bg-surface text-left text-navy-muted">
-            <tr>
-              <th className="px-3 py-2 font-medium">変更</th>
-              <th className="px-3 py-2 font-medium">Before</th>
-              <th className="px-3 py-2 font-medium">After</th>
-              <th className="px-3 py-2 font-medium">重要度</th>
-            </tr>
-          </thead>
-          <tbody>
-            {answer.changes.map((c) => (
-              <tr key={c.id}>
-                <td className="border-t border-line px-3 py-2 text-navy">
-                  <span className="font-medium">{c.title}</span>
-                  <span className="mt-0.5 block font-mono text-[11px] text-muted">
+      <div key="changes" className="min-w-0">
+        <ul className="space-y-2 lg:hidden">
+          {answer.changes.map((c) => (
+            <li
+              key={c.id}
+              className="rounded-md border border-line bg-white px-3 py-3"
+            >
+              <div className="flex items-start justify-between gap-2">
+                <div className="min-w-0">
+                  <p className="text-sm font-medium text-navy">{c.title}</p>
+                  <p className="mt-0.5 font-mono text-[11px] text-muted">
                     §{c.clauseId}
-                  </span>
-                </td>
-                <td className="border-t border-line px-3 py-2 text-muted line-through decoration-muted/40">
-                  {c.before}
-                </td>
-                <td className="border-t border-line px-3 py-2 font-semibold text-navy">
-                  {c.after}
-                </td>
-                <td className="border-t border-line px-3 py-2">
-                  <span
-                    className={`rounded px-1.5 py-0.5 text-[11px] font-medium ${severityClass[c.severity]}`}
-                  >
-                    {severityLabel[c.severity]}
-                  </span>
-                </td>
+                  </p>
+                </div>
+                <span
+                  className={`shrink-0 rounded px-1.5 py-0.5 text-[11px] font-medium ${severityClass[c.severity]}`}
+                >
+                  {severityLabel[c.severity]}
+                </span>
+              </div>
+              <dl className="mt-2 grid grid-cols-2 gap-2 text-sm">
+                <div>
+                  <dt className="text-[11px] text-muted">Before</dt>
+                  <dd className="text-muted line-through decoration-muted/40">
+                    {c.before}
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-[11px] text-muted">After</dt>
+                  <dd className="font-semibold text-navy">{c.after}</dd>
+                </div>
+              </dl>
+            </li>
+          ))}
+        </ul>
+        <div className="hidden overflow-hidden rounded-md border border-line lg:block">
+          <table className="w-full text-sm">
+            <thead className="bg-surface text-left text-navy-muted">
+              <tr>
+                <th className="px-3 py-2 font-medium">変更</th>
+                <th className="px-3 py-2 font-medium">Before</th>
+                <th className="px-3 py-2 font-medium">After</th>
+                <th className="px-3 py-2 font-medium">重要度</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {answer.changes.map((c) => (
+                <tr key={c.id}>
+                  <td className="border-t border-line px-3 py-2 text-navy">
+                    <span className="font-medium">{c.title}</span>
+                    <span className="mt-0.5 block font-mono text-[11px] text-muted">
+                      §{c.clauseId}
+                    </span>
+                  </td>
+                  <td className="border-t border-line px-3 py-2 text-muted line-through decoration-muted/40">
+                    {c.before}
+                  </td>
+                  <td className="border-t border-line px-3 py-2 font-semibold text-navy">
+                    {c.after}
+                  </td>
+                  <td className="border-t border-line px-3 py-2">
+                    <span
+                      className={`rounded px-1.5 py-0.5 text-[11px] font-medium ${severityClass[c.severity]}`}
+                    >
+                      {severityLabel[c.severity]}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>,
     );
   }
 
   if (!answer.changes && answer.before && answer.after) {
     detailBlocks.push(
-      <div key="ba" className="overflow-hidden rounded-md border border-line">
-        <table className="w-full text-sm">
-          <thead className="bg-surface text-left text-navy-muted">
-            <tr>
-              <th className="px-3 py-2 font-medium">Version</th>
-              <th className="px-3 py-2 font-medium">
-                {answer.comparisonLabel ?? "値"}
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td className="border-t border-line px-3 py-2 text-muted">v3.2</td>
-              <td className="border-t border-line px-3 py-2 text-muted line-through decoration-muted/40">
+      <div key="ba" className="min-w-0">
+        <div className="rounded-md border border-line bg-white px-3 py-3 lg:hidden">
+          <p className="text-sm font-medium text-navy">
+            {answer.comparisonLabel ?? "値"}
+          </p>
+          <dl className="mt-2 grid grid-cols-2 gap-2 text-sm">
+            <div>
+              <dt className="text-[11px] text-muted">Before</dt>
+              <dd className="text-muted line-through decoration-muted/40">
                 {answer.before}
-              </td>
-            </tr>
-            <tr>
-              <td className="border-t border-line px-3 py-2 font-medium text-navy">
-                v3.4
-              </td>
-              <td className="border-t border-line px-3 py-2 font-semibold text-navy">
-                {answer.after}
-              </td>
-            </tr>
-          </tbody>
-        </table>
+              </dd>
+            </div>
+            <div>
+              <dt className="text-[11px] text-muted">After</dt>
+              <dd className="font-semibold text-navy">{answer.after}</dd>
+            </div>
+          </dl>
+        </div>
+        <div className="hidden overflow-hidden rounded-md border border-line lg:block">
+          <table className="w-full text-sm">
+            <thead className="bg-surface text-left text-navy-muted">
+              <tr>
+                <th className="px-3 py-2 font-medium">Version</th>
+                <th className="px-3 py-2 font-medium">
+                  {answer.comparisonLabel ?? "値"}
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td className="border-t border-line px-3 py-2 text-muted">v3.2</td>
+                <td className="border-t border-line px-3 py-2 text-muted line-through decoration-muted/40">
+                  {answer.before}
+                </td>
+              </tr>
+              <tr>
+                <td className="border-t border-line px-3 py-2 font-medium text-navy">
+                  v3.4
+                </td>
+                <td className="border-t border-line px-3 py-2 font-semibold text-navy">
+                  {answer.after}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>,
     );
   }
@@ -200,40 +255,71 @@ function AnswerBody({
 
   if (answer.retests && answer.retests.length > 0) {
     detailBlocks.push(
-      <div key="retests" className="overflow-hidden rounded-md border border-line">
-        <table className="w-full text-sm">
-          <thead className="bg-surface text-left text-navy-muted">
-            <tr>
-              <th className="px-3 py-2 font-medium">試験</th>
-              <th className="px-3 py-2 font-medium">理由</th>
-              <th className="px-3 py-2 font-medium">優先度</th>
-            </tr>
-          </thead>
-          <tbody>
-            {answer.retests.map((r) => (
-              <tr key={r.id}>
-                <td className="border-t border-line px-3 py-2 text-navy">
-                  <span className="font-mono text-[11px] text-muted">{r.id}</span>
-                  <span className="mt-0.5 block font-medium">{r.name}</span>
-                </td>
-                <td className="border-t border-line px-3 py-2 text-ink">{r.reason}</td>
-                <td className="border-t border-line px-3 py-2">
-                  <span
-                    className={`rounded px-1.5 py-0.5 text-[11px] font-medium ${
-                      r.priority === "必須"
-                        ? severityClass.high
-                        : r.priority === "推奨"
-                          ? severityClass.medium
-                          : severityClass.low
-                    }`}
-                  >
-                    {r.priority}
-                  </span>
-                </td>
+      <div key="retests" className="min-w-0">
+        <ul className="space-y-2 lg:hidden">
+          {answer.retests.map((r) => (
+            <li
+              key={r.id}
+              className="rounded-md border border-line bg-white px-3 py-3"
+            >
+              <div className="flex items-start justify-between gap-2">
+                <div className="min-w-0">
+                  <p className="font-mono text-[11px] text-muted">{r.id}</p>
+                  <p className="text-sm font-medium text-navy">{r.name}</p>
+                </div>
+                <span
+                  className={`shrink-0 rounded px-1.5 py-0.5 text-[11px] font-medium ${
+                    r.priority === "必須"
+                      ? severityClass.high
+                      : r.priority === "推奨"
+                        ? severityClass.medium
+                        : severityClass.low
+                  }`}
+                >
+                  {r.priority}
+                </span>
+              </div>
+              <p className="mt-2 text-sm text-ink">{r.reason}</p>
+            </li>
+          ))}
+        </ul>
+        <div className="hidden overflow-hidden rounded-md border border-line lg:block">
+          <table className="w-full text-sm">
+            <thead className="bg-surface text-left text-navy-muted">
+              <tr>
+                <th className="px-3 py-2 font-medium">試験</th>
+                <th className="px-3 py-2 font-medium">理由</th>
+                <th className="px-3 py-2 font-medium">優先度</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {answer.retests.map((r) => (
+                <tr key={r.id}>
+                  <td className="border-t border-line px-3 py-2 text-navy">
+                    <span className="font-mono text-[11px] text-muted">{r.id}</span>
+                    <span className="mt-0.5 block font-medium">{r.name}</span>
+                  </td>
+                  <td className="border-t border-line px-3 py-2 text-ink">
+                    {r.reason}
+                  </td>
+                  <td className="border-t border-line px-3 py-2">
+                    <span
+                      className={`rounded px-1.5 py-0.5 text-[11px] font-medium ${
+                        r.priority === "必須"
+                          ? severityClass.high
+                          : r.priority === "推奨"
+                            ? severityClass.medium
+                            : severityClass.low
+                      }`}
+                    >
+                      {r.priority}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>,
     );
   }
@@ -346,7 +432,7 @@ function AnswerBody({
               {presentation ? (
                 <span className="flex flex-col items-start gap-0.5 text-left">
                   <span>§{s.clauseId}</span>
-                  <span className="max-w-[14rem] truncate font-sans text-[11px] font-medium text-muted">
+                  <span className="max-w-[9rem] truncate font-sans text-[11px] font-medium text-muted sm:max-w-[14rem]">
                     {s.documentName}
                   </span>
                 </span>
@@ -378,7 +464,7 @@ function AnswerBody({
             answer={answer}
             countUpMs={countUpMs}
           />
-          <p className="whitespace-pre-line text-xl font-semibold leading-snug tracking-tight text-navy sm:text-2xl">
+          <p className="whitespace-pre-line break-words text-lg font-semibold leading-snug tracking-tight text-navy sm:text-xl lg:text-2xl">
             {answer.summary}
           </p>
         </div>
@@ -524,7 +610,7 @@ export function QueryThread({
 }: QueryThreadProps) {
   return (
     <div
-      className={`mx-auto flex w-full flex-col px-4 py-6 sm:px-6 ${
+      className={`mx-auto flex w-full min-w-0 flex-col px-4 py-6 sm:px-6 ${
         wide ? "max-w-3xl gap-8 lg:max-w-4xl" : "max-w-2xl gap-6"
       }`}
     >
@@ -547,7 +633,7 @@ export function QueryThread({
                 <p className="text-xs font-bold tracking-[0.14em] text-white/70">
                   質問
                 </p>
-                <p className="text-xl font-bold leading-snug tracking-tight text-white sm:text-2xl lg:text-3xl">
+                <p className="break-words text-lg font-bold leading-snug tracking-tight text-white sm:text-2xl lg:text-3xl">
                   {item.text}
                 </p>
               </div>

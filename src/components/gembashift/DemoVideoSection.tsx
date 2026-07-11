@@ -14,12 +14,12 @@ const frames = [
   {
     label: "0:20",
     title: "確定回答",
-    body: "v3.2: ±5℃ → v3.4: ±3℃　影響範囲: 制御ロジック3箇所",
+    body: "v3.2: ±5℃ → v3.4: ±3℃\n影響範囲: 制御ロジック3箇所",
   },
   {
     label: "0:26",
     title: "出典",
-    body: "制御仕様書 v3.4　p.214〜218　根拠条項 4.1.3 / 4.1.4 / 4.2.1 / 5.3.2",
+    body: "制御仕様書 v3.4\np.214〜218\n根拠条項 4.1.3 / 4.1.4 / 4.2.1 / 5.3.2",
   },
 ];
 
@@ -103,15 +103,15 @@ export function DemoVideoSection() {
         </video>
 
         {showMock && (
-          <div className="aspect-video bg-[linear-gradient(160deg,#0b1f3a_0%,#16325a_55%,#1e3f66_100%)] p-6 sm:p-10">
-            <div className="flex h-full flex-col justify-between">
+          <div className="flex min-h-[280px] flex-col bg-[linear-gradient(160deg,#0b1f3a_0%,#16325a_55%,#1e3f66_100%)] p-5 sm:aspect-video sm:min-h-0 sm:p-10">
+            <div className="flex min-h-0 flex-1 flex-col justify-between gap-6">
               <div className="flex items-center justify-between text-xs text-white/55">
                 <span>GembaShift · 30秒デモ</span>
                 <span className="font-mono">{frame.label}</span>
               </div>
-              <div key={frameIndex} className="fade-in max-w-xl">
+              <div key={frameIndex} className="fade-in min-w-0 max-w-xl">
                 <p className="text-sm font-medium text-white/70">{frame.title}</p>
-                <p className="mt-3 text-xl font-semibold leading-snug text-white sm:text-2xl">
+                <p className="mt-3 whitespace-pre-line break-words text-base font-semibold leading-snug text-white sm:text-xl lg:text-2xl">
                   {frame.body}
                 </p>
               </div>

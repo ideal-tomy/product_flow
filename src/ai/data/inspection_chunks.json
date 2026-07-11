@@ -7,7 +7,7 @@
     "category": "inspection",
     "clauseId": "§2.1",
     "page": "3",
-    "text": "§2.1 外観判定\nキズの長さが 3mm 未満であれば合格とする。"
+    "text": "§2.1 外観判定\n東浜モビリティシステムズ株式会社・出荷検査場における外観検査では、キズの長さが 3mm 未満であれば合格とする。測定は目視およびスケールで行い、判定結果は紙帳票へ記入する。適用: INS-出荷-03 Rev.B。"
   },
   {
     "chunkId": "INS-OLD:2",
@@ -17,7 +17,7 @@
     "category": "inspection",
     "clauseId": "§3.2",
     "page": "6",
-    "text": "§3.2 寸法測定\n測定はノギスで行い、記録は紙帳票へ手書きする。"
+    "text": "§3.2 寸法測定\n測定はノギス（アナログ可）で行い、記録は紙帳票へ手書きする。帳票はロット単位でファイリングし、保管期間は1年とする。"
   },
   {
     "chunkId": "INS-OLD:3",
@@ -27,7 +27,17 @@
     "category": "inspection",
     "clauseId": "§4.1",
     "page": "8",
-    "text": "§4.1 抜取数\n1ロットあたり 5個を抜取検査する。"
+    "text": "§4.1 抜取数\n1ロットあたり 5個を抜取検査する。抜取はロット先頭・中間・末尾から無作為に選ぶ。"
+  },
+  {
+    "chunkId": "INS-OLD:4",
+    "documentId": "INS-OLD",
+    "documentName": "出荷検査手順 INS-出荷-03 Rev.B",
+    "version": "Rev.B",
+    "category": "inspection",
+    "clauseId": "§1.0",
+    "page": "1",
+    "text": "§1.0 適用範囲\n本手順は国内第2工場・出荷検査場の最終外観・寸法検査に適用する。発行: 品質保証課。Rev.B 適用日: 2025-06-01。"
   },
   {
     "chunkId": "INS-NEW:1",
@@ -37,7 +47,7 @@
     "category": "inspection",
     "clauseId": "§2.1",
     "page": "3-4",
-    "text": "§2.1 外観判定\nキズの長さが 2mm 未満であれば合格とする。2mm以上は不適合。"
+    "text": "§2.1 外観判定\nキズの長さが 2mm 未満であれば合格とする。2mm以上は不適合。判定は判定基準表 CR-出荷-03 Rev.C と一致させること。適用開始: 2026-05-01。旧基準（3mm未満合格）は失効。"
   },
   {
     "chunkId": "INS-NEW:2",
@@ -47,7 +57,7 @@
     "category": "inspection",
     "clauseId": "§3.2",
     "page": "6-7",
-    "text": "§3.2 寸法測定\n測定はデジタルノギスで行い、結果は検査システムへ電子記録する。紙帳票のみの記録は不可。"
+    "text": "§3.2 寸法測定\n測定は校正期限内のデジタルノギスで行い、結果は検査システム（製品番号紐づけ）へ電子記録する。紙帳票のみの記録は不可。システム障害時は品質保証課の臨時手順に従い、復旧後に電子転記する。"
   },
   {
     "chunkId": "INS-NEW:3",
@@ -57,7 +67,7 @@
     "category": "inspection",
     "clauseId": "§4.1",
     "page": "9",
-    "text": "§4.1 抜取数\n1ロットあたり 8個を抜取検査する。不適合・是正後ロットには全数確認を追加する。"
+    "text": "§4.1 抜取数\n1ロットあたり 8個を抜取検査する。不適合が発生したロット、および是正後ロットには全数確認を追加する。抜取計画は検査システムに登録する。"
   },
   {
     "chunkId": "INS-NEW:4",
@@ -67,7 +77,27 @@
     "category": "inspection",
     "clauseId": "§5.3",
     "page": "11",
-    "text": "§5.3 不適合時の処置\n不適合品は赤タグを付け、隔離棚へ移動する。再検査合格まで出荷してはならない。"
+    "text": "§5.3 不適合時の処置\n不適合品は赤タグを付け、隔離棚へ移動する。再検査合格まで出荷してはならない。処置内容・責任者・日時を検査システムへ記録する。"
+  },
+  {
+    "chunkId": "INS-NEW:5",
+    "documentId": "INS-NEW",
+    "documentName": "出荷検査手順 INS-出荷-03 Rev.C",
+    "version": "Rev.C",
+    "category": "inspection",
+    "clauseId": "§1.0",
+    "page": "1",
+    "text": "§1.0 適用範囲・改訂要旨\n東浜モビリティシステムズ株式会社・出荷検査場。Rev.C（適用予定: 2026-05-01）。主な改訂: キズ判定 3→2mm、電子記録必須、抜取 5→8個、不適合隔離の明確化。発行: 品質保証課 / 承認: 品質部長。"
+  },
+  {
+    "chunkId": "INS-NEW:6",
+    "documentId": "INS-NEW",
+    "documentName": "出荷検査手順 INS-出荷-03 Rev.C",
+    "version": "Rev.C",
+    "category": "inspection",
+    "clauseId": "§2.4",
+    "page": "5",
+    "text": "§2.4 判定の一元化\n現場掲示・手順書・判定基準表・検査システムマスタのキズ判定値はすべて 2mm で一致させる。不一致を発見した場合は検査を中断し品質保証課へ報告する。"
   },
   {
     "chunkId": "CRIT:1",
@@ -77,7 +107,7 @@
     "category": "criteria",
     "clauseId": "CR-01",
     "page": "1",
-    "text": "CR-01 キズ判定\n合格: 2mm未満。不適合: 2mm以上。旧基準（3mm未満）は失効。"
+    "text": "CR-01 キズ判定（現行）\n様式: CR-出荷-03 Rev.C。合格: 2mm未満。不適合: 2mm以上。旧基準（3mm未満合格 / Rev.B）は失効。掲示板の旧表は赤札回収すること。"
   },
   {
     "chunkId": "CRIT:2",
@@ -87,7 +117,17 @@
     "category": "criteria",
     "clauseId": "CR-01-OLD",
     "page": "1",
-    "text": "CR-01（旧）キズ判定\n合格: 3mm未満。※Rev.C適用後は使用禁止。"
+    "text": "CR-01（旧）キズ判定\n様式: CR-出荷-03 Rev.B。合格: 3mm未満。※INS Rev.C 適用後は使用禁止。現場残存は不適合扱いとする。"
+  },
+  {
+    "chunkId": "CRIT:3",
+    "documentId": "CRIT",
+    "documentName": "判定基準表 CR-出荷-03",
+    "version": "Rev.C",
+    "category": "criteria",
+    "clauseId": "CR-02",
+    "page": "1",
+    "text": "CR-02 寸法公差\n主要寸法は図面公差に従う。測定値はデジタルノギスで取得し、検査システムへ入力する。手書き転記のみは不可。"
   },
   {
     "chunkId": "CHG-INS:1",
@@ -97,7 +137,7 @@
     "category": "change_notice",
     "clauseId": "CHG-I1",
     "page": "1",
-    "text": "CHG-I1 キズ判定の厳格化\n変更前: 3mm。変更後: 2mm。理由: 顧客クレーム低減。"
+    "text": "CHG-I1 キズ判定の厳格化\n文書番号: CHG-INS-2026-041。変更前: 3mm未満合格。変更後: 2mm未満合格。理由: NC-2025-44（顧客キズ指摘）の再発防止。適用日: 2026-05-01。責任: 品質保証課。"
   },
   {
     "chunkId": "CHG-INS:2",
@@ -107,7 +147,7 @@
     "category": "change_notice",
     "clauseId": "CHG-I2",
     "page": "1",
-    "text": "CHG-I2 記録の電子化\n変更前: 紙帳票。変更後: 検査システム必須。理由: 追跡性向上。"
+    "text": "CHG-I2 記録の電子化\n変更前: 紙帳票。変更後: 検査システム必須。理由: NC-2024-19（記録欠落）への対策と追跡性向上。紙のみ運用は廃止。"
   },
   {
     "chunkId": "CHG-INS:3",
@@ -117,7 +157,17 @@
     "category": "change_notice",
     "clauseId": "CHG-I3",
     "page": "2",
-    "text": "CHG-I3 抜取数増加\n変更前: 5個。変更後: 8個。不適合・是正後は全数追加。"
+    "text": "CHG-I3 抜取数増加\n変更前: 5個。変更後: 8個。不適合・是正後ロットは全数確認を追加。影響: 検査工数・教育・システム設定。"
+  },
+  {
+    "chunkId": "CHG-INS:4",
+    "documentId": "CHG-INS",
+    "documentName": "検査手順改訂通知 2026-04",
+    "version": "1.0",
+    "category": "change_notice",
+    "clauseId": "CHG-I4",
+    "page": "2",
+    "text": "CHG-I4 適用条件\nRev.C 適用前に必須: (1) 再教育 RI-01 完了 (2) 旧判定基準表撤去 (3) デジタルノギス校正有効 (4) GATE-I 承認。"
   },
   {
     "chunkId": "NC:1",
@@ -127,7 +177,7 @@
     "category": "nonconformance",
     "clauseId": "NC-2025-44",
     "page": "2",
-    "text": "NC-2025-44 キズ見逃し\n事象: 顧客で3mm弱のキズが指摘。原因: 判定基準が緩い。対策: Rev.Cで2mmへ厳格化。"
+    "text": "NC-2025-44 キズ見逃し\n発生: 2025-11。事象: 顧客で約2.8mmのキズが指摘（社内は3mm未満で合格）。原因: 判定基準が緩い。対策: Rev.C で 2mm へ厳格化。水平展開: 出荷検査全班。"
   },
   {
     "chunkId": "NC:2",
@@ -137,7 +187,17 @@
     "category": "nonconformance",
     "clauseId": "NC-2024-19",
     "page": "4",
-    "text": "NC-2024-19 記録欠落\n事象: 紙帳票の紛失で追跡不能。対策: 電子記録必須化。"
+    "text": "NC-2024-19 記録欠落\n事象: 紙帳票の紛失でロット追跡不能。原因: 紙のみ運用。対策: 検査システムへの電子記録必須化（CHG-I2）。"
+  },
+  {
+    "chunkId": "NC:3",
+    "documentId": "NC",
+    "documentName": "不適合・再発防止記録",
+    "version": "2025",
+    "category": "nonconformance",
+    "clauseId": "NC-2025-08",
+    "page": "6",
+    "text": "NC-2025-08 抜取不足疑い\n事象: クレームロットで抜取5個では検出できなかった可能性。対策: 抜取を8個へ増加し、是正後は全数確認。"
   },
   {
     "chunkId": "CAL:1",
@@ -147,7 +207,17 @@
     "category": "calibration",
     "clauseId": "CAL-DN-02",
     "page": "1",
-    "text": "CAL-DN-02 デジタルノギス\nRev.C適用には校正期限内のデジタルノギスが必須。アナログノギスのみの班は器具更新が必要。"
+    "text": "CAL-DN-02 デジタルノギス\nRev.C 適用には校正期限内のデジタルノギスが必須。管理番号 DN-02 系列。アナログノギスのみの班は器具更新が必要。校正期限切れでの測定は不適合。"
+  },
+  {
+    "chunkId": "CAL:2",
+    "documentId": "CAL",
+    "documentName": "測定器校正記録",
+    "version": "2026-Q1",
+    "category": "calibration",
+    "clauseId": "CAL-SC-01",
+    "page": "2",
+    "text": "CAL-SC-01 外観用スケール\nキズ長さ測定用スケールは年1回校正。破損・目盛不鮮明は即交換。"
   },
   {
     "chunkId": "RETEST:1",
@@ -157,7 +227,7 @@
     "category": "retest",
     "clauseId": "RI-01",
     "page": "1",
-    "text": "RI-01 必須の再検査項目\nキズ判定訓練、電子記録操作、抜取数変更の実技確認。未完了者は単独検査不可。priority:必須"
+    "text": "RI-01 必須の再検査項目\nキズ判定訓練（2mm基準）、電子記録操作、抜取数変更の実技確認。未完了者は単独検査不可。priority:必須。教育責任: 出荷検査場 主任。"
   },
   {
     "chunkId": "RETEST:2",
@@ -167,7 +237,17 @@
     "category": "retest",
     "clauseId": "RI-02",
     "page": "1",
-    "text": "RI-02 実施状況\n日勤完了。遅番2名が電子記録操作未完了。"
+    "text": "RI-02 実施状況\n日勤は 2026-04-18 完了。遅番2名が電子記録操作未完了（予定: 4/25）。完了まで単独検査禁止。記録: EDU-INS-2026-04。"
+  },
+  {
+    "chunkId": "RETEST:3",
+    "documentId": "RETEST",
+    "documentName": "再検査・教育チェックリスト",
+    "version": "1.0",
+    "category": "retest",
+    "clauseId": "RI-03",
+    "page": "2",
+    "text": "RI-03 推奨テーマ\n不適合隔離フロー §5.3、旧基準表の識別と使用禁止、システム障害時の臨時手順。"
   },
   {
     "chunkId": "GATE-I:1",
@@ -177,7 +257,17 @@
     "category": "approval",
     "clauseId": "GATE-I",
     "page": "1",
-    "text": "GATE-I 承認条件\n再教育未完了、旧判定基準表の残存、校正切れ測定器がある場合は Rev.C 適用を承認しない。"
+    "text": "GATE-I 承認条件\n文書: GATE-INS-03。再教育未完了、旧判定基準表の残存、校正切れ測定器がある場合は Rev.C 適用を承認しない。承認者: 品質部長。現状（2026-04-20）: 遅番再教育未完了のため保留。"
+  },
+  {
+    "chunkId": "GATE-I:2",
+    "documentId": "GATE-I",
+    "documentName": "検査改訂承認ゲート",
+    "version": "1.0",
+    "category": "approval",
+    "clauseId": "GATE-I-B",
+    "page": "1",
+    "text": "GATE-I-B 適用後監視\n適用後2週間は顧客キズクレーム・記録欠落・抜取逸脱を重点監視し、日次で品質へ報告する。"
   },
   {
     "chunkId": "QMS-I:1",
@@ -187,7 +277,7 @@
     "category": "qms",
     "clauseId": "QMS-INS-01",
     "page": "1",
-    "text": "QMS-INS-01 判定基準の一元管理\n現場掲示・手順書・システムマスタの判定値が一致していること。"
+    "text": "QMS-INS-01 判定基準の一元管理\n現場掲示・手順書・システムマスタの判定値が一致していること。不一致は重大不適合として扱う。"
   },
   {
     "chunkId": "QMS-I:2",
@@ -197,6 +287,26 @@
     "category": "qms",
     "clauseId": "QMS-INS-02",
     "page": "1",
-    "text": "QMS-INS-02 記録の追跡性\n検査結果は製品番号と紐づけて検索できること。紙のみは不可。"
+    "text": "QMS-INS-02 記録の追跡性\n検査結果は製品番号と紐づけて検索できること。紙のみは不可。保管期間は顧客要求に従い最低3年。"
+  },
+  {
+    "chunkId": "QMS-I:3",
+    "documentId": "QMS-I",
+    "documentName": "検査品質要求メモ",
+    "version": "1.0",
+    "category": "qms",
+    "clauseId": "QMS-INS-03",
+    "page": "2",
+    "text": "QMS-INS-03 変更時教育\n検査手順・判定基準の変更時は、影響を受ける検査員への教育完了を適用条件とする。"
+  },
+  {
+    "chunkId": "SITE-I:1",
+    "documentId": "SITE-I",
+    "documentName": "出荷検査場 現場概要",
+    "version": "2026-04",
+    "category": "site",
+    "clauseId": "SITE-I01",
+    "page": "1",
+    "text": "SITE-I01 現場概要\n東浜モビリティシステムズ株式会社 国内第2工場・出荷検査場。対象手順: INS-出荷-03。人員: 日勤10名・遅番6名。本デモの改定対象検査場。"
   }
 ]

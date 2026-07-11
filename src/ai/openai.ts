@@ -145,6 +145,9 @@ export async function askWithOpenAI(
         clauseId: h.clauseId,
         excerpt: h.excerpt,
         highlight: h.highlight,
+        chunkId: h.id,
+        fullText: h.text,
+        documentId: h.documentId,
       }));
 
     if (sources.length === 0) return null;

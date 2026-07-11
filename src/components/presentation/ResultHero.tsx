@@ -24,11 +24,11 @@ export function ResultHero({ scenarioId, answer, countUpMs = 700 }: ResultHeroPr
         {primary && (
           <div>
             <p className="text-base font-semibold text-navy-muted">{primary.title}</p>
-            <p className="mt-4 flex flex-wrap items-center justify-center gap-4 text-4xl font-bold tracking-tight text-navy sm:text-5xl">
+            <p className="mt-4 flex flex-wrap items-center justify-center gap-3 text-2xl font-bold tracking-tight text-navy sm:gap-4 sm:text-3xl lg:text-4xl xl:text-5xl">
               <span className="text-muted line-through decoration-muted/50">
                 {primary.before}
               </span>
-              <span className="text-2xl font-semibold text-muted">→</span>
+              <span className="text-xl font-semibold text-muted sm:text-2xl">→</span>
               <span>{primary.after}</span>
             </p>
           </div>
@@ -45,7 +45,7 @@ export function ResultHero({ scenarioId, answer, countUpMs = 700 }: ResultHeroPr
             key={g.label}
             className="rounded-lg border-2 border-navy/10 bg-surface/40 px-4 py-6 text-center"
           >
-            <p className="text-4xl font-bold tabular-nums text-navy sm:text-5xl">
+            <p className="text-3xl font-bold tabular-nums text-navy sm:text-4xl lg:text-5xl">
               <CountUp to={g.count} durationMs={countUpMs} />
             </p>
             <p className="mt-2 text-sm font-bold tracking-wide text-navy-muted">
@@ -63,7 +63,7 @@ export function ResultHero({ scenarioId, answer, countUpMs = 700 }: ResultHeroPr
     const optional = answer.retests.filter((r) => r.priority === "任意").length;
     return (
       <div className="fade-in space-y-4 rounded-lg border-2 border-navy/10 bg-surface/40 px-5 py-7 text-center sm:py-8">
-        <p className="text-5xl font-bold tabular-nums text-navy sm:text-6xl">
+        <p className="text-4xl font-bold tabular-nums text-navy sm:text-5xl lg:text-6xl">
           <CountUp to={answer.retests.length} durationMs={countUpMs} />
         </p>
         <p className="text-sm font-bold tracking-[0.14em] text-navy-muted">
@@ -103,7 +103,7 @@ export function ResultHero({ scenarioId, answer, countUpMs = 700 }: ResultHeroPr
             <p className="text-xs font-semibold text-muted">
               {c.left.documentName} {c.left.version}
             </p>
-            <p className="mt-2 text-4xl font-bold text-navy sm:text-5xl">{c.left.value}</p>
+            <p className="mt-2 break-words text-3xl font-bold text-navy sm:text-4xl lg:text-5xl">{c.left.value}</p>
           </div>
           <p className="text-center text-lg font-bold tracking-wide text-muted">
             VS
@@ -112,7 +112,7 @@ export function ResultHero({ scenarioId, answer, countUpMs = 700 }: ResultHeroPr
             <p className="text-xs font-semibold text-muted">
               {c.right.documentName} {c.right.version}
             </p>
-            <p className="mt-2 text-4xl font-bold text-navy sm:text-5xl">{c.right.value}</p>
+            <p className="mt-2 break-words text-3xl font-bold text-navy sm:text-4xl lg:text-5xl">{c.right.value}</p>
           </div>
         </div>
       </div>

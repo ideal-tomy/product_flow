@@ -13,8 +13,35 @@ export function ImpactSection() {
           </p>
         </div>
 
-        <div className="mt-8 overflow-x-auto">
-          <table className="w-full min-w-[560px] text-left text-sm">
+        <ul className="mt-8 space-y-3 lg:hidden">
+          {impactRows.map((row) => (
+            <li
+              key={row.task}
+              className="rounded-md border border-line bg-white px-4 py-3"
+            >
+              <p className="text-sm font-medium text-navy">{row.task}</p>
+              <dl className="mt-2 grid grid-cols-3 gap-2 text-sm">
+                <div>
+                  <dt className="text-[11px] text-muted">Before</dt>
+                  <dd className="text-muted line-through decoration-muted/40">
+                    {row.before}
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-[11px] text-muted">After</dt>
+                  <dd className="font-semibold text-navy">{row.after}</dd>
+                </div>
+                <div>
+                  <dt className="text-[11px] text-muted">削減</dt>
+                  <dd className="font-semibold text-success">{row.reduction}</dd>
+                </div>
+              </dl>
+            </li>
+          ))}
+        </ul>
+
+        <div className="mt-8 hidden lg:block">
+          <table className="w-full text-left text-sm">
             <thead>
               <tr className="border-b border-line text-navy-muted">
                 <th className="py-3 pr-4 font-medium">業務</th>

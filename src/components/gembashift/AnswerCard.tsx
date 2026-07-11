@@ -45,58 +45,101 @@ export function AnswerCard({
         </p>
 
         {answer.changes && answer.changes.length > 0 ? (
-          <div className="fade-in-delay-1 mt-4 overflow-hidden rounded-md border border-line">
-            <table className="w-full text-sm">
-              <thead className="bg-surface text-left text-navy-muted">
-                <tr>
-                  <th className="px-3 py-2 font-medium">変更</th>
-                  <th className="px-3 py-2 font-medium">v3.2</th>
-                  <th className="px-3 py-2 font-medium">v3.4</th>
-                </tr>
-              </thead>
-              <tbody>
-                {answer.changes.map((c) => (
-                  <tr key={c.id}>
-                    <td className="border-t border-line px-3 py-2.5 text-muted">
-                      {c.title}
-                    </td>
-                    <td className="border-t border-line px-3 py-2.5 text-muted line-through decoration-muted/50">
-                      {c.before}
-                    </td>
-                    <td className="border-t border-line px-3 py-2.5 font-semibold text-navy">
-                      {c.after}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        ) : (
-          answer.before &&
-          answer.after && (
-            <div className="fade-in-delay-1 mt-4 overflow-hidden rounded-md border border-line">
+          <div className="fade-in-delay-1 mt-4 min-w-0">
+            <ul className="space-y-2 lg:hidden">
+              {answer.changes.map((c) => (
+                <li
+                  key={c.id}
+                  className="rounded-md border border-line bg-surface/40 px-3 py-3"
+                >
+                  <p className="text-sm font-medium text-navy">{c.title}</p>
+                  <dl className="mt-2 grid grid-cols-2 gap-2 text-sm">
+                    <div>
+                      <dt className="text-[11px] text-muted">v3.2</dt>
+                      <dd className="text-muted line-through decoration-muted/50">
+                        {c.before}
+                      </dd>
+                    </div>
+                    <div>
+                      <dt className="text-[11px] text-muted">v3.4</dt>
+                      <dd className="font-semibold text-navy">{c.after}</dd>
+                    </div>
+                  </dl>
+                </li>
+              ))}
+            </ul>
+            <div className="hidden overflow-hidden rounded-md border border-line lg:block">
               <table className="w-full text-sm">
                 <thead className="bg-surface text-left text-navy-muted">
                   <tr>
-                    <th className="px-3 py-2 font-medium">項目</th>
+                    <th className="px-3 py-2 font-medium">変更</th>
                     <th className="px-3 py-2 font-medium">v3.2</th>
                     <th className="px-3 py-2 font-medium">v3.4</th>
                   </tr>
                 </thead>
                 <tbody>
-                  <tr>
-                    <td className="border-t border-line px-3 py-2.5 text-muted">
-                      {answer.comparisonLabel ?? "値"}
-                    </td>
-                    <td className="border-t border-line px-3 py-2.5 text-muted line-through decoration-muted/50">
-                      {answer.before}
-                    </td>
-                    <td className="border-t border-line px-3 py-2.5 font-semibold text-navy">
-                      {answer.after}
-                    </td>
-                  </tr>
+                  {answer.changes.map((c) => (
+                    <tr key={c.id}>
+                      <td className="border-t border-line px-3 py-2.5 text-muted">
+                        {c.title}
+                      </td>
+                      <td className="border-t border-line px-3 py-2.5 text-muted line-through decoration-muted/50">
+                        {c.before}
+                      </td>
+                      <td className="border-t border-line px-3 py-2.5 font-semibold text-navy">
+                        {c.after}
+                      </td>
+                    </tr>
+                  ))}
                 </tbody>
               </table>
+            </div>
+          </div>
+        ) : (
+          answer.before &&
+          answer.after && (
+            <div className="fade-in-delay-1 mt-4 min-w-0">
+              <div className="rounded-md border border-line bg-surface/40 px-3 py-3 lg:hidden">
+                <p className="text-sm font-medium text-navy">
+                  {answer.comparisonLabel ?? "値"}
+                </p>
+                <dl className="mt-2 grid grid-cols-2 gap-2 text-sm">
+                  <div>
+                    <dt className="text-[11px] text-muted">v3.2</dt>
+                    <dd className="text-muted line-through decoration-muted/50">
+                      {answer.before}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt className="text-[11px] text-muted">v3.4</dt>
+                    <dd className="font-semibold text-navy">{answer.after}</dd>
+                  </div>
+                </dl>
+              </div>
+              <div className="hidden overflow-hidden rounded-md border border-line lg:block">
+                <table className="w-full text-sm">
+                  <thead className="bg-surface text-left text-navy-muted">
+                    <tr>
+                      <th className="px-3 py-2 font-medium">項目</th>
+                      <th className="px-3 py-2 font-medium">v3.2</th>
+                      <th className="px-3 py-2 font-medium">v3.4</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td className="border-t border-line px-3 py-2.5 text-muted">
+                        {answer.comparisonLabel ?? "値"}
+                      </td>
+                      <td className="border-t border-line px-3 py-2.5 text-muted line-through decoration-muted/50">
+                        {answer.before}
+                      </td>
+                      <td className="border-t border-line px-3 py-2.5 font-semibold text-navy">
+                        {answer.after}
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
             </div>
           )
         )}

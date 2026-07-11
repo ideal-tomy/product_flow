@@ -5,6 +5,12 @@ export interface SourceReference {
   clauseId: string;
   excerpt: string;
   highlight?: string;
+  /** AI ナレッジチャンク ID（閲覧・根拠追跡用） */
+  chunkId?: string;
+  /** チャンク全文。無い場合は excerpt を表示 */
+  fullText?: string;
+  /** 文書 ID（ナレッジブラウザへのジャンプ用） */
+  documentId?: string;
 }
 
 export interface SpecChangeItem {

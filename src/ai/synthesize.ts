@@ -372,7 +372,7 @@ function synthesizeCompany(hits: ScoredChunk[]): DemoAnswer {
   const company = allByDoc("COMPANY-001");
   return {
     summary:
-      "東浜モビリティシステムズ株式会社（架空）の車載温度制御ユニット TCU-480 が対象です。従業員4,800名、国内6工場・海外3拠点、対象車種12、累計出荷240万ユニット。本デモは制御仕様書 v3.2 と v3.4 の改訂影響を扱います。",
+      "東浜モビリティシステムズ株式会社の車載温度制御ユニット TCU-480 が対象です。従業員4,800名、国内6工場・海外3拠点、対象車種12、累計出荷240万ユニット。本デモは制御仕様書 v3.2 と v3.4 の改訂影響を扱います。",
     sources: sourcesFrom([...company, ...hits]),
   };
 }

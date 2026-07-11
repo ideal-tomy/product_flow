@@ -14,6 +14,7 @@ import type { QueryCatalogItem } from "../data/query-catalog";
 import { presentationSearchSteps } from "../data/presentation-script";
 import { usePresentationMode } from "../hooks/usePresentationMode";
 import { getPack, usePack } from "../packs";
+import { enrichSourcesFromChunks } from "../packs/chunkUtils";
 import { LiveShell } from "../components/live/LiveShell";
 import {
   WorkspaceSidebar,
@@ -199,8 +200,9 @@ export function LiveDemoPage() {
 
   const openSources = useCallback(
     (sources: SourceReference[], focus?: SourceReference) => {
-      setDrawerSources(sources);
-      setSelectedSource(pickSource(sources, activeDoc, focus));
+      const enriched = enrichSourcesFromChunks(sources, pack.ai.chunks);
+      setDrawerSources(enriched);
+      setSelectedSource(pickSource(enriched, activeDoc, focus));
 
       if (sourceOpenTimerRef.current != null) {
         window.clearTimeout(sourceOpenTimerRef.current);
@@ -217,7 +219,7 @@ export function LiveDemoPage() {
         setSourceOpen(true);
       }
     },
-    [activeDoc, presentation, timings.sourceCueMs],
+    [activeDoc, presentation, timings.sourceCueMs, pack.ai.chunks],
   );
 
   useEffect(() => {

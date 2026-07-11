@@ -15,7 +15,8 @@ const src = {
     version: "3.0",
     page: "4-5",
     clauseId: "3.1",
-    excerpt: "安全メガネおよび耐切創手袋を必ず着用する。",
+    excerpt:
+      "安全メガネおよび耐切創手袋（型式: CG-07 相当以上）を必ず着用する。未着用の場合は作業を開始してはならない。",
     highlight: "耐切創手袋",
   } satisfies SourceReference,
   sopOld31: {
@@ -23,7 +24,7 @@ const src = {
     version: "2.1",
     page: "4-5",
     clauseId: "3.1",
-    excerpt: "手袋の着用は任意とする。",
+    excerpt: "手袋の着用は任意とする。耐切創手袋の常備は推奨するが、着用義務は設けない。",
     highlight: "任意",
   } satisfies SourceReference,
   sopNew42: {
@@ -31,7 +32,8 @@ const src = {
     version: "3.0",
     page: "8-9",
     clauseId: "4.2",
-    excerpt: "ボルトAの締付トルクは 10 N·m とする。",
+    excerpt:
+      "ボルトAの締付トルクは 10 N·m とする。専用トルクレンチ TL-07 を使用する。",
     highlight: "10 N·m",
   } satisfies SourceReference,
   sopOld42: {
@@ -39,7 +41,7 @@ const src = {
     version: "2.1",
     page: "8",
     clauseId: "4.2",
-    excerpt: "ボルトAの締付トルクは 8 N·m とする。",
+    excerpt: "ボルトA（ブラケット固定用）の締付トルクは 8 N·m とする。",
     highlight: "8 N·m",
   } satisfies SourceReference,
   train: {
@@ -47,7 +49,8 @@ const src = {
     version: "2026-03",
     page: "1",
     clauseId: "TR-01",
-    excerpt: "未受講者は単独作業不可。",
+    excerpt:
+      "保護具・トルク・二重確認の再教育を実施すること。未受講者は単独作業不可。",
     highlight: "単独作業不可",
   } satisfies SourceReference,
   hh: {
@@ -55,7 +58,8 @@ const src = {
     version: "2025",
     page: "3",
     clauseId: "HH-2025-12",
-    excerpt: "手袋任意ルールが切創寸前の原因。",
+    excerpt:
+      "手袋任意ルールにより未着用で作業し切創寸前。対策: 耐切創手袋必須化。",
     highlight: "手袋任意",
   } satisfies SourceReference,
   chkOld: {
@@ -63,7 +67,7 @@ const src = {
     version: "2.1",
     page: "1",
     clauseId: "CL-03-OLD",
-    excerpt: "ボルトAは 8 N·m。",
+    excerpt: "ボルトAは 8 N·m。v3.0 適用後は本様式を使ってはならない。",
     highlight: "8 N·m",
   } satisfies SourceReference,
   gate: {
@@ -71,7 +75,8 @@ const src = {
     version: "1.0",
     page: "1",
     clauseId: "GATE-A",
-    excerpt: "再教育未完了などがある場合は承認しない。",
+    excerpt:
+      "再教育未完了、旧チェックリスト残存、保護具未配備がある場合は量産適用を承認しない。",
     highlight: "承認しない",
   } satisfies SourceReference,
 };
@@ -353,6 +358,7 @@ const categoryNote: Record<string, string> = {
   checklist: "帳票",
   approval: "承認",
   qms: "品質",
+  site: "現場",
 };
 
 export const workProcedurePack: KnowledgePack = {
@@ -362,8 +368,10 @@ export const workProcedurePack: KnowledgePack = {
   audience: "everyone",
   audienceLabel: "だれでもわかる",
   context: {
-    topic: "工場の組立「標準作業手順書」の改定（v2.1→v3.0）",
-    sources: "旧/新SOP・改訂通知・教育記録・ヒヤリハット・チェックリストなど",
+    topic:
+      "東浜モビリティ・組立ラインAの標準作業手順書改定（SOP-組立-07 v2.1→v3.0）",
+    sources:
+      "旧/新SOP・改訂通知・教育記録・ヒヤリハット・チェックリスト・承認ゲート・品質要求など",
     actions:
       "「何が変わった？」「誰に影響？」「再教育は？」「古い帳票と矛盾は？」と聞く",
     outcomes: "差分・影響・再教育・矛盾・適用可否が根拠付きで出る",
@@ -396,8 +404,8 @@ export const workProcedurePack: KnowledgePack = {
     stats: {
       documents: new Set(chunks.map((c) => c.documentId)).size,
       chunks: chunks.length,
-      company: "デモ工場（組立ラインA）",
-      product: "SOP-組立-07",
+      company: "東浜モビリティシステムズ株式会社",
+      product: "組立ラインA · SOP-組立-07",
     },
     initialDocId: "SOP-NEW",
   },

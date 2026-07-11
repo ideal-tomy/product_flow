@@ -8,15 +8,17 @@ interface SourceDrawerProps {
   onSelectSource: (source: SourceReference) => void;
   onClose: () => void;
   isMobile: boolean;
+  /** 登録ナレッジの該当文書へジャンプ（AI Mode） */
+  onBrowseDocument?: (documentId: string, clauseId?: string) => void;
 }
 
-function highlightExcerpt(excerpt: string, highlight?: string) {
-  if (!highlight || !excerpt.includes(highlight)) {
-    return <span>{excerpt}</span>;
+function highlightBody(text: string, highlight?: string) {
+  if (!highlight || !text.includes(highlight)) {
+    return <span className="whitespace-pre-wrap">{text}</span>;
   }
-  const parts = excerpt.split(highlight);
+  const parts = text.split(highlight);
   return (
-    <>
+    <span className="whitespace-pre-wrap">
       {parts.map((part, i) => (
         <span key={i}>
           {part}
@@ -27,7 +29,7 @@ function highlightExcerpt(excerpt: string, highlight?: string) {
           )}
         </span>
       ))}
-    </>
+    </span>
   );
 }
 
@@ -39,8 +41,11 @@ export function SourceDrawer({
   onSelectSource,
   onClose,
   isMobile,
+  onBrowseDocument,
 }: SourceDrawerProps) {
   if (!open) return null;
+
+  const body = source?.fullText ?? source?.excerpt ?? "";
 
   const panel = (
     <div className="flex h-full flex-col bg-white">
@@ -83,7 +88,9 @@ export function SourceDrawer({
               source?.documentName === s.documentName;
             const matchesActiveDoc =
               s.documentName === activeDoc.name &&
-              s.version === activeDoc.version;
+              (s.version === activeDoc.version ||
+                `v${s.version}` === activeDoc.version ||
+                s.version === activeDoc.version.replace(/^v/, ""));
             return (
               <button
                 key={key}
@@ -106,17 +113,31 @@ export function SourceDrawer({
 
       <div className="flex-1 overflow-y-auto px-4 py-4">
         {source ? (
-          <div className="rounded-md border border-line bg-surface/40 px-4 py-5">
-            <p className="mb-3 font-mono text-xs text-navy-muted">
-              § {source.clauseId}
-            </p>
-            <p className="text-sm leading-relaxed text-ink">
-              {highlightExcerpt(source.excerpt, source.highlight)}
-            </p>
+          <div className="space-y-3">
+            <div className="rounded-md border border-line bg-surface/40 px-4 py-5">
+              <p className="mb-3 font-mono text-xs text-navy-muted">
+                § {source.clauseId}
+                {source.fullText ? " · 原文" : " · 抜粋"}
+              </p>
+              <div className="text-sm leading-relaxed text-ink">
+                {highlightBody(body, source.highlight)}
+              </div>
+            </div>
+            {onBrowseDocument && source.documentId && (
+              <button
+                type="button"
+                onClick={() =>
+                  onBrowseDocument(source.documentId!, source.clauseId)
+                }
+                className="text-sm font-semibold text-navy underline-offset-2 hover:underline"
+              >
+                この文書の他条項を見る →
+              </button>
+            )}
           </div>
         ) : (
           <p className="text-sm text-muted">
-            回答の根拠を選択すると、該当条項の抜粋を表示します。
+            回答の根拠を選択すると、該当条項の原文を表示します。
           </p>
         )}
       </div>

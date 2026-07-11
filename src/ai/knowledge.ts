@@ -93,6 +93,9 @@ export function chunkToSource(chunk: KnowledgeChunk): SourceReference {
     clauseId: chunk.clauseId,
     excerpt: chunk.excerpt,
     highlight: chunk.highlight,
+    chunkId: chunk.id,
+    fullText: chunk.text,
+    documentId: chunk.documentId,
   };
 }
 

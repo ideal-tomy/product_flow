@@ -46,9 +46,10 @@ export const tcuPack: KnowledgePack = {
   audience: "specialist",
   audienceLabel: "設計・品質向け",
   context: {
-    topic: "車載温度制御ユニット（TCU-480）の制御仕様書改訂（v3.2→v3.4）",
+    topic:
+      "東浜モビリティ・車載温度制御ユニット（TCU-480）の制御仕様書改訂（v3.2→v3.4）",
     sources:
-      "制御仕様書・センサー仕様・試験条件・FMEA・不具合事例・変更管理など13文書（66チャンク）",
+      "制御仕様・センサー・試験・FMEA・不具合・DR・サプライヤー・監査・承認WFなど13文書",
     actions:
       "「何が変わった？」「影響は？」「再試験は？」「矛盾は？」「承認して大丈夫？」と聞く",
     outcomes: "差分・影響範囲・再試験・不整合・根拠条項が数秒で出る",
