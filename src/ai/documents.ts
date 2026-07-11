@@ -1,4 +1,4 @@
-import type { DemoDocument } from "../data/gembashift-demo";
+import type { DemoDocument } from "../data/ConformSystem-demo";
 import { knowledgeChunks, knowledgeStats } from "./knowledge";
 
 const categoryNote: Record<string, string> = {

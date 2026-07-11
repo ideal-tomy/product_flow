@@ -5,7 +5,7 @@ export function DemoHero() {
       <div className="relative mx-auto grid max-w-6xl gap-10 px-5 pb-16 pt-16 lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:pb-24 lg:pt-20">
         <div>
           <p className="mb-4 text-sm font-medium tracking-[0.08em] text-navy-muted">
-            GembaShift
+            ConformSystem
           </p>
           <h1 className="text-[2.15rem] font-bold leading-[1.25] tracking-tight text-navy sm:text-[2.75rem]">
             探す時間を、

@@ -2,7 +2,7 @@ import type {
   DemoDocument,
   DemoQuestion,
   SourceReference,
-} from "../../data/gembashift-demo";
+} from "../../data/ConformSystem-demo";
 import type { QueryCatalogItem } from "../../data/query-catalog";
 import type { RawKnowledgeChunk } from "../../ai/knowledge";
 import { adaptRawChunks, chunksToDocuments } from "../chunkUtils";
@@ -367,6 +367,10 @@ export const workProcedurePack: KnowledgePack = {
   title: "SOP-組立-07",
   audience: "everyone",
   audienceLabel: "",
+  synthesizer: "generic",
+  llmSystemPrompt:
+    "You are ConformSystem, an industrial document reasoning assistant for assembly SOP revisions. " +
+    "Answer in Japanese. Use ONLY the provided chunks. Cite documentName and clauseId.",
   context: {
     topic:
       "東浜モビリティ・組立ラインAの標準作業手順書改定（SOP-組立-07 v2.1→v3.0）",

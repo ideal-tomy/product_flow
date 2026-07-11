@@ -527,7 +527,7 @@
     "category": "quality_audit",
     "clauseId": "AUD-2025-018",
     "page": null,
-    "text": "AUD-2025-018 仕様変更時の影響範囲記録不足\nseverity: major。指摘日: 2025-09。仕様変更申請において、制御・試験・FMEA・サプライヤーへの影響が一貫して記録されていない。是正: WI-DC-04 の影響範囲分析を必須化し、GembaShift 等で根拠条項を添付する。"
+    "text": "AUD-2025-018 仕様変更時の影響範囲記録不足\nseverity: major。指摘日: 2025-09。仕様変更申請において、制御・試験・FMEA・サプライヤーへの影響が一貫して記録されていない。是正: WI-DC-04 の影響範囲分析を必須化し、ConformSystem 等で根拠条項を添付する。"
   },
   {
     "chunkId": "AUDIT-FINDINGS-001:54",
@@ -577,7 +577,7 @@
     "category": "compliance_matrix",
     "clauseId": "QMS-EVD-03",
     "page": null,
-    "text": "QMS-EVD-03 根拠の追跡可能性\n重要な判断は、参照文書・条項・ページまで追跡できること。GembaShift回答には documentName, clauseId, page, excerpt を保持する。"
+    "text": "QMS-EVD-03 根拠の追跡可能性\n重要な判断は、参照文書・条項・ページまで追跡できること。ConformSystem回答には documentName, clauseId, page, excerpt を保持する。"
   },
   {
     "chunkId": "COMPLIANCE-MATRIX-001:59",

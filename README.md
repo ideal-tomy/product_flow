@@ -1,9 +1,12 @@
-# GembaShift Demo
+# ConformSystem Demo
 
 - **`/`** — Live Demo（触る用）
+- **`/ai`** — AI Mode（ナレッジ検索）
 - **`/?presentation=1`** — Presentation Mode（見せる用・動画向け）
 - **`/?presentation=1&autoplay=1`** — 約30秒の自動再生（録画用）
 - **`/lp`** — LP（価値説明・資料用）
+
+パック切替: `/?pack=starter` / `work-procedure` / `inspection` / `tcu-480` / `standardization`
 
 ## 開発
 
@@ -11,6 +14,22 @@
 npm install
 npm run dev
 ```
+
+## 業界デモの転用（テンプレート）
+
+ナレッジと回答ルールだけ差し替えて別業界デモを作る場合:
+
+```bash
+# 新パックを starter から生成
+npm run new-pack -- my-industry "表示名"
+
+# 空テンプレート状態にする（専用ブランチで実行）
+git checkout -b template
+npm run prepare:template
+```
+
+- パック追加手順: [docs/PACK_RECIPE.md](./docs/PACK_RECIPE.md)
+- GitHub Template 化: [docs/TEMPLATE.md](./docs/TEMPLATE.md)
 
 ## ビルド
 
@@ -20,9 +39,3 @@ npm run preview
 ```
 
 静的ホストでは SPA フォールバック（`/lp` など）を有効にしてください。
-
-## 要件・プラン
-
-- [gembashift_live_demo_requirements.md](./gembashift_live_demo_requirements.md) — Live Demo
-- [gembashift_presentation_mode_plan.md](./gembashift_presentation_mode_plan.md) — Presentation Mode
-- [gembashift_demo_web_requirements.md](./gembashift_demo_web_requirements.md) — LP

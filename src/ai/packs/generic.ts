@@ -5,7 +5,7 @@ import type {
   SimilarCaseItem,
   SpecChangeItem,
   SourceReference,
-} from "../../data/gembashift-demo";
+} from "../../data/ConformSystem-demo";
 import type { KnowledgeChunk } from "../knowledge";
 import type { AskIntent } from "../intent";
 import type { ScoredChunk } from "../retrieve";

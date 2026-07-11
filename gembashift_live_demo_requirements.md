@@ -1,4 +1,4 @@
-# GembaShift Live Demo 要件定義書
+# ConformSystem Live Demo 要件定義書
 
 ## 0. 文書概要
 
@@ -6,7 +6,7 @@
 |---|---|
 | **目的** | 説明文なしで、仕様書について聞いた瞬間に根拠付きの答えが返る体験をさせる |
 | **位置づけ** | デプロイして URL を渡す／同席で開く **稼働中の製品体験** |
-| **対になる文書** | [gembashift_demo_web_requirements.md](./gembashift_demo_web_requirements.md)（LP・理解用） |
+| **対になる文書** | [ConformSystem_demo_web_requirements.md](./ConformSystem_demo_web_requirements.md)（LP・理解用） |
 | **基本思想** | 売らない。説明しない。触らせる。中心は SaaS 管理画面ではなく **質問 → 正確な回答 → 根拠確認** |
 
 ### LP との役割分離
@@ -58,7 +58,7 @@ URLを開く
 
 ```text
 ┌────────────────────────────────────────────────────────────┐
-│ GembaShift   温度制御ユニット改訂 Sample   v3.2 → v3.4  Ready │
+│ ConformSystem   温度制御ユニット改訂 Sample   v3.2 → v3.4  Ready │
 ├──────────────┬─────────────────────────────────────────────┤
 │ DOCUMENTS    │  （初期）差分Q&A 表示済み                     │
 │ ● 制御仕様書 │  [ 3件の根拠を確認 → ]                       │
@@ -84,7 +84,7 @@ Docs | 質問・回答 | 出典（§ / p. / 抜粋ハイライト）
 
 | 要素 | 内容 |
 |---|---|
-| 製品名 | GembaShift |
+| 製品名 | ConformSystem |
 | 案件 | 温度制御ユニット改訂 + 小さく `Sample` |
 | 版 | **ラベル** `v3.2 → v3.4`（偽セレクタ禁止） |
 | 状態 | Ready |
@@ -120,7 +120,7 @@ Docs | 質問・回答 | 出典（§ / p. / 抜粋ハイライト）
 
 ## 3. データ
 
-- バックエンド / LLM なし。`gembashift-demo.ts` を LP と共用
+- バックエンド / LLM なし。`ConformSystem-demo.ts` を LP と共用
 - シナリオ: 差分 / 影響 / 例外 / 出典（内部4本。表面上は限定感を出さない）
 
 ---

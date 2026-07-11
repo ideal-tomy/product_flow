@@ -1,4 +1,4 @@
-import { impactRows } from "../../data/gembashift-demo";
+import { impactRows } from "../../data/ConformSystem-demo";
 
 export function ImpactSection() {
   return (

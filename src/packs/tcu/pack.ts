@@ -5,7 +5,7 @@ import {
   scaleStats,
   sidebarDocuments,
   type DemoQuestion,
-} from "../../data/gembashift-demo";
+} from "../../data/ConformSystem-demo";
 import { queryCatalog } from "../../data/query-catalog";
 import { adaptRawChunks, chunksToDocuments } from "../chunkUtils";
 import { knowledgeChunks as tcuChunks, knowledgeStats as tcuStats } from "../../ai/knowledge";
@@ -14,6 +14,11 @@ import { aiRecommendedQueries } from "../../ai/recommended";
 import type { KnowledgePack } from "../types";
 import type { RawKnowledgeChunk } from "../../ai/knowledge";
 import rawTcu from "../../ai/data/knowledge_chunks.json";
+import {
+  presentationBeats,
+  presentationSearchSteps,
+  presentationTagline,
+} from "../../data/presentation-script";
 
 const categoryNote: Record<string, string> = {
   company_profile: "会社・製品",
@@ -45,6 +50,10 @@ export const tcuPack: KnowledgePack = {
   title: "制御仕様 v3.2→v3.4",
   audience: "specialist",
   audienceLabel: "",
+  synthesizer: "tcu",
+  llmSystemPrompt:
+    "You are ConformSystem, an industrial document reasoning assistant for Tohama Mobility TCU-480. " +
+    "Answer in Japanese. Use ONLY the provided chunks.",
   context: {
     topic:
       "東浜モビリティ・車載温度制御ユニット（TCU-480）の制御仕様書改訂（v3.2→v3.4）",
@@ -81,5 +90,18 @@ export const tcuPack: KnowledgePack = {
       product: tcuStats.product,
     },
     initialDocId: "CTRL-SPEC-34",
+  },
+  presentation: {
+    tagline: presentationTagline,
+    searchSteps: [...presentationSearchSteps],
+    beats: presentationBeats,
+    scaleIntro: {
+      eyebrow: "Tohama Mobility · TCU-480",
+      documents: scaleStats.documents,
+      pages: scaleStats.pages,
+      clauses: 436,
+      pagesLabel: "pages",
+      clausesLabel: "clauses",
+    },
   },
 };

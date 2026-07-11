@@ -1,8 +1,8 @@
-# GembaShift デモ用ダミーデータ集
+# ConformSystem デモ用ダミーデータ集
 
 > **目的**: 初見の経営者・営業・別業界の人でも、「何ができて、どんな効果があるか」が伝わるデモにする。  
 > **方針**: 件数を増やすのではなく、**できることの種類**を増やす。  
-> **使い方**: 本ファイルを Cursor に渡し、`gembashift-demo.ts` / Live Demo UI の拡充に使う。
+> **使い方**: 本ファイルを Cursor に渡し、`ConformSystem-demo.ts` / Live Demo UI の拡充に使う。
 
 ---
 
@@ -479,7 +479,7 @@
 
 ### トップバー
 
-- 製品名: GembaShift
+- 製品名: ConformSystem
 - 案件: 温度制御ユニット改訂 `Sample`
 - 版: v3.2 → v3.4
 - 状態: Ready

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import type { DemoDocument, SourceReference } from "../data/gembashift-demo";
+import type { DemoDocument, SourceReference } from "../data/ConformSystem-demo";
 import type { QueryCatalogItem } from "../data/query-catalog";
 import type { KnowledgeChunk } from "../ai/knowledge";
 import { intentToScenarioId } from "../ai/recommended";

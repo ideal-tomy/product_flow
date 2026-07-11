@@ -1,5 +1,4 @@
-import type { DemoAnswer } from "../../data/gembashift-demo";
-import { scaleStats } from "../../data/gembashift-demo";
+import type { DemoAnswer } from "../../data/ConformSystem-demo";
 import type { ScenarioId } from "../../data/question-aliases";
 import { CountUp } from "./CountUp";
 
@@ -18,7 +17,7 @@ export function ResultHero({ scenarioId, answer, countUpMs = 700 }: ResultHeroPr
     return (
       <div className="fade-in space-y-4 rounded-lg border-2 border-navy/10 bg-surface/40 px-5 py-7 text-center sm:py-8">
         <p className="text-sm font-bold tracking-[0.14em] text-navy-muted">
-          <CountUp to={answer.changes?.length ?? scaleStats.majorChanges} durationMs={countUpMs} />{" "}
+          <CountUp to={answer.changes?.length ?? 0} durationMs={countUpMs} />{" "}
           CHANGES DETECTED
         </p>
         {primary && (

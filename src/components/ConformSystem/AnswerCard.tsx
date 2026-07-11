@@ -1,5 +1,5 @@
-import type { DemoAnswer } from "../../data/gembashift-demo";
-import type { SourceReference } from "../../data/gembashift-demo";
+import type { DemoAnswer } from "../../data/ConformSystem-demo";
+import type { SourceReference } from "../../data/ConformSystem-demo";
 
 interface AnswerCardProps {
   answer: DemoAnswer;
@@ -39,7 +39,7 @@ export function AnswerCard({
       )}
 
       <div className="fade-in rounded-md border border-line bg-white p-4 sm:p-5">
-        <p className="text-xs font-medium tracking-wide text-success">GembaShift</p>
+        <p className="text-xs font-medium tracking-wide text-success">ConformSystem</p>
         <p className="mt-2 text-[1.05rem] font-semibold leading-relaxed text-navy">
           {answer.summary}
         </p>

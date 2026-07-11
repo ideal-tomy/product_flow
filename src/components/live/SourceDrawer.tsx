@@ -1,4 +1,4 @@
-import type { DemoDocument, SourceReference } from "../../data/gembashift-demo";
+import type { DemoDocument, SourceReference } from "../../data/ConformSystem-demo";
 
 interface SourceDrawerProps {
   open: boolean;

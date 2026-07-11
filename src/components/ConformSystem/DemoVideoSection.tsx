@@ -94,7 +94,7 @@ export function DemoVideoSection() {
           playsInline
           preload={preferPoster ? "none" : "metadata"}
           poster="/video/poster.svg"
-          aria-label="GembaShift デモ動画"
+          aria-label="ConformSystem デモ動画"
           onLoadedData={() => setHasVideo(true)}
           onError={() => setHasVideo(false)}
         >
@@ -106,7 +106,7 @@ export function DemoVideoSection() {
           <div className="flex min-h-[280px] flex-col bg-[linear-gradient(160deg,#0b1f3a_0%,#16325a_55%,#1e3f66_100%)] p-5 sm:aspect-video sm:min-h-0 sm:p-10">
             <div className="flex min-h-0 flex-1 flex-col justify-between gap-6">
               <div className="flex items-center justify-between text-xs text-white/55">
-                <span>GembaShift · 30秒デモ</span>
+                <span>ConformSystem · 30秒デモ</span>
                 <span className="font-mono">{frame.label}</span>
               </div>
               <div key={frameIndex} className="fade-in min-w-0 max-w-xl">

@@ -1,9 +1,7 @@
-import type { ScenarioId } from "./question-aliases";
-
 export type PresentationBeat =
   | { at: number; type: "intro" }
   | { at: number; type: "clear" }
-  | { at: number; type: "ask"; scenarioId: ScenarioId }
+  | { at: number; type: "ask"; scenarioId: string }
   | { at: number; type: "open-source" }
   | { at: number; type: "tagline" }
   | { at: number; type: "done" };

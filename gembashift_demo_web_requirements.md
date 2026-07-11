@@ -1,11 +1,11 @@
-# GembaShift デモ体験・Web掲載 要件定義書
+# ConformSystem デモ体験・Web掲載 要件定義書
 
 > **役割**: LP・HP掲載・価値の言語化向け。  
-> **製品として触らせる Live Demo** は別文書 → [gembashift_live_demo_requirements.md](./gembashift_live_demo_requirements.md)
+> **製品として触らせる Live Demo** は別文書 → [ConformSystem_live_demo_requirements.md](./ConformSystem_live_demo_requirements.md)
 
 ## 0. 文書概要
 
-- **目的**: GembaShiftの価値を、強い営業感を出さず、自然な閲覧体験の中で「見ればわかる」「少し触ればわかる」状態にする。
+- **目的**: ConformSystemの価値を、強い営業感を出さず、自然な閲覧体験の中で「見ればわかる」「少し触ればわかる」状態にする。
 - **対象**: 大手企業・製造業・設計開発部門・技術部門・DX推進部門・情報システム部門・経営企画部門。
 - **前提**: 実際に操作できるデモと、30秒程度の自動再生動画を両方用意する。
 - **基本思想**: 「売り込む」のではなく、「実際の業務がどう変わるかを、静かに体験させる」。
@@ -47,7 +47,7 @@
 - 数値や条件の根拠が分からない
 - 最後は人が原本を開いて再確認する
 
-### GembaShift
+### ConformSystem
 
 - 条項IDを基準に回答
 - 出典ページまで追跡可能
@@ -395,7 +395,7 @@ AI回答を表示。
 
 ### After
 
-**GembaShift**
+**ConformSystem**
 
 > はい、許容範囲が変更されています。
 > 
@@ -534,7 +534,7 @@ interface SourceReference {
 ## 12. 推奨コンポーネント構成
 
 ```text
-/components/gembashift/
+/components/ConformSystem/
   DemoHero.tsx
   ProblemSection.tsx
   DemoVideoSection.tsx
@@ -554,7 +554,7 @@ interface SourceReference {
 ## 13. データファイル例
 
 ```text
-/data/gembashift-demo.ts
+/data/ConformSystem-demo.ts
 ```
 
 ```ts

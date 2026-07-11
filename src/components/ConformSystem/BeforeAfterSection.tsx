@@ -37,7 +37,7 @@ export function BeforeAfterSection() {
 
         <div className="rounded-md border border-navy/25 bg-white p-5 shadow-[0_16px_40px_-28px_rgba(11,31,58,0.4)]">
           <p className="text-xs font-medium tracking-wide text-success">
-            AFTER · 構造化AI（GembaShift）
+            AFTER · 構造化AI（ConformSystem）
           </p>
           <p className="mt-4 text-sm leading-relaxed text-navy">
             はい、許容範囲が変更されています。

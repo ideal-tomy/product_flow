@@ -1,4 +1,4 @@
-import { checklistItems } from "../../data/gembashift-demo";
+import { checklistItems } from "../../data/ConformSystem-demo";
 
 export function UseCasesSection() {
   return (

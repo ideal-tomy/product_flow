@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import type { DemoAnswer, SourceReference } from "../../data/gembashift-demo";
+import type { DemoAnswer, SourceReference } from "../../data/ConformSystem-demo";
 import type { ScenarioId } from "../../data/question-aliases";
 import { ResultHero } from "../presentation/ResultHero";
 import { SearchSteps } from "../presentation/SearchSteps";
@@ -535,7 +535,7 @@ export function QueryThread({
                     : "text-[11px] font-semibold tracking-[0.1em] text-navy-muted"
                 }
               >
-                {presentation ? "登録ナレッジを検索中" : "GembaShift"}
+                {presentation ? "登録ナレッジを検索中" : "ConformSystem"}
               </p>
               <SearchSteps
                 stepMs={item.stepMs}
@@ -571,7 +571,7 @@ export function QueryThread({
               className="fade-in space-y-3"
             >
               <p className="text-[11px] font-semibold tracking-[0.1em] text-navy-muted">
-                GembaShift
+                ConformSystem
               </p>
               <p className="text-sm leading-relaxed text-navy-muted">
                 {item.answer.summary}
@@ -607,7 +607,7 @@ export function QueryThread({
           >
             {!isPresentationAnswer && (
               <p className="text-[11px] font-semibold tracking-[0.1em] text-navy-muted">
-                GembaShift
+                ConformSystem
               </p>
             )}
             <AnswerBody

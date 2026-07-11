@@ -1,4 +1,4 @@
-import type { DemoAnswer, SourceReference } from "../../data/gembashift-demo";
+import type { DemoAnswer, SourceReference } from "../../data/ConformSystem-demo";
 import type { KnowledgeChunk } from "../knowledge";
 import type { AskIntent } from "../intent";
 import type { ScoredChunk } from "../retrieve";

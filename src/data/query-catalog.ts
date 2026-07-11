@@ -1,4 +1,4 @@
-import { demoQuestions } from "./gembashift-demo";
+import { demoQuestions } from "./ConformSystem-demo";
 import type { ScenarioId } from "./question-aliases";
 
 export type QueryCategoryId =

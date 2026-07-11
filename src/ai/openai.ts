@@ -1,4 +1,4 @@
-import type { DemoAnswer } from "../data/gembashift-demo";
+import type { DemoAnswer } from "../data/ConformSystem-demo";
 import type { AskResult } from "../engines/types";
 import { DEFAULT_PACK_ID, getPack, type KnowledgePackId } from "../packs";
 import type { AskIntent } from "./intent";
@@ -51,20 +51,18 @@ Rules:
 }
 
 function systemPromptFor(packId: KnowledgePackId): string {
-  if (packId === "standardization") {
-    return (
-      "You are GembaShift, an industrial document reasoning assistant for the METI textbook " +
-      "『標準化実務入門』（経済産業省 基準認証ユニット）。 " +
-      "Answer in Japanese. Cite documentName and clauseId from the provided chunks. " +
-      "Do not use knowledge outside the provided chunks. " +
-      `When the question is about 社内規格 / 社内標準, append this exact sentence to summary: ${COMPANY_BRIDGE} ` +
-      buildSchemaHint()
-    );
+  const pack = getPack(packId);
+  if (pack.llmSystemPrompt) {
+    let prompt = pack.llmSystemPrompt;
+    if (pack.synthesizer === "standardization") {
+      prompt += ` When the question is about 社内規格 / 社内標準, append this exact sentence to summary: ${COMPANY_BRIDGE} `;
+    }
+    return prompt + " " + buildSchemaHint();
   }
 
   return (
-    "You are GembaShift, an industrial document reasoning assistant for Tohama Mobility TCU-480. " +
-    "Answer in Japanese. " +
+    "You are ConformSystem, an industrial document reasoning assistant. " +
+    "Answer in Japanese using ONLY the provided chunks. " +
     buildSchemaHint()
   );
 }

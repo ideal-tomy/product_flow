@@ -1,4 +1,4 @@
-import type { SourceReference } from "../data/gembashift-demo";
+import type { SourceReference } from "../data/ConformSystem-demo";
 import rawChunks from "./data/knowledge_chunks.json";
 
 export type RawKnowledgeChunk = {

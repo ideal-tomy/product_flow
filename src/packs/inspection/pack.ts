@@ -2,7 +2,7 @@ import type {
   DemoDocument,
   DemoQuestion,
   SourceReference,
-} from "../../data/gembashift-demo";
+} from "../../data/ConformSystem-demo";
 import type { QueryCatalogItem } from "../../data/query-catalog";
 import type { RawKnowledgeChunk } from "../../ai/knowledge";
 import { adaptRawChunks, chunksToDocuments } from "../chunkUtils";
@@ -361,6 +361,10 @@ export const inspectionPack: KnowledgePack = {
   title: "INS-出荷-03",
   audience: "everyone",
   audienceLabel: "",
+  synthesizer: "generic",
+  llmSystemPrompt:
+    "You are ConformSystem, an industrial document reasoning assistant for shipping inspection revisions. " +
+    "Answer in Japanese. Use ONLY the provided chunks. Cite documentName and clauseId.",
   context: {
     topic:
       "東浜モビリティ・出荷検査場の検査手順改定（INS-出荷-03 Rev.B→Rev.C）",

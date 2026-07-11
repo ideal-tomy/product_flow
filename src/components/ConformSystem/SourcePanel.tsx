@@ -1,4 +1,4 @@
-import type { SourceReference } from "../../data/gembashift-demo";
+import type { SourceReference } from "../../data/ConformSystem-demo";
 
 interface SourcePanelProps {
   source: SourceReference | null;

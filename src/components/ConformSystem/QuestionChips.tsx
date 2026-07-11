@@ -1,4 +1,4 @@
-import type { DemoQuestion } from "../../data/gembashift-demo";
+import type { DemoQuestion } from "../../data/ConformSystem-demo";
 
 interface QuestionChipsProps {
   questions: DemoQuestion[];

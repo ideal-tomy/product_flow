@@ -1,4 +1,3 @@
-import { scaleStats } from "../../data/gembashift-demo";
 import { CountUp } from "./CountUp";
 
 export type ScaleIntroStats = {
@@ -17,12 +16,12 @@ interface ScaleIntroProps {
 }
 
 const DEFAULT_STATS: ScaleIntroStats = {
-  eyebrow: "1,500ページの仕様書。必要な情報を探すだけで45分。",
-  documents: scaleStats.documents,
-  pages: scaleStats.pages,
-  clauses: 436,
+  eyebrow: "文書を探す時間を、判断する時間へ。",
+  documents: 3,
+  pages: 6,
+  clauses: 4,
   pagesLabel: "pages",
-  clausesLabel: "clauses",
+  clausesLabel: "chunks",
 };
 
 export function ScaleIntro({

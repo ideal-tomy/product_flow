@@ -2,12 +2,18 @@ import type {
   DemoDocument,
   DemoQuestion,
   SourceReference,
-} from "../../data/gembashift-demo";
+} from "../../data/ConformSystem-demo";
 import type { QueryCatalogItem } from "../../data/query-catalog";
 import type { RawKnowledgeChunk } from "../../ai/knowledge";
 import { adaptRawChunks, chunksToDocuments } from "../chunkUtils";
 import type { KnowledgePack } from "../types";
 import raw from "../../ai/data/standardization_chunks.json";
+import {
+  standardizationPresentationBeats,
+  standardizationPresentationSearchSteps,
+  standardizationPresentationTagline,
+  standardizationScaleIntro,
+} from "../../data/presentation-std-script";
 
 const chunks = adaptRawChunks(raw as RawKnowledgeChunk[]);
 
@@ -252,6 +258,12 @@ export const standardizationPack: KnowledgePack = {
   title: "標準化実務入門",
   audience: "everyone",
   audienceLabel: "",
+  synthesizer: "standardization",
+  llmSystemPrompt:
+    "You are ConformSystem, an industrial document reasoning assistant for the METI textbook " +
+    "『標準化実務入門』（経済産業省 基準認証ユニット）。 " +
+    "Answer in Japanese. Cite documentName and clauseId from the provided chunks. " +
+    "Do not use knowledge outside the provided chunks.",
   context: {
     topic: "標準・規格の定義と制度",
     sources: "経済産業省『標準化実務入門』全9章",
@@ -289,5 +301,11 @@ export const standardizationPack: KnowledgePack = {
       product: "標準化実務入門",
     },
     initialDocId: "STD-CH01",
+  },
+  presentation: {
+    tagline: standardizationPresentationTagline,
+    searchSteps: [...standardizationPresentationSearchSteps],
+    beats: standardizationPresentationBeats,
+    scaleIntro: { ...standardizationScaleIntro },
   },
 };

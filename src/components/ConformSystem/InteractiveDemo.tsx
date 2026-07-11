@@ -5,7 +5,7 @@ import {
   lpDemoQuestions,
   type DemoQuestion,
   type SourceReference,
-} from "../../data/gembashift-demo";
+} from "../../data/ConformSystem-demo";
 import { QuestionChips } from "./QuestionChips";
 import { DemoInput } from "./DemoInput";
 import { AnswerCard } from "./AnswerCard";

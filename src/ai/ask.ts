@@ -12,7 +12,7 @@ export type AskGembaOptions = {
 };
 
 /**
- * GembaShift AI 問い合わせのエントリ。
+ * ConformSystem AI 問い合わせのエントリ。
  * ブラウザ・API の両方から同じ RAG 合成を使い、
  * サーバで allowLlm + OPENAI_API_KEY のときだけ LLM を試す。
  */

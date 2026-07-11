@@ -1,4 +1,4 @@
-# GembaShift Presentation Mode 実装プラン
+# ConformSystem Presentation Mode 実装プラン
 
 ## 概要
 
@@ -63,7 +63,7 @@ QuestionShown
 
 ## シナリオ別 Hero（既存データを利用）
 
-データは `src/data/gembashift-demo.ts` の  
+データは `src/data/ConformSystem-demo.ts` の  
 `scaleStats` / `changes` / `impactGroups` / `retests` / `contradictions` を流用。
 
 | シナリオ | Hero | その後の詳細 |

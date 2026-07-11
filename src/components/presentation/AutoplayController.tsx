@@ -4,18 +4,16 @@ import {
   presentationTagline,
   type PresentationBeat,
 } from "../../data/presentation-script";
-import type { ScenarioId } from "../../data/question-aliases";
-import { demoQuestions } from "../../data/gembashift-demo";
-import type { DemoQuestion } from "../../data/gembashift-demo";
+import type { DemoQuestion } from "../../data/ConformSystem-demo";
 
 interface AutoplayControllerProps {
   enabled: boolean;
-  onAsk: (scenarioId: ScenarioId, question: string) => void;
+  onAsk: (scenarioId: string, question: string) => void;
   onOpenSource: () => void;
   onIntro: (show: boolean) => void;
   onTagline: (show: boolean) => void;
   onClear: () => void;
-  /** 省略時は TCU 既定 */
+  /** 省略時は空（呼び出し側で pack.presentation.beats を渡す） */
   beats?: PresentationBeat[];
   questions?: DemoQuestion[];
 }
@@ -28,7 +26,7 @@ export function AutoplayController({
   onTagline,
   onClear,
   beats = presentationBeats,
-  questions = demoQuestions,
+  questions = [],
 }: AutoplayControllerProps) {
   const started = useRef(false);
   const callbacks = useRef({

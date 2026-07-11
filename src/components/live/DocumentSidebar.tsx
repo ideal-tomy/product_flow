@@ -2,7 +2,7 @@ import {
   scaleStats,
   sidebarDocuments,
   type DemoDocument,
-} from "../../data/gembashift-demo";
+} from "../../data/ConformSystem-demo";
 
 interface DocumentSidebarProps {
   activeDocId: string;
