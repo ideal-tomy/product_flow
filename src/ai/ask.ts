@@ -50,7 +50,7 @@ export async function askGemba(
   if (options.allowLlm) {
     const { hits } = retrieveChunks(trimmed, { intent, topK: 10, packId });
     if (hits.length > 0) {
-      const llm = await askWithOpenAI(trimmed, intent, hits);
+      const llm = await askWithOpenAI(trimmed, intent, hits, packId);
       if (llm) {
         return {
           ...llm,

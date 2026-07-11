@@ -76,7 +76,23 @@ export const aiRecommendedQueries: QueryCatalogItem[] = [
   },
 ];
 
-export function intentToScenarioId(intent: string | undefined): ScenarioId | null {
+export function intentToScenarioId(
+  intent: string | undefined,
+  packId?: string,
+): ScenarioId | null {
+  if (packId === "standardization") {
+    switch (intent as AskIntent) {
+      case "company":
+        return "std-company";
+      case "qms":
+        return "std-definition";
+      case "general":
+        return "std-classification";
+      default:
+        return null;
+    }
+  }
+
   switch (intent as AskIntent) {
     case "version_diff":
       return "version-diff";

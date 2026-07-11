@@ -13,12 +13,10 @@ import {
 } from "../components/live/WorkspaceSidebar";
 import {
   QueryThread,
-  type GuideConfig,
   type ThreadItem,
 } from "../components/live/QueryThread";
 import { QueryComposer } from "../components/live/QueryComposer";
 import { SourceDrawer } from "../components/live/SourceDrawer";
-import { PackContextBar } from "../components/live/PackContextBar";
 import { KnowledgeBrowser } from "../components/live/KnowledgeBrowser";
 
 type CenterTab = "knowledge" | "answers";
@@ -202,7 +200,7 @@ export function AiDemoPage() {
         }
 
         setLastMeta(result.meta);
-        const scenarioId = intentToScenarioId(result.meta.intent);
+        const scenarioId = intentToScenarioId(result.meta.intent, packId);
 
         setThread((prev) => {
           const withoutSearching = prev.filter((i) => i.id !== loadingId);
@@ -222,15 +220,7 @@ export function AiDemoPage() {
           ];
         });
 
-        const next =
-          queries.find((q) => q.id === queryId) ??
-          queries.find((q) => q.id === scenarioId);
-        const nextIdx = next
-          ? queries.findIndex((q) => q.id === next.id)
-          : -1;
-        if (nextIdx >= 0 && nextIdx < queries.length - 1) {
-          setInput(queries[nextIdx + 1]!.question);
-        }
+        setInput("");
       } catch {
         setThread((prev) => {
           const withoutSearching = prev.filter((i) => i.id !== loadingId);
@@ -270,7 +260,7 @@ export function AiDemoPage() {
     setLastMeta(null);
     setSourceOpen(false);
     setActiveQueryId(null);
-    setInput(ai.recommendedQueries[0]?.question ?? "");
+    setInput("");
   }, [packId, ai]);
 
   const handlePickQuery = (item: QueryCatalogItem) => {
@@ -299,28 +289,16 @@ export function AiDemoPage() {
     },
   }));
 
-  const guide: GuideConfig = {
-    title: pack.sample.intro.title,
-    subtitle: pack.sample.intro.subtitle,
-    context: pack.context,
-    stats: pack.sample.stats,
-    suggestions: ai.recommendedQueries.map((c) => ({
-      id: c.id,
-      label: c.label,
-    })),
-    aiLink: `/ai?pack=${packId}`,
-  };
-
   return (
     <LiveShell
       onOpenDocs={() => openSidebar("docs")}
       onOpenQueries={() => openSidebar("queries")}
       mode="ai"
       packTitle={pack.title}
+      packLabel={pack.label}
       packId={packId}
       onPackChange={setPackId}
       versionLabel={pack.sample.versionLabel}
-      aiSubtitle={`${ai.stats.chunks} chunks`}
     >
       <div className="relative flex min-h-0 flex-1">
         <WorkspaceSidebar
@@ -344,21 +322,19 @@ export function AiDemoPage() {
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div>
                   <p className="text-xs font-bold tracking-[0.12em] text-navy">
-                    AI Mode · {ai.stats.company}
+                    {ai.stats.company}
                   </p>
                   <p className="mt-0.5 text-[11px] text-muted">
-                    {ai.stats.product} · {ai.stats.chunks} chunks ·
-                    根拠がある場合のみ回答
+                    {ai.stats.product} · 根拠がある場合のみ回答
                   </p>
                 </div>
                 <Link
                   to={`/?pack=${packId}`}
                   className="rounded-md border border-line px-3 py-1.5 text-xs font-semibold text-navy transition-colors hover:border-navy/40"
                 >
-                  Sample に戻る
+                  文書に戻る
                 </Link>
               </div>
-              <PackContextBar context={pack.context} />
               <div className="flex gap-1 rounded-md border border-line bg-surface/40 p-1">
                 {(
                   [
@@ -383,16 +359,6 @@ export function AiDemoPage() {
                   </button>
                 ))}
               </div>
-              {lastMeta && centerTab === "answers" && (
-                <p className="hidden break-all font-mono text-[11px] text-navy-muted sm:block">
-                  {lastMeta.searchedDocuments} documents searched ·{" "}
-                  {lastMeta.sourcesFound} sources found · confidence{" "}
-                  {lastMeta.confidence}
-                  {lastMeta.intent ? ` · intent ${lastMeta.intent}` : ""}
-                  {lastMeta.refused ? " · refused" : ""} · engine{" "}
-                  {lastMeta.engine}
-                </p>
-              )}
             </div>
           </div>
 
@@ -415,9 +381,8 @@ export function AiDemoPage() {
                 presentation
                 staggerMs={160}
                 countUpMs={600}
-                hideGuide={thread.length > 0}
                 wide
-                guide={guide}
+                emptyHint="登録ナレッジについて質問できます"
               />
             )}
           </div>

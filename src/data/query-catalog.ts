@@ -76,6 +76,14 @@ const meta: Record<
   "action-plan": { category: "next", hint: "やるべきこと一覧" },
   "man-hours": { category: "next", hint: "手作業の工数目安" },
   "source-trace": { category: "next", hint: "条項とページ" },
+  "std-definition": { category: "diff", hint: "ISO/IECガイド2の定義" },
+  "std-classification": { category: "diff", hint: "規格の5分類" },
+  "std-company": { category: "impact", hint: "社内規格の意味と効果" },
+  "std-conformity": { category: "impact", hint: "適合性評価の概要" },
+  "std-iso-iec": { category: "risk", hint: "ISOとIECの違い" },
+  "std-jis": { category: "risk", hint: "JIS制定とJISC" },
+  "std-tbt": { category: "decide", hint: "WTO/TBTと企業影響" },
+  "std-ip": { category: "decide", hint: "知財と標準化" },
 };
 
 export const queryCatalog: QueryCatalogItem[] = demoQuestions.map((q) => {

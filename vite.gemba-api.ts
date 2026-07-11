@@ -35,7 +35,12 @@ async function handleAsk(req: IncomingMessage, res: ServerResponse) {
   }
 
   let question = "";
-  let packId: "work-procedure" | "inspection" | "tcu-480" | undefined;
+  let packId:
+    | "work-procedure"
+    | "inspection"
+    | "tcu-480"
+    | "standardization"
+    | undefined;
   try {
     const raw = await readBody(req);
     const body = JSON.parse(raw) as { question?: string; packId?: string };
@@ -43,7 +48,8 @@ async function handleAsk(req: IncomingMessage, res: ServerResponse) {
     if (
       body.packId === "work-procedure" ||
       body.packId === "inspection" ||
-      body.packId === "tcu-480"
+      body.packId === "tcu-480" ||
+      body.packId === "standardization"
     ) {
       packId = body.packId;
     }

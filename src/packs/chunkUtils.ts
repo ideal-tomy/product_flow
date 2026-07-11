@@ -66,9 +66,12 @@ export function chunksToDocuments(
     if (!prev) {
       map.set(c.documentId, {
         name: c.documentName,
-        version: c.version.startsWith("v") || c.version.startsWith("Rev")
-          ? c.version
-          : `v${c.version}`,
+        version:
+          c.version.startsWith("v") ||
+          c.version.startsWith("Rev") ||
+          /^H\d/.test(c.version)
+            ? c.version
+            : `v${c.version}`,
         category: c.category,
         pages: 1,
       });

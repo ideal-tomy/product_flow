@@ -10,11 +10,11 @@ interface LiveShellProps {
   autoplay?: boolean;
   mode?: "sample" | "ai";
   onTogglePresentation?: () => void;
-  onWatchVideo?: () => void;
   onExitVideo?: () => void;
   hideChrome?: boolean;
   /** ヘッダー中央の案件名 */
   packTitle?: string;
+  packLabel?: string;
   packId?: KnowledgePackId;
   onPackChange?: (id: KnowledgePackId) => void;
   versionLabel?: string;
@@ -22,36 +22,44 @@ interface LiveShellProps {
   children: ReactNode;
 }
 
-function ModeToggle({
+function WorkspaceNav({
   isAi,
   sampleLink,
   aiLink,
-  compact,
 }: {
   isAi: boolean;
   sampleLink: string;
   aiLink: string;
-  compact?: boolean;
 }) {
   return (
-    <div className="flex shrink-0 rounded-md border border-line p-0.5 text-[11px]">
+    <nav
+      className="flex shrink-0 items-center gap-1 text-[12px]"
+      aria-label="画面切替"
+    >
       <Link
         to={sampleLink}
-        className={`min-h-9 rounded px-2.5 py-1.5 font-medium transition-colors ${
-          !isAi ? "bg-navy text-white" : "text-muted hover:text-navy"
+        className={`min-h-9 rounded px-2.5 py-1.5 transition-colors ${
+          !isAi
+            ? "font-semibold text-navy"
+            : "text-muted hover:text-navy"
         }`}
       >
-        Sample
+        文書
       </Link>
+      <span className="text-line" aria-hidden="true">
+        |
+      </span>
       <Link
         to={aiLink}
-        className={`min-h-9 rounded px-2.5 py-1.5 font-bold transition-colors ${
-          isAi ? "bg-navy text-white" : "text-muted hover:text-navy"
+        className={`min-h-9 rounded px-2.5 py-1.5 transition-colors ${
+          isAi
+            ? "font-semibold text-navy"
+            : "text-muted hover:text-navy"
         }`}
       >
-        {compact ? "AI" : "AI Mode"}
+        ナレッジ
       </Link>
-    </div>
+    </nav>
   );
 }
 
@@ -62,10 +70,10 @@ export function LiveShell({
   autoplay = false,
   mode = "sample",
   onTogglePresentation,
-  onWatchVideo,
   onExitVideo,
   hideChrome = false,
-  packTitle = "作業手順の改定",
+  packTitle = "SOP-組立-07",
+  packLabel,
   packId,
   onPackChange,
   versionLabel,
@@ -78,6 +86,9 @@ export function LiveShell({
 
   const sampleLink = packId ? `/?pack=${packId}` : "/";
   const aiLink = packId ? `/ai?pack=${packId}` : "/ai";
+
+  const headerTitle =
+    packLabel && packTitle ? `${packLabel} · ${packTitle}` : packTitle;
 
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -123,8 +134,8 @@ export function LiveShell({
           </p>
           <p className="truncate text-[11px] text-muted">
             {presentation || autoplay
-              ? (aiSubtitle ?? packTitle)
-              : packTitle}
+              ? (aiSubtitle ?? headerTitle)
+              : headerTitle}
           </p>
         </div>
 
@@ -136,12 +147,19 @@ export function LiveShell({
           >
             戻る
           </button>
+        ) : presentation && onTogglePresentation ? (
+          <button
+            type="button"
+            onClick={onTogglePresentation}
+            className="min-h-11 shrink-0 rounded-md border border-line bg-white px-3 text-xs font-semibold text-navy"
+          >
+            戻る
+          </button>
         ) : (
-          <ModeToggle
+          <WorkspaceNav
             isAi={isAi}
             sampleLink={sampleLink}
             aiLink={aiLink}
-            compact
           />
         )}
       </header>
@@ -153,37 +171,14 @@ export function LiveShell({
         </span>
         <span className="hidden h-4 w-px bg-line sm:block" aria-hidden="true" />
         <div className="min-w-0 flex-1 truncate text-sm text-navy-muted">
-          {isAi ? (
-            <span className="tabular-nums">
-              <span className="text-navy">{packTitle}</span>
-              <span className="ml-2 rounded bg-navy px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white">
-                AI
-              </span>
-              {aiSubtitle && (
-                <span className="ml-2 text-[11px] text-muted">{aiSubtitle}</span>
-              )}
+          {presentation || autoplay ? (
+            <span className="tabular-nums text-navy">
+              {aiSubtitle ?? headerTitle}
             </span>
-          ) : presentation ? (
-            <span className="tabular-nums">{aiSubtitle ?? packTitle}</span>
           ) : (
-            <>
-              <span className="text-navy">{packTitle}</span>
-              <span className="ml-2 rounded bg-surface px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-muted">
-                Sample
-              </span>
-            </>
+            <span className="text-navy">{headerTitle}</span>
           )}
         </div>
-
-        {!isAi && !presentation && onWatchVideo && (
-          <button
-            type="button"
-            onClick={onWatchVideo}
-            className="shrink-0 rounded-md bg-navy px-3 py-1.5 text-xs font-bold tracking-wide text-white shadow-sm transition-colors hover:bg-navy-soft sm:px-4 sm:text-sm"
-          >
-            動画でdemoを見る
-          </button>
-        )}
 
         {autoplay && onExitVideo && (
           <button
@@ -191,55 +186,31 @@ export function LiveShell({
             onClick={onExitVideo}
             className="shrink-0 rounded-md border border-line bg-white px-3 py-1.5 text-xs font-semibold text-navy transition-colors hover:border-navy/40 sm:text-sm"
           >
-            操作デモに戻る
+            戻る
           </button>
         )}
 
-        {!autoplay && (
-          <ModeToggle isAi={isAi} sampleLink={sampleLink} aiLink={aiLink} />
+        {presentation && !autoplay && onTogglePresentation && (
+          <button
+            type="button"
+            onClick={onTogglePresentation}
+            className="shrink-0 rounded-md border border-line bg-white px-3 py-1.5 text-xs font-semibold text-navy transition-colors hover:border-navy/40 sm:text-sm"
+          >
+            戻る
+          </button>
         )}
 
-        {onTogglePresentation && !autoplay && !isAi && (
-          <div className="flex shrink-0 rounded-md border border-line p-0.5 text-[11px]">
-            <button
-              type="button"
-              onClick={() => presentation && onTogglePresentation()}
-              className={`rounded px-2 py-1 font-medium transition-colors ${
-                !presentation
-                  ? "bg-navy text-white"
-                  : "text-muted hover:text-navy"
-              }`}
-            >
-              Demo
-            </button>
-            <button
-              type="button"
-              onClick={() => !presentation && onTogglePresentation()}
-              className={`rounded px-2 py-1 font-medium transition-colors ${
-                presentation
-                  ? "bg-navy text-white"
-                  : "text-muted hover:text-navy"
-              }`}
-            >
-              Presentation
-            </button>
-          </div>
-        )}
-        {!presentation && versionLabel && (
-          <span
-            className="text-xs text-muted"
-            title="比較対象（表示のみ）"
-          >
-            {versionLabel}
-          </span>
-        )}
-        <span className="flex items-center gap-1.5 text-xs text-success">
-          <span
-            className="h-1.5 w-1.5 rounded-full bg-success"
-            aria-hidden="true"
+        {!autoplay && !presentation && (
+          <WorkspaceNav
+            isAi={isAi}
+            sampleLink={sampleLink}
+            aiLink={aiLink}
           />
-          Ready
-        </span>
+        )}
+
+        {!presentation && versionLabel && (
+          <span className="text-xs text-muted">{versionLabel}</span>
+        )}
       </header>
 
       {showPackSwitcher && packId && onPackChange && (
@@ -293,17 +264,24 @@ export function LiveShell({
                   </button>
                 </li>
               )}
-              {!isAi && !presentation && onWatchVideo && (
-                <li>
-                  <button
-                    type="button"
-                    onClick={() => runAndClose(onWatchVideo)}
-                    className="flex min-h-12 w-full items-center px-3 text-left text-sm font-semibold text-navy"
-                  >
-                    動画でdemoを見る
-                  </button>
-                </li>
-              )}
+              <li>
+                <Link
+                  to={sampleLink}
+                  onClick={closeMenu}
+                  className="flex min-h-12 w-full items-center px-3 text-left text-sm font-medium text-navy"
+                >
+                  文書
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to={aiLink}
+                  onClick={closeMenu}
+                  className="flex min-h-12 w-full items-center px-3 text-left text-sm font-medium text-navy"
+                >
+                  ナレッジ
+                </Link>
+              </li>
             </ul>
           </div>
         </div>

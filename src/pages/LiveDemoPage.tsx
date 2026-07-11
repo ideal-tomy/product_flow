@@ -1,17 +1,23 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type {
   DemoDocument,
-  DemoQuestion,
   SourceReference,
 } from "../data/gembashift-demo";
 import {
-  nextPresetAfter,
   unmatchedSuggestions,
-  type ScenarioId,
 } from "../data/question-aliases";
 import { sampleEngine } from "../engines";
 import type { QueryCatalogItem } from "../data/query-catalog";
-import { presentationSearchSteps } from "../data/presentation-script";
+import {
+  presentationSearchSteps,
+  presentationTagline as tcuTagline,
+} from "../data/presentation-script";
+import {
+  standardizationPresentationBeats,
+  standardizationPresentationSearchSteps,
+  standardizationPresentationTagline,
+  standardizationScaleIntro,
+} from "../data/presentation-std-script";
 import { usePresentationMode } from "../hooks/usePresentationMode";
 import { getPack, usePack } from "../packs";
 import { enrichSourcesFromChunks } from "../packs/chunkUtils";
@@ -26,10 +32,9 @@ import { SourceDrawer } from "../components/live/SourceDrawer";
 import { PresentationOverlay } from "../components/presentation/PresentationOverlay";
 import { SourceCue } from "../components/presentation/SourceCue";
 import { ScaleIntro } from "../components/presentation/ScaleIntro";
-import {
-  AutoplayController,
-  presentationTagline,
-} from "../components/presentation/AutoplayController";
+import { AutoplayController } from "../components/presentation/AutoplayController";
+import { presentationBeats } from "../data/presentation-script";
+import { demoQuestions } from "../data/gembashift-demo";
 
 function pickSource(
   sources: SourceReference[],
@@ -77,67 +82,54 @@ function pickSource(
   return sources[0];
 }
 
-function createThreadFromQuestion(q: DemoQuestion): ThreadItem[] {
-  return [
-    { kind: "user", id: "init-user", text: q.question },
-    {
-      kind: "assistant",
-      id: "init-assistant",
-      answer: q.answer,
-      scenarioId: q.id as ScenarioId,
-    },
-  ];
-}
-
-/** Presentation（autoplay なし）は入口で SearchSteps から始めるため空で開始 */
-function isPresentationEntry(): boolean {
-  if (typeof window === "undefined") return false;
-  const p = new URLSearchParams(window.location.search);
-  return p.get("presentation") === "1" && p.get("autoplay") !== "1";
-}
-
 export function LiveDemoPage() {
   const {
     presentation,
     autoplay,
     setPresentation,
-    setAutoplay,
     timings,
     isNarrow,
   } = usePresentationMode();
 
   const { pack: selectedPack, packId, setPackId } = usePack();
-  // Presentation / 動画は当面 TCU 固定
-  const pack = presentation || autoplay ? getPack("tcu-480") : selectedPack;
+  // Presentation / 動画: standardization 指定時のみそのパック、それ以外は TCU 固定
+  const pack =
+    presentation || autoplay
+      ? selectedPack.id === "standardization"
+        ? selectedPack
+        : getPack("tcu-480")
+      : selectedPack;
   const sample = pack.sample;
-
-  const initialQ = useMemo(() => {
-    return (
-      sample.questions.find((q) => q.id === sample.initialQuestionId) ??
-      sample.questions[0]!
-    );
-  }, [sample]);
+  const isStdPresentation = pack.id === "standardization";
+  const activeSearchSteps = isStdPresentation
+    ? standardizationPresentationSearchSteps
+    : presentationSearchSteps;
+  const activeTagline = isStdPresentation
+    ? standardizationPresentationTagline
+    : tcuTagline;
+  const activeBeats = isStdPresentation
+    ? standardizationPresentationBeats
+    : presentationBeats;
+  const activeAutoplayQuestions = isStdPresentation
+    ? sample.questions
+    : demoQuestions;
 
   const [activeDoc, setActiveDoc] = useState<DemoDocument>(
     () =>
       sample.documents.find((d) => d.id === sample.initialDocId) ??
       sample.documents[0]!,
   );
-  const [sidebarMode, setSidebarMode] = useState<SidebarMode>("queries");
+  const [sidebarMode, setSidebarMode] = useState<SidebarMode>("docs");
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [input, setInput] = useState("この変更の影響範囲は？");
-  const [thread, setThread] = useState<ThreadItem[]>(() =>
-    isPresentationEntry() ? [] : createThreadFromQuestion(initialQ),
-  );
+  const [input, setInput] = useState("");
+  const [thread, setThread] = useState<ThreadItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [sourceOpen, setSourceOpen] = useState(false);
   const [drawerSources, setDrawerSources] = useState<SourceReference[]>([]);
   const [selectedSource, setSelectedSource] = useState<SourceReference | null>(
     null,
   );
-  const [activeQueryId, setActiveQueryId] = useState<string | null>(
-    sample.initialQuestionId,
-  );
+  const [activeQueryId, setActiveQueryId] = useState<string | null>(null);
   const [focusActive, setFocusActive] = useState(false);
   const [sourceCueActive, setSourceCueActive] = useState(false);
   const [showIntro, setShowIntro] = useState(false);
@@ -156,17 +148,10 @@ export function LiveDemoPage() {
       selectedPack.sample.documents.find(
         (d) => d.id === selectedPack.sample.initialDocId,
       ) ?? selectedPack.sample.documents[0]!;
-    const q =
-      selectedPack.sample.questions.find(
-        (x) => x.id === selectedPack.sample.initialQuestionId,
-      ) ?? selectedPack.sample.questions[0]!;
     setActiveDoc(doc);
-    setThread(createThreadFromQuestion(q));
-    setActiveQueryId(q.id);
-    setInput(
-      selectedPack.sample.questions.find((x) => x.id === "impact-scope")
-        ?.question ?? "この変更の影響範囲は？",
-    );
+    setThread([]);
+    setActiveQueryId(null);
+    setInput("");
     setSourceOpen(false);
     setLoading(false);
   }, [selectedPack, presentation, autoplay]);
@@ -255,11 +240,12 @@ export function LiveDemoPage() {
             kind: "searching",
             id: loadingId,
             stepMs: timings.stepMs,
+            steps: activeSearchSteps,
           },
         ]);
         setInput("");
 
-        const delay = timings.stepMs * presentationSearchSteps.length + 80;
+        const delay = timings.stepMs * activeSearchSteps.length + 80;
 
         window.setTimeout(() => {
           void sampleEngine
@@ -297,9 +283,6 @@ export function LiveDemoPage() {
                 ];
               });
 
-              if (matchedId) {
-                setInput(nextPresetAfter[matchedId] ?? "");
-              }
               setLoading(false);
               window.setTimeout(() => setFocusActive(false), 400);
             });
@@ -349,14 +332,11 @@ export function LiveDemoPage() {
               ];
             });
 
-            if (matchedId) {
-              setInput(nextPresetAfter[matchedId] ?? "");
-            }
             setLoading(false);
           });
       }, 850);
     },
-    [loading, presentation, timings.stepMs, packIdForAsk, packUnmatched],
+    [loading, presentation, timings.stepMs, packIdForAsk, packUnmatched, activeSearchSteps],
   );
 
   runQueryRef.current = runQuery;
@@ -376,17 +356,20 @@ export function LiveDemoPage() {
       setSourceCueActive(false);
       setShowTagline(false);
       setShowIntro(false);
-      setActiveQueryId("version-diff");
-      const tcu = getPack("tcu-480");
+      const bootId = isStdPresentation
+        ? sample.initialQuestionId
+        : "version-diff";
+      setActiveQueryId(bootId);
       const question =
-        tcu.sample.questions.find((q) => q.id === "version-diff")?.question ??
+        sample.questions.find((q) => q.id === bootId)?.question ??
+        sample.questions[0]?.question ??
         "";
       const t = window.setTimeout(() => {
         runQueryRef.current(question);
       }, 0);
       return () => window.clearTimeout(t);
     }
-  }, [presentation, autoplay]);
+  }, [presentation, autoplay, isStdPresentation, sample]);
 
   const handleSubmit = () => runQuery(input);
 
@@ -410,17 +393,7 @@ export function LiveDemoPage() {
 
   const hideSidebarOnDesktop = presentation;
 
-  const watchVideo = () => setAutoplay(true);
   const exitVideo = () => setPresentation(false);
-
-  const guide = {
-    title: sample.intro.title,
-    subtitle: sample.intro.subtitle,
-    context: pack.context,
-    stats: sample.stats,
-    suggestions: sample.catalog.map((c) => ({ id: c.id, label: c.label })),
-    aiLink: `/ai?pack=${packId}`,
-  };
 
   return (
     <LiveShell
@@ -430,10 +403,10 @@ export function LiveDemoPage() {
       autoplay={autoplay}
       mode="sample"
       onTogglePresentation={() => setPresentation(!presentation)}
-      onWatchVideo={watchVideo}
       onExitVideo={exitVideo}
       hideChrome={presentation && autoplay}
       packTitle={pack.title}
+      packLabel={pack.label}
       packId={packId}
       onPackChange={setPackId}
       versionLabel={sample.versionLabel}
@@ -452,6 +425,8 @@ export function LiveDemoPage() {
 
       <AutoplayController
         enabled={autoplay}
+        beats={activeBeats}
+        questions={activeAutoplayQuestions}
         onIntro={setShowIntro}
         onTagline={setShowTagline}
         onClear={() => {
@@ -498,7 +473,22 @@ export function LiveDemoPage() {
         <div className="relative flex min-w-0 flex-1 flex-col">
           <div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto">
             {showIntro && (
-              <ScaleIntro visible countUpMs={timings.countUpMs} />
+              <ScaleIntro
+                visible
+                countUpMs={timings.countUpMs}
+                stats={
+                  isStdPresentation
+                    ? {
+                        eyebrow: standardizationScaleIntro.eyebrow,
+                        documents: standardizationScaleIntro.documents,
+                        pages: standardizationScaleIntro.pages,
+                        clauses: standardizationScaleIntro.clauses,
+                        pagesLabel: standardizationScaleIntro.pagesLabel,
+                        clausesLabel: standardizationScaleIntro.clausesLabel,
+                      }
+                    : undefined
+                }
+              />
             )}
 
             {!showIntro && (
@@ -512,21 +502,18 @@ export function LiveDemoPage() {
                   );
                   runQuery(hit?.question ?? text);
                 }}
-                onWatchVideo={watchVideo}
                 presentation={presentation}
                 staggerMs={timings.staggerMs}
                 countUpMs={timings.countUpMs}
                 sourceCueActive={sourceCueActive}
-                hideGuide={presentation}
                 wide={presentation}
-                guide={guide}
               />
             )}
 
             {showTagline && (
               <div className="fade-in px-6 pb-16 pt-8 text-center">
                 <p className="text-xl font-semibold tracking-tight text-navy sm:text-2xl">
-                  {presentationTagline}
+                  {activeTagline}
                 </p>
                 <p className="mt-3 text-sm text-navy-muted">GembaShift</p>
               </div>

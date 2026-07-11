@@ -363,10 +363,10 @@ const categoryNote: Record<string, string> = {
 
 export const workProcedurePack: KnowledgePack = {
   id: "work-procedure",
-  label: "作業手順の改定",
-  title: "作業手順の改定",
+  label: "組立ラインA",
+  title: "SOP-組立-07",
   audience: "everyone",
-  audienceLabel: "だれでもわかる",
+  audienceLabel: "",
   context: {
     topic:
       "東浜モビリティ・組立ラインAの標準作業手順書改定（SOP-組立-07 v2.1→v3.0）",
@@ -382,8 +382,7 @@ export const workProcedurePack: KnowledgePack = {
     questions,
     intro: {
       title: "作業のやり方が変わったとき、すぐ確認できます。",
-      subtitle:
-        "保護具・トルク・確認印など、現場が気にする変更を質問するだけで整理します。",
+      subtitle: "SOP-組立-07 · v2.1 → v3.0",
     },
     stats: {
       documents: documents.length,

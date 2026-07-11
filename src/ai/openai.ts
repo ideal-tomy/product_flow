@@ -1,8 +1,10 @@
 import type { DemoAnswer } from "../data/gembashift-demo";
 import type { AskResult } from "../engines/types";
+import { DEFAULT_PACK_ID, getPack, type KnowledgePackId } from "../packs";
 import type { AskIntent } from "./intent";
 import type { ScoredChunk } from "./retrieve";
 import { knowledgeStats } from "./knowledge";
+import { COMPANY_BRIDGE } from "./packs/standardization";
 
 type LlmPayload = {
   summary: string;
@@ -48,6 +50,25 @@ Rules:
 - If evidence is insufficient, set refuse=true and explain in refuseReason.`;
 }
 
+function systemPromptFor(packId: KnowledgePackId): string {
+  if (packId === "standardization") {
+    return (
+      "You are GembaShift, an industrial document reasoning assistant for the METI textbook " +
+      "『標準化実務入門』（経済産業省 基準認証ユニット）。 " +
+      "Answer in Japanese. Cite documentName and clauseId from the provided chunks. " +
+      "Do not use knowledge outside the provided chunks. " +
+      `When the question is about 社内規格 / 社内標準, append this exact sentence to summary: ${COMPANY_BRIDGE} ` +
+      buildSchemaHint()
+    );
+  }
+
+  return (
+    "You are GembaShift, an industrial document reasoning assistant for Tohama Mobility TCU-480. " +
+    "Answer in Japanese. " +
+    buildSchemaHint()
+  );
+}
+
 /**
  * OpenAI 構造化回答。キーが無い／失敗時は null。
  * Node (Vite middleware) からのみ呼ぶ想定。
@@ -56,9 +77,13 @@ export async function askWithOpenAI(
   question: string,
   intent: AskIntent,
   hits: ScoredChunk[],
+  packId?: KnowledgePackId,
 ): Promise<AskResult | null> {
   const apiKey = process.env.OPENAI_API_KEY;
   if (!apiKey || hits.length === 0) return null;
+
+  const pack = getPack(packId ?? DEFAULT_PACK_ID);
+  const searchedDocuments = pack.ai.stats.documents || knowledgeStats.documents;
 
   const chunkPayload = hits.map((h) => ({
     id: h.id,
@@ -76,10 +101,7 @@ export async function askWithOpenAI(
     messages: [
       {
         role: "system",
-        content:
-          "You are GembaShift, an industrial document reasoning assistant for Tohama Mobility TCU-480. " +
-          "Answer in Japanese. " +
-          buildSchemaHint(),
+        content: systemPromptFor(pack.id),
       },
       {
         role: "user",
@@ -123,7 +145,7 @@ export async function askWithOpenAI(
           exceptionNote: "LLM が根拠不足と判断しました。",
         },
         meta: {
-          searchedDocuments: knowledgeStats.documents,
+          searchedDocuments,
           sourcesFound: 0,
           confidence: "low",
           refused: true,
@@ -170,7 +192,7 @@ export async function askWithOpenAI(
     return {
       answer,
       meta: {
-        searchedDocuments: knowledgeStats.documents,
+        searchedDocuments,
         sourcesFound: sources.length,
         confidence: parsed.confidence ?? "medium",
         engine: "llm",

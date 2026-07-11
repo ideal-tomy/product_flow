@@ -13,6 +13,7 @@ import { chunkToSource, knowledgeChunks } from "./knowledge";
 import { detectIntent, type AskIntent } from "./intent";
 import { retrieveChunks, type ScoredChunk } from "./retrieve";
 import { synthesizeGenericPackAnswer } from "./packs/generic";
+import { synthesizeStandardizationAnswer } from "./packs/standardization";
 
 function sourcesFrom(chunks: KnowledgeChunkLike[]): SourceReference[] {
   const map = new Map<string, SourceReference>();
@@ -372,7 +373,7 @@ function synthesizeCompany(hits: ScoredChunk[]): DemoAnswer {
   const company = allByDoc("COMPANY-001");
   return {
     summary:
-      "東浜モビリティシステムズ株式会社の車載温度制御ユニット TCU-480 が対象です。従業員4,800名、国内6工場・海外3拠点、対象車種12、累計出荷240万ユニット。本デモは制御仕様書 v3.2 と v3.4 の改訂影響を扱います。",
+      "東浜モビリティシステムズ株式会社の車載温度制御ユニット TCU-480 が対象です。従業員4,800名、国内6工場・海外3拠点、対象車種12、累計出荷240万ユニット。制御仕様書 v3.2 と v3.4 の改訂影響を扱います。",
     sources: sourcesFrom([...company, ...hits]),
   };
 }
@@ -431,8 +432,12 @@ export function synthesizeAnswer(
   if (hits.length === 0 && intent === "general") {
     return withPackMeta(
       refuseAnswer(
-        `関連度の高い根拠が見つかりませんでした。「${pack.title}」の差分・影響・再確認・矛盾・承認について質問してください。`,
-        ["何が変わった？", "影響は？", "再確認は必要？"],
+        pack.id === "standardization"
+          ? `関連度の高い根拠が見つかりませんでした。「${pack.title}」の定義・分類・適合性評価・国際制度について質問してください。`
+          : `関連度の高い根拠が見つかりませんでした。「${pack.title}」の差分・影響・再確認・矛盾・承認について質問してください。`,
+        pack.id === "standardization"
+          ? ["標準化とは？", "社内規格とは？", "適合性評価とは？"]
+          : ["何が変わった？", "影響は？", "再確認は必要？"],
         searchedDocuments,
         intent,
       ),
@@ -442,7 +447,14 @@ export function synthesizeAnswer(
 
   let answer: DemoAnswer;
 
-  if (pack.id !== "tcu-480") {
+  if (pack.id === "standardization") {
+    answer = synthesizeStandardizationAnswer(
+      question,
+      intent,
+      pack.ai.chunks,
+      hits,
+    );
+  } else if (pack.id !== "tcu-480") {
     answer = synthesizeGenericPackAnswer(
       question,
       intent,
@@ -481,10 +493,26 @@ export function synthesizeAnswer(
   }
 
   if (answer.sources.length === 0) {
+    if (answer.exceptionNote === "標準化実務入門パック向け案内") {
+      return {
+        answer,
+        meta: {
+          searchedDocuments,
+          sourcesFound: 0,
+          confidence: "medium",
+          engine: "rag",
+          intent,
+          packId: pack.id,
+        },
+        scenarioId: null,
+      };
+    }
     return withPackMeta(
       refuseAnswer(
         "根拠チャンクを特定できませんでした。質問を具体化するか、推奨質問から選んでください。",
-        ["差分", "矛盾", "再確認", "過去事例", "承認"],
+        pack.id === "standardization"
+          ? ["標準化とは？", "社内規格とは？", "適合性評価とは？"]
+          : ["差分", "矛盾", "再確認", "過去事例", "承認"],
         searchedDocuments,
         intent,
       ),

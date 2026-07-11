@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "chunk:std": "node scripts/chunk-standardization.mjs"
   },
   "dependencies": {
     "react": "^19.1.0",

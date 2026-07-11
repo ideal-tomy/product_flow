@@ -34,7 +34,15 @@ export type ScenarioId =
   | "rollback"
   | "priority-top3"
   | "cold-start"
-  | "owners";
+  | "owners"
+  | "std-definition"
+  | "std-classification"
+  | "std-company"
+  | "std-conformity"
+  | "std-iso-iec"
+  | "std-jis"
+  | "std-tbt"
+  | "std-ip";
 
 function normalize(text: string): string {
   return text
@@ -44,6 +52,50 @@ function normalize(text: string): string {
 }
 
 const aliasMap: Record<ScenarioId, string[]> = {
+  "std-definition": [
+    "標準化とは何ですか？ISO/IECガイド2の定義で説明してください",
+    "標準化とは何ですか",
+    "標準化の定義",
+    "ISO/IECガイド2",
+  ],
+  "std-classification": [
+    "規格は作成組織によってどう分類されますか？社内規格も含めて",
+    "規格は作成組織によってどう分類されますか",
+    "規格の分類",
+    "国際規格と社内規格",
+  ],
+  "std-company": [
+    "社内規格とは何ですか？どのような効果がありますか？",
+    "社内規格とは何ですか",
+    "社内規格の効果",
+    "社内標準とは",
+  ],
+  "std-conformity": [
+    "適合性評価とは何ですか？概要を説明してください",
+    "適合性評価とは何ですか",
+    "適合性評価の概要",
+  ],
+  "std-iso-iec": [
+    "ISOとIECの違いは何ですか？",
+    "ISOとIECの違い",
+    "ISOとIEC",
+  ],
+  "std-jis": [
+    "JISはどのように制定されますか？JISCの役割は？",
+    "JISはどのように制定されますか",
+    "JISCの役割",
+  ],
+  "std-tbt": [
+    "WTO/TBT協定とは何ですか？企業にどう影響しますか？",
+    "WTO/TBT協定とは何ですか",
+    "TBT協定",
+    "WTO/TBT",
+  ],
+  "std-ip": [
+    "知的財産と標準化はどう関係しますか？",
+    "知的財産と標準化",
+    "パテントと標準",
+  ],
   "critical-changes": [
     "重要な変更だけ教えてください",
     "重要な変更だけ",
@@ -395,10 +447,26 @@ export const nextPresetAfter: Record<ScenarioId, string> = {
   "priority-top3": "次にやるべきことを教えてください",
   "cold-start": "再試験が必要な項目は？",
   owners: "今いちばん優先すべきことは何ですか？",
+  "std-definition": "規格は作成組織によってどう分類されますか？社内規格も含めて",
+  "std-classification": "社内規格とは何ですか？どのような効果がありますか？",
+  "std-company": "適合性評価とは何ですか？概要を説明してください",
+  "std-conformity": "ISOとIECの違いは何ですか？",
+  "std-iso-iec": "JISはどのように制定されますか？JISCの役割は？",
+  "std-jis": "WTO/TBT協定とは何ですか？企業にどう影響しますか？",
+  "std-tbt": "知的財産と標準化はどう関係しますか？",
+  "std-ip": "",
 };
 
 /** 具体度の高いシナリオを先に判定 */
 const matchOrder: ScenarioId[] = [
+  "std-definition",
+  "std-classification",
+  "std-company",
+  "std-conformity",
+  "std-iso-iec",
+  "std-jis",
+  "std-tbt",
+  "std-ip",
   "critical-changes",
   "hold-detail",
   "alarm-detail",
@@ -440,6 +508,41 @@ const matchOrder: ScenarioId[] = [
 export function matchScenario(input: string): ScenarioId | null {
   const n = normalize(input);
   if (!n) return null;
+
+  if (
+    n.includes("規格の分類") ||
+    (n.includes("作成組織") && n.includes("分類")) ||
+    (n.includes("分類") && n.includes("社内規格"))
+  ) {
+    return "std-classification";
+  }
+  if (n.includes("社内規格") || n.includes("社内標準")) {
+    return "std-company";
+  }
+  if (n.includes("適合性評価")) {
+    return "std-conformity";
+  }
+  if ((n.includes("iso") && n.includes("iec")) || n.includes("isoとiec")) {
+    return "std-iso-iec";
+  }
+  if (n.includes("jisc") || (n.includes("jis") && n.includes("制定"))) {
+    return "std-jis";
+  }
+  if (n.includes("tbt") || n.includes("wto")) {
+    return "std-tbt";
+  }
+  if (
+    (n.includes("知的財産") || n.includes("パテント")) &&
+    (n.includes("標準") || n.includes("規格"))
+  ) {
+    return "std-ip";
+  }
+  if (
+    (n.includes("標準化とは") || n.includes("標準化の定義") || n.includes("ガイド2") || n.includes("ガイド２")) &&
+    !n.includes("社内")
+  ) {
+    return "std-definition";
+  }
 
   for (const id of matchOrder) {
     for (const alias of aliasMap[id]) {

@@ -30,6 +30,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       | "work-procedure"
       | "inspection"
       | "tcu-480"
+      | "standardization"
       | undefined;
     const result = await askGemba(question, { allowLlm: true, packId });
     res.status(200).json(result);

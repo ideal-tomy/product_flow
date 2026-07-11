@@ -2,7 +2,11 @@ import type { DemoDocument, DemoQuestion } from "../data/gembashift-demo";
 import type { QueryCatalogItem } from "../data/query-catalog";
 import type { KnowledgeChunk } from "../ai/knowledge";
 
-export type KnowledgePackId = "work-procedure" | "inspection" | "tcu-480";
+export type KnowledgePackId =
+  | "work-procedure"
+  | "inspection"
+  | "tcu-480"
+  | "standardization";
 
 export type PackContext = {
   topic: string;
@@ -59,6 +63,7 @@ export function isKnowledgePackId(value: string | null | undefined): value is Kn
   return (
     value === "work-procedure" ||
     value === "inspection" ||
-    value === "tcu-480"
+    value === "tcu-480" ||
+    value === "standardization"
   );
 }

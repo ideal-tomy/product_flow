@@ -41,10 +41,10 @@ const catalog = queryCatalog.filter((q) =>
 
 export const tcuPack: KnowledgePack = {
   id: "tcu-480",
-  label: "温度制御ユニット",
-  title: "温度制御ユニット改訂",
+  label: "TCU-480",
+  title: "制御仕様 v3.2→v3.4",
   audience: "specialist",
-  audienceLabel: "設計・品質向け",
+  audienceLabel: "",
   context: {
     topic:
       "東浜モビリティ・車載温度制御ユニット（TCU-480）の制御仕様書改訂（v3.2→v3.4）",
@@ -60,7 +60,7 @@ export const tcuPack: KnowledgePack = {
     questions: demoQuestions as DemoQuestion[],
     intro: {
       title: demoIntro.title,
-      subtitle: demoIntro.subtitle,
+      subtitle: "TCU-480 · 制御仕様 v3.2 → v3.4",
     },
     stats: { ...scaleStats },
     catalog,

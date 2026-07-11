@@ -119,5 +119,53 @@ export function ResultHero({ scenarioId, answer, countUpMs = 700 }: ResultHeroPr
     );
   }
 
+  if (scenarioId === "std-classification" && answer.impactGroups) {
+    return (
+      <div className="fade-in space-y-4">
+        <p className="text-center text-sm font-bold tracking-[0.14em] text-navy-muted">
+          <CountUp to={answer.impactGroups.length} durationMs={countUpMs} />{" "}
+          TYPES OF STANDARDS
+        </p>
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+          {answer.impactGroups.map((g) => (
+            <div
+              key={g.label}
+              className={`rounded-lg border-2 px-3 py-5 text-center ${
+                g.label === "社内規格"
+                  ? "border-navy/30 bg-navy/5"
+                  : "border-navy/10 bg-surface/40"
+              }`}
+            >
+              <p className="text-sm font-bold tracking-wide text-navy">{g.label}</p>
+              <p className="mt-2 text-xs text-navy-muted">{g.items[0]}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (scenarioId === "std-company") {
+    return (
+      <div className="fade-in space-y-4 rounded-lg border-2 border-navy/10 bg-surface/40 px-5 py-7 text-center sm:py-8">
+        <p className="text-sm font-bold tracking-[0.14em] text-navy-muted">
+          COMPANY STANDARD
+        </p>
+        <p className="text-2xl font-bold tracking-tight text-navy sm:text-3xl">
+          社内規格
+        </p>
+        {(answer.before || answer.after) && (
+          <p className="mt-2 flex flex-wrap items-center justify-center gap-3 text-lg font-semibold text-navy-muted sm:text-xl">
+            <span className="text-muted line-through decoration-muted/50">
+              {answer.before}
+            </span>
+            <span className="text-base text-muted">→</span>
+            <span className="text-navy">{answer.after}</span>
+          </p>
+        )}
+      </div>
+    );
+  }
+
   return null;
 }

@@ -2,6 +2,7 @@ import { DEFAULT_PACK_ID, isKnowledgePackId, type KnowledgePack, type KnowledgeP
 import { workProcedurePack } from "./work-procedure/pack";
 import { inspectionPack } from "./inspection/pack";
 import { tcuPack } from "./tcu/pack";
+import { standardizationPack } from "./standardization/pack";
 
 export type { KnowledgePack, KnowledgePackId, PackContext } from "./types";
 export { DEFAULT_PACK_ID, isKnowledgePackId } from "./types";
@@ -11,6 +12,7 @@ export const knowledgePacks: KnowledgePack[] = [
   workProcedurePack,
   inspectionPack,
   tcuPack,
+  standardizationPack,
 ];
 
 export function getPack(id: KnowledgePackId | string | null | undefined): KnowledgePack {

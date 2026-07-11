@@ -15,6 +15,7 @@
 | `work-procedure` | [`src/ai/data/work_procedure_chunks.json`](src/ai/data/work_procedure_chunks.json) | 東浜モビリティ 組立ラインA / SOP-組立-07 |
 | `inspection` | [`src/ai/data/inspection_chunks.json`](src/ai/data/inspection_chunks.json) | 東浜モビリティ 出荷検査場 / INS-出荷-03 |
 | `tcu-480` | [`src/ai/data/knowledge_chunks.json`](src/ai/data/knowledge_chunks.json) | 東浜モビリティ TCU-480 制御仕様 v3.2→v3.4 |
+| `standardization` | [`src/ai/data/standardization_chunks.json`](src/ai/data/standardization_chunks.json) | 経産省『標準化実務入門』全9章 |
 
 - アダプタ: [`src/ai/knowledge.ts`](src/ai/knowledge.ts) / [`src/packs/chunkUtils.ts`](src/packs/chunkUtils.ts)
 - パック定義: [`src/packs/*/pack.ts`](src/packs/)
@@ -60,4 +61,7 @@ Production / Preview の両方に設定し、再デプロイすること。
 1. `/ai?pack=work-procedure` … 文書閲覧 → 推奨質問 → 根拠全文
 2. `/ai?pack=inspection` … 同上
 3. `/ai?pack=tcu-480` … 13文書横断の根拠
-4. `/?pack=work-procedure` など Sample … 根拠ドロワーが壊れないこと
+4. `/ai?pack=standardization` … 経産省教材・推奨質問・社内規格ブリッジ
+5. `/?pack=standardization&presentation=1&autoplay=1` … 標準化30秒動画
+6. `/?presentation=1&autoplay=1` … TCU 動画が壊れていないこと
+7. `/?pack=work-procedure` など Sample … 根拠ドロワーが壊れないこと

@@ -111,7 +111,7 @@ export function WorkspaceSidebar({
               : "text-navy-muted hover:bg-surface"
           }`}
         >
-          Docs
+          文書
         </button>
         <button
           type="button"
@@ -122,7 +122,7 @@ export function WorkspaceSidebar({
               : "text-navy-muted hover:bg-surface"
           }`}
         >
-          Queries
+          質問
           <span
             className={`ml-1 tabular-nums ${
               mode === "queries" ? "text-white/65" : "text-muted"

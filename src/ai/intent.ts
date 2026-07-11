@@ -29,9 +29,35 @@ export function detectIntent(question: string): AskIntent {
     n.includes("給与") ||
     n.includes("人事") ||
     n.includes("株価") ||
-    n.includes("決算")
+    n.includes("決算") ||
+    n.includes("機密") ||
+    n.includes("価格交渉")
   ) {
     return "refuse";
+  }
+
+  // 標準化教材向け: 社内規格・分類・定義を改訂 intent より優先
+  if (
+    (n.includes("作成組織") && n.includes("分類")) ||
+    (n.includes("分類") && (n.includes("規格") || n.includes("社内規格")))
+  ) {
+    return "qms";
+  }
+
+  if (
+    (n.includes("社内規格") || n.includes("社内標準")) &&
+    !n.includes("分類")
+  ) {
+    return "company";
+  }
+
+  if (
+    n.includes("標準化とは") ||
+    n.includes("標準化の定義") ||
+    n.includes("ガイド2") ||
+    n.includes("ガイド２")
+  ) {
+    return "qms";
   }
 
   if (
@@ -90,6 +116,16 @@ export function detectIntent(question: string): AskIntent {
   if (
     n.includes("品質要求") ||
     n.includes("規格") ||
+    n.includes("標準化") ||
+    n.includes("適合性評価") ||
+    n.includes("jis") ||
+    n.includes("iso") ||
+    n.includes("iec") ||
+    n.includes("認証") ||
+    n.includes("tbt") ||
+    n.includes("wto") ||
+    n.includes("デジュール") ||
+    n.includes("デファクト") ||
     n.includes("qms") ||
     n.includes("コンプライアンス") ||
     n.includes("マトリクス")
@@ -177,8 +213,15 @@ export const intentCategoryBoost: Record<AskIntent, string[]> = {
     "inspection",
     "training",
   ],
-  qms: ["compliance_matrix", "work_instruction", "quality_audit", "qms"],
-  company: ["company_profile"],
-  general: [],
+  qms: [
+    "compliance_matrix",
+    "work_instruction",
+    "quality_audit",
+    "qms",
+    "std_core",
+    "std_background",
+  ],
+  company: ["company_profile", "std_background", "std_core"],
+  general: ["std_core", "std_background"],
   refuse: [],
 };

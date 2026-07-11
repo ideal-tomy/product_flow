@@ -1,12 +1,9 @@
 import type { ReactNode } from "react";
-import { Link } from "react-router-dom";
 import type { DemoAnswer, SourceReference } from "../../data/gembashift-demo";
 import type { ScenarioId } from "../../data/question-aliases";
-import type { PackContext } from "../../packs/types";
 import { ResultHero } from "../presentation/ResultHero";
 import { SearchSteps } from "../presentation/SearchSteps";
 import { StaggerReveal } from "../presentation/StaggerReveal";
-import { PackContextBar } from "./PackContextBar";
 
 export type ThreadItem =
   | { kind: "user"; id: string; text: string }
@@ -27,33 +24,16 @@ export type ThreadItem =
       steps?: readonly string[];
     };
 
-export type GuideConfig = {
-  title: string;
-  subtitle: string;
-  context: PackContext;
-  stats: {
-    documents: number;
-    pages: number;
-    majorChanges: number;
-    retestCandidates: number;
-    contradictions: number;
-  };
-  suggestions: { id: string; label: string }[];
-  aiLink?: string;
-};
-
 interface QueryThreadProps {
   items: ThreadItem[];
   onOpenSources: (sources: SourceReference[], focus?: SourceReference) => void;
   onSuggest?: (text: string) => void;
-  onWatchVideo?: () => void;
   presentation?: boolean;
   staggerMs?: number;
   countUpMs?: number;
   sourceCueActive?: boolean;
-  hideGuide?: boolean;
   wide?: boolean;
-  guide?: GuideConfig;
+  emptyHint?: string;
 }
 
 const severityLabel = {
@@ -486,127 +466,16 @@ function AnswerBody({
   );
 }
 
-function DemoGuide({
-  onSuggest,
-  onWatchVideo,
-  guide,
-}: {
-  onSuggest?: (text: string) => void;
-  onWatchVideo?: () => void;
-  guide: GuideConfig;
-}) {
-  const stats = [
-    { value: String(guide.stats.documents), unit: "文書", label: "検索対象" },
-    {
-      value: guide.stats.pages.toLocaleString(),
-      unit: "ページ",
-      label: "横断検索可能",
-    },
-    {
-      value: String(guide.stats.majorChanges),
-      unit: "件",
-      label: "主要な変更",
-    },
-    {
-      value: String(guide.stats.retestCandidates),
-      unit: "件",
-      label: "再確認候補",
-    },
-    {
-      value: String(guide.stats.contradictions),
-      unit: "件",
-      label: "文書不整合候補",
-    },
-  ];
-
-  return (
-    <div className="space-y-4 border-b border-line pb-5">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-        <div className="min-w-0">
-          <h1 className="text-lg font-semibold text-navy sm:text-xl">
-            {guide.title}
-          </h1>
-          <p className="mt-1.5 text-sm leading-relaxed text-navy-muted">
-            {guide.subtitle}
-          </p>
-        </div>
-        {onWatchVideo && (
-          <button
-            type="button"
-            onClick={onWatchVideo}
-            className="shrink-0 rounded-lg bg-navy px-5 py-3 text-sm font-bold tracking-wide text-white shadow-sm transition-colors hover:bg-navy-soft sm:text-base"
-          >
-            動画でdemoを見る
-          </button>
-        )}
-      </div>
-
-      <PackContextBar context={guide.context} />
-
-      <div className="flex flex-wrap items-center gap-2">
-        <Link
-          to={guide.aiLink ?? "/ai"}
-          className="rounded-lg border-2 border-navy bg-white px-4 py-2.5 text-sm font-bold text-navy transition-colors hover:bg-navy hover:text-white"
-        >
-          AI Mode を試す
-        </Link>
-        <p className="text-[11px] text-muted">
-          登録ナレッジを検索して根拠付きで回答します
-        </p>
-      </div>
-
-      <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
-        {stats.map((s) => (
-          <div
-            key={s.label}
-            className="rounded-md border border-line bg-white px-2.5 py-2"
-          >
-            <p className="text-base font-semibold tabular-nums text-navy sm:text-lg">
-              {s.value}
-              <span className="ml-0.5 text-[10px] font-normal text-muted">
-                {s.unit}
-              </span>
-            </p>
-            <p className="mt-0.5 text-[11px] text-muted">{s.label}</p>
-          </div>
-        ))}
-      </div>
-
-      {onSuggest && (
-        <div className="space-y-2">
-          <p className="text-[11px] font-medium tracking-wide text-muted">
-            質問例（タップで入力）
-          </p>
-          <div className="flex flex-wrap gap-2">
-            {guide.suggestions.map((s) => (
-              <button
-                key={s.id}
-                type="button"
-                onClick={() => onSuggest(s.label)}
-                className="rounded border border-line bg-white px-2.5 py-1.5 text-xs text-navy transition-colors hover:border-navy/40"
-              >
-                {s.label}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
-
 export function QueryThread({
   items,
   onOpenSources,
   onSuggest,
-  onWatchVideo,
   presentation = false,
   staggerMs = 200,
   countUpMs = 700,
   sourceCueActive = false,
-  hideGuide = false,
   wide = false,
-  guide,
+  emptyHint = "選択中の文書について質問できます",
 }: QueryThreadProps) {
   return (
     <div
@@ -614,12 +483,8 @@ export function QueryThread({
         wide ? "max-w-3xl gap-8 lg:max-w-4xl" : "max-w-2xl gap-6"
       }`}
     >
-      {!hideGuide && !presentation && guide && (
-        <DemoGuide
-          onSuggest={onSuggest}
-          onWatchVideo={onWatchVideo}
-          guide={guide}
-        />
+      {!presentation && items.length === 0 && (
+        <p className="py-8 text-center text-sm text-navy-muted">{emptyHint}</p>
       )}
 
       {items.map((item) => {
@@ -742,3 +607,4 @@ export function QueryThread({
     </div>
   );
 }
+

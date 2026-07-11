@@ -25,7 +25,7 @@ export const sampleEngine: QueryEngine = {
       return {
         answer: {
           summary:
-            "このサンプルでは、変更点・影響・再確認・矛盾・過去事例などに回答できます。近い質問を選んでください。",
+            "近い質問を選ぶか、別の聞き方で質問してください。",
           sources: [],
         },
         meta: {

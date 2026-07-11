@@ -2,9 +2,11 @@ import { useEffect, useRef } from "react";
 import {
   presentationBeats,
   presentationTagline,
+  type PresentationBeat,
 } from "../../data/presentation-script";
 import type { ScenarioId } from "../../data/question-aliases";
 import { demoQuestions } from "../../data/gembashift-demo";
+import type { DemoQuestion } from "../../data/gembashift-demo";
 
 interface AutoplayControllerProps {
   enabled: boolean;
@@ -13,6 +15,9 @@ interface AutoplayControllerProps {
   onIntro: (show: boolean) => void;
   onTagline: (show: boolean) => void;
   onClear: () => void;
+  /** 省略時は TCU 既定 */
+  beats?: PresentationBeat[];
+  questions?: DemoQuestion[];
 }
 
 export function AutoplayController({
@@ -22,6 +27,8 @@ export function AutoplayController({
   onIntro,
   onTagline,
   onClear,
+  beats = presentationBeats,
+  questions = demoQuestions,
 }: AutoplayControllerProps) {
   const started = useRef(false);
   const callbacks = useRef({
@@ -42,7 +49,7 @@ export function AutoplayController({
     started.current = true;
 
     const timers: number[] = [];
-    for (const beat of presentationBeats) {
+    for (const beat of beats) {
       timers.push(
         window.setTimeout(() => {
           const c = callbacks.current;
@@ -56,7 +63,7 @@ export function AutoplayController({
               c.onClear();
               break;
             case "ask": {
-              const q = demoQuestions.find((d) => d.id === beat.scenarioId);
+              const q = questions.find((d) => d.id === beat.scenarioId);
               if (q) c.onAsk(beat.scenarioId, q.question);
               break;
             }
@@ -77,7 +84,7 @@ export function AutoplayController({
       timers.forEach((t) => window.clearTimeout(t));
       started.current = false;
     };
-  }, [enabled]);
+  }, [enabled, beats, questions]);
 
   return null;
 }

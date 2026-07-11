@@ -357,10 +357,10 @@ const categoryNote: Record<string, string> = {
 
 export const inspectionPack: KnowledgePack = {
   id: "inspection",
-  label: "検査手順の改定",
-  title: "検査手順の改定",
+  label: "出荷検査場",
+  title: "INS-出荷-03",
   audience: "everyone",
-  audienceLabel: "だれでもわかる",
+  audienceLabel: "",
   context: {
     topic:
       "東浜モビリティ・出荷検査場の検査手順改定（INS-出荷-03 Rev.B→Rev.C）",
@@ -376,8 +376,7 @@ export const inspectionPack: KnowledgePack = {
     questions,
     intro: {
       title: "検査の合格ラインが変わったとき、すぐ確認できます。",
-      subtitle:
-        "キズ基準・記録方法・抜取数など、検査現場が気にする変更を質問で整理します。",
+      subtitle: "INS-出荷-03 · Rev.B → Rev.C",
     },
     stats: {
       documents: documents.length,

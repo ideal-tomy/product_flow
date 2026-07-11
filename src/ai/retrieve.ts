@@ -17,7 +17,7 @@ const SYNONYM_GROUPS: string[][] = [
   ["承認", "gate", "量産", "大丈夫", "適用"],
   ["不具合", "事例", "過去", "類似", "ヒヤリハット", "誤アラーム"],
   ["影響", "波及", "fmea", "誰が"],
-  ["品質", "規格", "qms", "要求"],
+  ["品質", "規格", "標準", "標準化", "qms", "要求", "jis", "iso", "iec", "適合性", "社内規格", "tbt", "wto"],
   ["許容", "精度", "±3", "±4", "±5", "トルク", "キズ"],
   ["保留", "始動", "起動", "5秒"],
   ["アラーム", "82", "85", "78"],
@@ -122,6 +122,74 @@ export function retrieveChunks(
     }
     if (intent === "approval" && chunk.documentId === "WI-DC-04") score += 3;
     if (intent === "approval" && chunk.category === "approval") score += 3;
+
+    if (pack.id === "standardization") {
+      const q = normalize(question);
+      if (
+        (q.includes("社内規格") || q.includes("社内標準")) &&
+        chunk.text.includes("社内規格は")
+      ) {
+        score += 12;
+      }
+      if (
+        (q.includes("分類") || q.includes("作成組織")) &&
+        (chunk.text.includes("５つのタイプ") ||
+          chunk.text.includes("5つのタイプ") ||
+          chunk.text.includes("国際規格") && chunk.text.includes("社内規格"))
+      ) {
+        score += 10;
+      }
+      if (
+        (q.includes("標準化とは") ||
+          q.includes("ガイド2") ||
+          q.includes("ガイド２") ||
+          q.includes("最適な秩序")) &&
+        (chunk.text.includes("最適な秩序を得る") ||
+          chunk.clauseId.includes("標準化とは"))
+      ) {
+        score += 12;
+      }
+      if (
+        (q.includes("適合性評価") || q.includes("casco")) &&
+        chunk.documentId === "STD-CH04"
+      ) {
+        score += 6;
+      }
+      if (
+        (q.includes("iso") || q.includes("iec")) &&
+        chunk.documentId === "STD-CH05" &&
+        (chunk.clauseId.includes("ISO") || chunk.clauseId.includes("IEC"))
+      ) {
+        score += 8;
+      }
+      if (
+        (q.includes("jis") || q.includes("jisc")) &&
+        chunk.documentId === "STD-CH06"
+      ) {
+        score += 8;
+      }
+      if (
+        (q.includes("tbt") || q.includes("wto")) &&
+        (chunk.documentId === "STD-CH02" || chunk.documentId === "STD-CH09")
+      ) {
+        score += 8;
+      }
+      if (
+        (q.includes("知的財産") || q.includes("パテント")) &&
+        chunk.documentId === "STD-CH07"
+      ) {
+        score += 8;
+      }
+      // 定義・分類質問で第4章CASCO等が上位独占しないよう抑制
+      if (
+        !q.includes("適合性") &&
+        !q.includes("casco") &&
+        chunk.documentId === "STD-CH04" &&
+        chunk.text.includes("CASCO")
+      ) {
+        score -= 4;
+      }
+    }
 
     return { ...chunk, score };
   });

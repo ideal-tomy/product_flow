@@ -96,8 +96,7 @@ export const scaleStats = {
 
 export const demoIntro = {
   title: "社内文書に、そのまま質問できます。",
-  subtitle:
-    "18文書・2,842ページのサンプルデータから、変更点・影響範囲・例外条件・根拠を確認できます。",
+  subtitle: "TCU-480 · 制御仕様 v3.2 → v3.4",
 } as const;
 
 export const demoDocuments: DemoDocument[] = [
