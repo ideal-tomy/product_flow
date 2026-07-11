@@ -18,6 +18,7 @@ import {
 import { QueryComposer } from "../components/live/QueryComposer";
 import { SourceDrawer } from "../components/live/SourceDrawer";
 import { KnowledgeBrowser } from "../components/live/KnowledgeBrowser";
+import { scrollToLatestThreadAnchor } from "../components/live/scrollToLatestAnswer";
 
 type CenterTab = "knowledge" | "answers";
 
@@ -118,9 +119,7 @@ export function AiDemoPage() {
 
   useEffect(() => {
     if (centerTab !== "answers") return;
-    const el = scrollRef.current;
-    if (!el) return;
-    el.scrollTop = el.scrollHeight;
+    scrollToLatestThreadAnchor(scrollRef.current);
   }, [thread, loading, lastMeta, centerTab]);
 
   useEffect(() => {
@@ -211,7 +210,6 @@ export function AiDemoPage() {
               id: nextId(),
               answer: result.answer,
               scenarioId: scenarioId ?? undefined,
-              presentation: true,
               unmatched: Boolean(result.meta.refused),
               suggestions: result.meta.refused
                 ? queries.slice(0, 4).map((q) => q.question)
@@ -378,7 +376,6 @@ export function AiDemoPage() {
                   if (loading) return;
                   void runQuery(text);
                 }}
-                presentation
                 staggerMs={160}
                 countUpMs={600}
                 wide

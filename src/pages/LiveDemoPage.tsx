@@ -35,6 +35,7 @@ import { ScaleIntro } from "../components/presentation/ScaleIntro";
 import { AutoplayController } from "../components/presentation/AutoplayController";
 import { presentationBeats } from "../data/presentation-script";
 import { demoQuestions } from "../data/gembashift-demo";
+import { scrollToLatestThreadAnchor } from "../components/live/scrollToLatestAnswer";
 
 function pickSource(
   sources: SourceReference[],
@@ -166,9 +167,7 @@ export function LiveDemoPage() {
   }, [sourceOpen]);
 
   useEffect(() => {
-    const el = scrollRef.current;
-    if (!el) return;
-    el.scrollTop = el.scrollHeight;
+    scrollToLatestThreadAnchor(scrollRef.current);
   }, [thread, loading, showIntro, showTagline]);
 
   useEffect(() => {

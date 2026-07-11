@@ -385,13 +385,16 @@ function AnswerBody({
         className={
           presentation
             ? "space-y-3 rounded-lg border border-navy/15 bg-surface/60 px-4 py-4"
-            : "flex flex-wrap items-center gap-2 pt-1"
+            : "flex flex-wrap items-center gap-1.5"
         }
       >
         {presentation && (
           <p className="text-xs font-bold tracking-[0.12em] text-navy">
             根拠 · 登録ナレッジ
           </p>
+        )}
+        {!presentation && (
+          <span className="mr-0.5 text-[11px] font-medium text-muted">根拠</span>
         )}
         <div className="flex flex-wrap items-center gap-2">
           {answer.sources.map((s) => (
@@ -402,7 +405,7 @@ function AnswerBody({
               className={`rounded border font-mono text-navy transition-colors hover:border-navy/40 ${
                 presentation
                   ? "border-navy/25 bg-white px-3 py-2 text-sm font-semibold"
-                  : "border-line px-2 py-1 text-xs"
+                  : "border-line px-2 py-0.5 text-[11px]"
               } ${
                 sourceCueActive
                   ? "border-navy bg-navy/[0.06] ring-2 ring-navy/20"
@@ -425,10 +428,10 @@ function AnswerBody({
             type="button"
             onClick={() => onOpenSources(answer.sources, answer.sources[0])}
             className={`font-semibold text-navy underline-offset-2 hover:underline ${
-              presentation ? "text-base" : "text-sm font-medium"
+              presentation ? "text-base" : "text-xs font-medium"
             }`}
           >
-            {answer.sources.length}件の根拠を確認 →
+            {answer.sources.length}件 →
           </button>
         </div>
       </div>
@@ -457,11 +460,11 @@ function AnswerBody({
 
   return (
     <div className="space-y-3">
-      <p className="whitespace-pre-line text-[15px] leading-relaxed text-navy">
+      {sourcesBlock}
+      <p className="whitespace-pre-line text-sm leading-relaxed text-navy">
         {answer.summary}
       </p>
       {detailBlocks}
-      {sourcesBlock}
     </div>
   );
 }
@@ -493,6 +496,7 @@ export function QueryThread({
             return (
               <div
                 key={item.id}
+                data-thread-anchor="turn"
                 className="fade-in space-y-2 rounded-xl border-2 border-navy bg-navy px-5 py-5 sm:px-6 sm:py-6"
               >
                 <p className="text-xs font-bold tracking-[0.14em] text-white/70">
@@ -505,7 +509,11 @@ export function QueryThread({
             );
           }
           return (
-            <div key={item.id} className="fade-in flex justify-end">
+            <div
+              key={item.id}
+              data-thread-anchor="turn"
+              className="fade-in flex justify-end"
+            >
               <div className="max-w-[90%] rounded-lg bg-navy px-4 py-3 text-sm leading-relaxed text-white">
                 {item.text}
               </div>
@@ -515,7 +523,11 @@ export function QueryThread({
 
         if (item.kind === "searching") {
           return (
-            <div key={item.id} className="fade-in space-y-3">
+            <div
+              key={item.id}
+              data-thread-anchor="turn"
+              className="fade-in space-y-3"
+            >
               <p
                 className={
                   presentation
@@ -538,6 +550,7 @@ export function QueryThread({
           return (
             <div
               key={item.id}
+              data-thread-anchor="turn"
               className="flex items-center gap-2 text-sm text-navy-muted"
             >
               <span className="flex gap-1" aria-hidden="true">
@@ -552,7 +565,11 @@ export function QueryThread({
 
         if (item.unmatched) {
           return (
-            <div key={item.id} className="fade-in space-y-3">
+            <div
+              key={item.id}
+              data-thread-anchor="answer"
+              className="fade-in space-y-3"
+            >
               <p className="text-[11px] font-semibold tracking-[0.1em] text-navy-muted">
                 GembaShift
               </p>
@@ -581,6 +598,7 @@ export function QueryThread({
         return (
           <div
             key={item.id}
+            data-thread-anchor="answer"
             className={
               isPresentationAnswer
                 ? "fade-in space-y-4 rounded-xl border border-line bg-white px-5 py-6 sm:px-6 sm:py-7"
