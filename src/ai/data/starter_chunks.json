@@ -1,0 +1,42 @@
+[
+  {
+    "chunkId": "DOC-A:1",
+    "documentId": "DOC-A",
+    "documentName": "サンプル文書 A v1.0",
+    "version": "1.0",
+    "category": "sop",
+    "clauseId": "§1.1",
+    "page": "1",
+    "text": "§1.1 概要\nこれはテンプレート用のプレースホルダ文書です。業界デモを作るときは、この JSON を実文書のチャンクに差し替えてください。会社名・製品名・条項はすべて仮の内容です。"
+  },
+  {
+    "chunkId": "DOC-A:2",
+    "documentId": "DOC-A",
+    "documentName": "サンプル文書 A v1.0",
+    "version": "1.0",
+    "category": "sop",
+    "clauseId": "§2.1",
+    "page": "2",
+    "text": "§2.1 変更点（旧版との差分例）\n旧版では手順を任意としていました。現行版では手順の実施を必須とします。数値例: 旧 5 → 新 8。"
+  },
+  {
+    "chunkId": "DOC-B:1",
+    "documentId": "DOC-B",
+    "documentName": "サンプル改訂通知 v1.0",
+    "version": "1.0",
+    "category": "change_notice",
+    "clauseId": "§1",
+    "page": "1",
+    "text": "§1 改訂概要\n文書 A を v1.0 に改訂しました。主な変更は「任意→必須」と数値 5→8 です。適用開始日はデモ用の仮日付です。"
+  },
+  {
+    "chunkId": "DOC-C:1",
+    "documentId": "DOC-C",
+    "documentName": "サンプル確認リスト v0.9",
+    "version": "0.9",
+    "category": "checklist",
+    "clauseId": "CL-01",
+    "page": "1",
+    "text": "CL-01 確認項目\n数値は 5 のままです（旧版）。文書 A v1.0（数値 8）と矛盾するプレースホルダ例です。実デモでは現場の旧帳票を入れてください。"
+  }
+]

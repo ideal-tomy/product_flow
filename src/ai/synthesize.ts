@@ -6,7 +6,7 @@ import type {
   SpecChangeItem,
   SourceReference,
   ImpactGroup,
-} from "../data/gembashift-demo";
+} from "../data/ConformSystem-demo";
 import type { AskResult } from "../engines/types";
 import { DEFAULT_PACK_ID, getPack, type KnowledgePackId } from "../packs";
 import { chunkToSource, knowledgeChunks } from "./knowledge";
@@ -429,13 +429,15 @@ export function synthesizeAnswer(
     packId: pack.id,
   });
 
+  const synthesizer = pack.synthesizer ?? "generic";
+
   if (hits.length === 0 && intent === "general") {
     return withPackMeta(
       refuseAnswer(
-        pack.id === "standardization"
+        synthesizer === "standardization"
           ? `関連度の高い根拠が見つかりませんでした。「${pack.title}」の定義・分類・適合性評価・国際制度について質問してください。`
           : `関連度の高い根拠が見つかりませんでした。「${pack.title}」の差分・影響・再確認・矛盾・承認について質問してください。`,
-        pack.id === "standardization"
+        synthesizer === "standardization"
           ? ["標準化とは？", "社内規格とは？", "適合性評価とは？"]
           : ["何が変わった？", "影響は？", "再確認は必要？"],
         searchedDocuments,
@@ -447,14 +449,14 @@ export function synthesizeAnswer(
 
   let answer: DemoAnswer;
 
-  if (pack.id === "standardization") {
+  if (synthesizer === "standardization") {
     answer = synthesizeStandardizationAnswer(
       question,
       intent,
       pack.ai.chunks,
       hits,
     );
-  } else if (pack.id !== "tcu-480") {
+  } else if (synthesizer === "generic") {
     answer = synthesizeGenericPackAnswer(
       question,
       intent,
@@ -510,7 +512,7 @@ export function synthesizeAnswer(
     return withPackMeta(
       refuseAnswer(
         "根拠チャンクを特定できませんでした。質問を具体化するか、推奨質問から選んでください。",
-        pack.id === "standardization"
+        (pack.synthesizer ?? "generic") === "standardization"
           ? ["標準化とは？", "社内規格とは？", "適合性評価とは？"]
           : ["差分", "矛盾", "再確認", "過去事例", "承認"],
         searchedDocuments,

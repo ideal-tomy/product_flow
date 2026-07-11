@@ -1,4 +1,4 @@
-import type { SourceReference } from "../data/gembashift-demo";
+import type { SourceReference } from "../data/ConformSystem-demo";
 import type { KnowledgeChunk, RawKnowledgeChunk } from "../ai/knowledge";
 
 const HIGHLIGHT_RE =
@@ -55,7 +55,7 @@ export function adaptRawChunks(rawChunks: RawKnowledgeChunk[]): KnowledgeChunk[]
 export function chunksToDocuments(
   chunks: KnowledgeChunk[],
   categoryNote: Record<string, string>,
-): import("../data/gembashift-demo").DemoDocument[] {
+): import("../data/ConformSystem-demo").DemoDocument[] {
   const map = new Map<
     string,
     { name: string; version: string; category: string; pages: number }

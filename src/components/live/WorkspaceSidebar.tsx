@@ -2,7 +2,7 @@ import {
   scaleStats,
   sidebarDocuments,
   type DemoDocument,
-} from "../../data/gembashift-demo";
+} from "../../data/ConformSystem-demo";
 import type { QueryCatalogItem } from "../../data/query-catalog";
 import { queryCatalog } from "../../data/query-catalog";
 import { QueryCatalog } from "./QueryCatalog";

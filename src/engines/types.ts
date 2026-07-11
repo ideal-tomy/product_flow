@@ -1,4 +1,4 @@
-import type { DemoAnswer } from "../data/gembashift-demo";
+import type { DemoAnswer } from "../data/ConformSystem-demo";
 import type { ScenarioId } from "../data/question-aliases";
 import type { KnowledgePackId } from "../packs/types";
 

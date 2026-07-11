@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import type { DemoDocument } from "../../data/gembashift-demo";
+import type { DemoDocument } from "../../data/ConformSystem-demo";
 import type { KnowledgeChunk } from "../../ai/knowledge";
 
 interface KnowledgeBrowserProps {

@@ -1,5 +1,5 @@
 {
-  "name": "gembashift-demo",
+  "name": "ConformSystem-demo",
   "private": true,
   "version": "1.0.0",
   "type": "module",
@@ -7,7 +7,9 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "preview": "vite preview",
-    "chunk:std": "node scripts/chunk-standardization.mjs"
+    "chunk:std": "node scripts/chunk-standardization.mjs",
+    "new-pack": "node scripts/new-pack.mjs",
+    "prepare:template": "node scripts/prepare-template.mjs"
   },
   "dependencies": {
     "react": "^19.1.0",

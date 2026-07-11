@@ -2,24 +2,14 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type {
   DemoDocument,
   SourceReference,
-} from "../data/gembashift-demo";
+} from "../data/ConformSystem-demo";
 import {
   unmatchedSuggestions,
 } from "../data/question-aliases";
 import { sampleEngine } from "../engines";
 import type { QueryCatalogItem } from "../data/query-catalog";
-import {
-  presentationSearchSteps,
-  presentationTagline as tcuTagline,
-} from "../data/presentation-script";
-import {
-  standardizationPresentationBeats,
-  standardizationPresentationSearchSteps,
-  standardizationPresentationTagline,
-  standardizationScaleIntro,
-} from "../data/presentation-std-script";
 import { usePresentationMode } from "../hooks/usePresentationMode";
-import { getPack, usePack } from "../packs";
+import { usePack } from "../packs";
 import { enrichSourcesFromChunks } from "../packs/chunkUtils";
 import { LiveShell } from "../components/live/LiveShell";
 import {
@@ -33,9 +23,16 @@ import { PresentationOverlay } from "../components/presentation/PresentationOver
 import { SourceCue } from "../components/presentation/SourceCue";
 import { ScaleIntro } from "../components/presentation/ScaleIntro";
 import { AutoplayController } from "../components/presentation/AutoplayController";
-import { presentationBeats } from "../data/presentation-script";
-import { demoQuestions } from "../data/gembashift-demo";
 import { scrollToLatestThreadAnchor } from "../components/live/scrollToLatestAnswer";
+
+function defaultSearchSteps(docCount: number): string[] {
+  return [
+    `Scanning ${docCount} documents`,
+    "Comparing revisions",
+    "Checking contradictions",
+    "Sources found",
+  ];
+}
 
 function pickSource(
   sources: SourceReference[],
@@ -92,28 +89,23 @@ export function LiveDemoPage() {
     isNarrow,
   } = usePresentationMode();
 
-  const { pack: selectedPack, packId, setPackId } = usePack();
-  // Presentation / 動画: standardization 指定時のみそのパック、それ以外は TCU 固定
-  const pack =
-    presentation || autoplay
-      ? selectedPack.id === "standardization"
-        ? selectedPack
-        : getPack("tcu-480")
-      : selectedPack;
+  const { pack, packId, setPackId } = usePack();
   const sample = pack.sample;
-  const isStdPresentation = pack.id === "standardization";
-  const activeSearchSteps = isStdPresentation
-    ? standardizationPresentationSearchSteps
-    : presentationSearchSteps;
-  const activeTagline = isStdPresentation
-    ? standardizationPresentationTagline
-    : tcuTagline;
-  const activeBeats = isStdPresentation
-    ? standardizationPresentationBeats
-    : presentationBeats;
-  const activeAutoplayQuestions = isStdPresentation
-    ? sample.questions
-    : demoQuestions;
+  const presentationConfig = pack.presentation;
+  const activeSearchSteps =
+    presentationConfig?.searchSteps ?? defaultSearchSteps(sample.stats.documents);
+  const activeTagline =
+    presentationConfig?.tagline ?? "探す時間を、判断する時間へ。";
+  const activeBeats = presentationConfig?.beats ?? [
+    { at: 0, type: "intro" as const },
+    { at: 3, type: "clear" as const },
+    { at: 3.2, type: "ask" as const, scenarioId: sample.initialQuestionId },
+    { at: 14, type: "open-source" as const },
+    { at: 20, type: "tagline" as const },
+    { at: 24, type: "done" as const },
+  ];
+  const activeAutoplayQuestions = sample.questions;
+  const scaleIntroStats = presentationConfig?.scaleIntro;
 
   const [activeDoc, setActiveDoc] = useState<DemoDocument>(
     () =>
@@ -146,16 +138,16 @@ export function LiveDemoPage() {
   useEffect(() => {
     if (presentation || autoplay) return;
     const doc =
-      selectedPack.sample.documents.find(
-        (d) => d.id === selectedPack.sample.initialDocId,
-      ) ?? selectedPack.sample.documents[0]!;
+      pack.sample.documents.find(
+        (d) => d.id === pack.sample.initialDocId,
+      ) ?? pack.sample.documents[0]!;
     setActiveDoc(doc);
     setThread([]);
     setActiveQueryId(null);
     setInput("");
     setSourceOpen(false);
     setLoading(false);
-  }, [selectedPack, presentation, autoplay]);
+  }, [pack, presentation, autoplay]);
 
   useEffect(() => {
     if (!sourceOpen) return;
@@ -355,9 +347,7 @@ export function LiveDemoPage() {
       setSourceCueActive(false);
       setShowTagline(false);
       setShowIntro(false);
-      const bootId = isStdPresentation
-        ? sample.initialQuestionId
-        : "version-diff";
+      const bootId = sample.initialQuestionId;
       setActiveQueryId(bootId);
       const question =
         sample.questions.find((q) => q.id === bootId)?.question ??
@@ -368,7 +358,7 @@ export function LiveDemoPage() {
       }, 0);
       return () => window.clearTimeout(t);
     }
-  }, [presentation, autoplay, isStdPresentation, sample]);
+  }, [presentation, autoplay, sample]);
 
   const handleSubmit = () => runQuery(input);
 
@@ -476,14 +466,14 @@ export function LiveDemoPage() {
                 visible
                 countUpMs={timings.countUpMs}
                 stats={
-                  isStdPresentation
+                  scaleIntroStats
                     ? {
-                        eyebrow: standardizationScaleIntro.eyebrow,
-                        documents: standardizationScaleIntro.documents,
-                        pages: standardizationScaleIntro.pages,
-                        clauses: standardizationScaleIntro.clauses,
-                        pagesLabel: standardizationScaleIntro.pagesLabel,
-                        clausesLabel: standardizationScaleIntro.clausesLabel,
+                        eyebrow: scaleIntroStats.eyebrow,
+                        documents: scaleIntroStats.documents,
+                        pages: scaleIntroStats.pages,
+                        clauses: scaleIntroStats.clauses,
+                        pagesLabel: scaleIntroStats.pagesLabel,
+                        clausesLabel: scaleIntroStats.clausesLabel,
                       }
                     : undefined
                 }
@@ -514,7 +504,7 @@ export function LiveDemoPage() {
                 <p className="text-xl font-semibold tracking-tight text-navy sm:text-2xl">
                   {activeTagline}
                 </p>
-                <p className="mt-3 text-sm text-navy-muted">GembaShift</p>
+                <p className="mt-3 text-sm text-navy-muted">ConformSystem</p>
               </div>
             )}
           </div>

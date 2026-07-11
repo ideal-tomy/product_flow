@@ -123,7 +123,7 @@ export function retrieveChunks(
     if (intent === "approval" && chunk.documentId === "WI-DC-04") score += 3;
     if (intent === "approval" && chunk.category === "approval") score += 3;
 
-    if (pack.id === "standardization") {
+    if ((pack.synthesizer ?? "generic") === "standardization") {
       const q = normalize(question);
       if (
         (q.includes("社内規格") || q.includes("社内標準")) &&

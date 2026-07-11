@@ -1,12 +1,13 @@
-import type { DemoDocument, DemoQuestion } from "../data/gembashift-demo";
+import type { DemoDocument, DemoQuestion } from "../data/demo-types";
 import type { QueryCatalogItem } from "../data/query-catalog";
 import type { KnowledgeChunk } from "../ai/knowledge";
+import type { PresentationBeat } from "../data/presentation-script";
 
-export type KnowledgePackId =
-  | "work-procedure"
-  | "inspection"
-  | "tcu-480"
-  | "standardization";
+/** 登録されたパックの id（registry で検証） */
+export type KnowledgePackId = string;
+
+/** AI 回答の合成器。新規パックは generic を推奨 */
+export type PackSynthesizer = "generic" | "tcu" | "standardization";
 
 export type PackContext = {
   topic: string;
@@ -46,6 +47,23 @@ export type PackAiData = {
   initialDocId: string;
 };
 
+export type PackScaleIntro = {
+  eyebrow: string;
+  documents: number;
+  pages: number;
+  clauses: number;
+  pagesLabel?: string;
+  clausesLabel?: string;
+};
+
+/** Presentation / 自動再生用（任意） */
+export type PackPresentation = {
+  tagline: string;
+  searchSteps: string[];
+  beats: PresentationBeat[];
+  scaleIntro?: PackScaleIntro;
+};
+
 export type KnowledgePack = {
   id: KnowledgePackId;
   label: string;
@@ -55,15 +73,13 @@ export type KnowledgePack = {
   context: PackContext;
   sample: PackSampleData;
   ai: PackAiData;
+  /** 省略時は generic */
+  synthesizer?: PackSynthesizer;
+  /** OpenAI 用システムプロンプト（省略時は汎用） */
+  llmSystemPrompt?: string;
+  /** Presentation Mode 用。無い場合は Sample 統計からフォールバック */
+  presentation?: PackPresentation;
 };
 
-export const DEFAULT_PACK_ID: KnowledgePackId = "work-procedure";
-
-export function isKnowledgePackId(value: string | null | undefined): value is KnowledgePackId {
-  return (
-    value === "work-procedure" ||
-    value === "inspection" ||
-    value === "tcu-480" ||
-    value === "standardization"
-  );
-}
+/** ショーケース既定。テンプレ化後は starter に差し替わる */
+export const DEFAULT_PACK_ID: KnowledgePackId = "starter";

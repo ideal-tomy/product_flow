@@ -1,11 +1,11 @@
-import { DemoHero } from "../components/gembashift/DemoHero";
-import { ProblemSection } from "../components/gembashift/ProblemSection";
-import { DemoVideoSection } from "../components/gembashift/DemoVideoSection";
-import { InteractiveDemo } from "../components/gembashift/InteractiveDemo";
-import { BeforeAfterSection } from "../components/gembashift/BeforeAfterSection";
-import { ImpactSection } from "../components/gembashift/ImpactSection";
-import { UseCasesSection } from "../components/gembashift/UseCasesSection";
-import { DemoCTA } from "../components/gembashift/DemoCTA";
+import { DemoHero } from "../components/ConformSystem/DemoHero";
+import { ProblemSection } from "../components/ConformSystem/ProblemSection";
+import { DemoVideoSection } from "../components/ConformSystem/DemoVideoSection";
+import { InteractiveDemo } from "../components/ConformSystem/InteractiveDemo";
+import { BeforeAfterSection } from "../components/ConformSystem/BeforeAfterSection";
+import { ImpactSection } from "../components/ConformSystem/ImpactSection";
+import { UseCasesSection } from "../components/ConformSystem/UseCasesSection";
+import { DemoCTA } from "../components/ConformSystem/DemoCTA";
 
 export function LandingPage() {
   return (
@@ -13,7 +13,7 @@ export function LandingPage() {
       <header className="sticky top-0 z-40 border-b border-line/70 bg-white/85 backdrop-blur-md">
         <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-5">
           <a href="#top" className="text-[15px] font-semibold tracking-wide text-navy">
-            GembaShift
+            ConformSystem
           </a>
           <a
             href="#demo"
@@ -37,7 +37,7 @@ export function LandingPage() {
 
       <footer className="border-t border-line py-8">
         <div className="mx-auto flex max-w-6xl flex-col gap-2 px-5 text-sm text-muted sm:flex-row sm:items-center sm:justify-between">
-          <p>GembaShift — 探す時間を、判断する時間へ。</p>
+          <p>ConformSystem — 探す時間を、判断する時間へ。</p>
           <p>サンプル文書によるデモです。実案件の文書は含まれません。</p>
         </div>
       </footer>
