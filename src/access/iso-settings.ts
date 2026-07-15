@@ -11,8 +11,8 @@ import {
   setSettings,
   clearAll,
   type StudioSettings,
-} from "../vendor/ai-demo/demo-core/storage";
-import type { AiProvider } from "../vendor/ai-demo/types/access-mode";
+} from "@axeon/ai-demo-core/demo-core/storage";
+import type { AiProvider } from "@axeon/ai-demo-core/types/access-mode";
 import {
   isIsoAccessMode,
   type IsoAccessMode,

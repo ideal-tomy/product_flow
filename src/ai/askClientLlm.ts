@@ -16,7 +16,7 @@ import { DEFAULT_PACK_ID, getPack, type KnowledgePackId } from "../packs";
 import {
   estimateTokens,
   sendAiRequest,
-} from "../vendor/ai-demo/demo-core";
+} from "@axeon/ai-demo-core/demo-core";
 import type { KnowledgeChunk } from "./knowledge";
 import { buildIsoAiRequest } from "./adapters/iso-input";
 import { parseIsoAiResult } from "./adapters/iso-output";

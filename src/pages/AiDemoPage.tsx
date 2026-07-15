@@ -33,6 +33,9 @@ import {
   DEFAULT_TRIAL_PORTAL_BASE,
   ISO_DEMO_CATALOG_ID,
 } from "../access/trial-portal";
+import { ensureAiDemoCoreConfigured } from "../lib/ai-demo-core-setup";
+
+ensureAiDemoCoreConfigured();
 
 type CenterTab = "knowledge" | "answers";
 

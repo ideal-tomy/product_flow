@@ -22,16 +22,16 @@ import {
   setTrialCode,
   setUserDocumentText,
 } from "../../access/iso-settings";
-import { getProviderConfig, getEnabledProviders } from "../../vendor/ai-demo/config/provider.config";
+import { getProviderConfig, getEnabledProviders } from "@axeon/ai-demo-core/config/provider.config";
 import {
   extractDocumentText,
   DocumentIngestError,
   testConnection,
   testTrialConnection,
   evaluateKnowledge,
-} from "../../vendor/ai-demo/demo-core";
-import type { AiProvider } from "../../vendor/ai-demo/types/access-mode";
-import type { TrialPublicStatus } from "../../vendor/ai-demo/types/trial";
+} from "@axeon/ai-demo-core/demo-core";
+import type { AiProvider } from "@axeon/ai-demo-core/types/access-mode";
+import type { TrialPublicStatus } from "@axeon/ai-demo-core/types/trial";
 
 type Props = {
   open: boolean;

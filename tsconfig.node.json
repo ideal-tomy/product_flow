@@ -17,10 +17,7 @@
     "erasableSyntaxOnly": true,
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true,
-    "baseUrl": ".",
-    "paths": {
-      "@ai-demo/*": ["src/vendor/ai-demo/*"]
-    }
+    "baseUrl": "."
   },
   "include": ["vite.config.ts", "vite.gemba-api.ts"]
 }

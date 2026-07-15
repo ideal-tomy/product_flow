@@ -19,10 +19,7 @@
     "erasableSyntaxOnly": true,
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true,
-    "baseUrl": ".",
-    "paths": {
-      "@ai-demo/*": ["src/vendor/ai-demo/*"]
-    }
+    "baseUrl": "."
   },
   "include": ["src"]
 }

@@ -1,9 +1,9 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { getTrialStatusForCode } from "../../src/vendor/ai-demo/trial/gateway";
+import { getTrialStatusForCode } from "@axeon/ai-demo-core/trial/gateway";
 import {
   codeHashFromBearer,
   trialErrorPayload,
-} from "../../src/vendor/ai-demo/trial/http";
+} from "@axeon/ai-demo-core/trial/http";
 
 /**
  * Vercel Serverless: GET /api/trial/status

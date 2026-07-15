@@ -6,7 +6,7 @@
  */
 import type { AskResult } from "../engines/types";
 import { DEFAULT_PACK_ID, getPack, type KnowledgePackId } from "../packs";
-import { openaiAdapter } from "../vendor/ai-demo/providers/openai-adapter";
+import { openaiAdapter } from "@axeon/ai-demo-core/providers/openai-adapter";
 import { buildIsoAiRequest } from "./adapters/iso-input";
 import { parseIsoAiResult } from "./adapters/iso-output";
 import type { AskIntent } from "./intent";

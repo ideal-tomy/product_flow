@@ -2,7 +2,7 @@
  * ISO Input Adapter — pack + RAG hits → Core AiRequest.
  * UI / retrieve / synthesize は触らない。サーバー経路（env API key）向け。
  */
-import type { AiRequest } from "../../vendor/ai-demo/types/provider";
+import type { AiRequest } from "@axeon/ai-demo-core/types/provider";
 import { DEFAULT_PACK_ID, getPack, type KnowledgePackId } from "../../packs";
 import type { AskIntent } from "../intent";
 import type { ScoredChunk } from "../retrieve";
