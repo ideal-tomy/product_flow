@@ -24,7 +24,7 @@ type Props = {
   onModeChange: (mode: IsoAccessMode) => void;
   /** Open detail panel when credentials are needed */
   onNeedSetup: (mode: IsoAccessMode) => void;
-  /** Customer-facing Studio /trial URL (with demo + return params) */
+  /** Studio /admin/trial URL (with demo + return params) */
   trialPortalUrl?: string;
 };
 

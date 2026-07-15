@@ -1,7 +1,7 @@
 /// <reference types="vite/client" />
 
 interface ImportMetaEnv {
-  /** Customer-facing Studio trial portal (e.g. https://demo.axeon.jp/trial) */
+  /** Studio trial portal — 共通飛ばし先 /admin/trial */
   readonly VITE_TRIAL_PORTAL_URL?: string;
 }
 
