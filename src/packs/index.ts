@@ -4,6 +4,8 @@ import { inspectionPack } from "./inspection/pack";
 import { tcuPack } from "./tcu/pack";
 import { standardizationPack } from "./standardization/pack";
 import { starterPack } from "./starter/pack";
+import { minatoHrPack } from "./minato-hr/pack";
+import { minatoFactoryPack } from "./minato-factory/pack";
 
 export type { KnowledgePack, KnowledgePackId, PackContext, PackSynthesizer } from "./types";
 export { DEFAULT_PACK_ID } from "./types";
@@ -19,6 +21,8 @@ export const knowledgePacks: KnowledgePack[] = [
   inspectionPack,
   tcuPack,
   standardizationPack,
+  minatoHrPack,
+  minatoFactoryPack,
 ];
 
 export function isKnowledgePackId(

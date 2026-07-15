@@ -35,23 +35,13 @@ async function handleAsk(req: IncomingMessage, res: ServerResponse) {
   }
 
   let question = "";
-  let packId:
-    | "work-procedure"
-    | "inspection"
-    | "tcu-480"
-    | "standardization"
-    | undefined;
+  let packId: string | undefined;
   try {
     const raw = await readBody(req);
     const body = JSON.parse(raw) as { question?: string; packId?: string };
     question = body.question?.trim() ?? "";
-    if (
-      body.packId === "work-procedure" ||
-      body.packId === "inspection" ||
-      body.packId === "tcu-480" ||
-      body.packId === "standardization"
-    ) {
-      packId = body.packId;
+    if (typeof body.packId === "string" && body.packId.trim()) {
+      packId = body.packId.trim();
     }
   } catch {
     res.statusCode = 400;
