@@ -223,7 +223,7 @@ export const starterPack: KnowledgePack = {
     stats: {
       documents: new Set(chunks.map((c) => c.documentId)).size,
       chunks: chunks.length,
-      company: "（会社名を差し替え）",
+      company: "株式会社ミナトテック",
       product: "（製品・現場名を差し替え）",
     },
     initialDocId: "DOC-A",

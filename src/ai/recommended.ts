@@ -63,7 +63,7 @@ export const aiRecommendedQueries: QueryCatalogItem[] = [
   {
     id: "newbie",
     label: "TCU-480 とは？",
-    question: "東浜モビリティの TCU-480 について教えて",
+    question: "ミナトテックの TCU-480 について教えて",
     category: "share",
     hint: "会社・製品概要",
   },

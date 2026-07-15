@@ -135,7 +135,7 @@ export function detectIntent(question: string): AskIntent {
 
   if (
     n.includes("会社") ||
-    n.includes("東浜") ||
+    n.includes("ミナトテック") ||
     n.includes("tcu-480") ||
     n.includes("tcu480") ||
     n.includes("製品概要") ||

@@ -12,6 +12,14 @@
     "api/ask.ts": {
       "memory": 1024,
       "maxDuration": 60
+    },
+    "api/trial/ask.ts": {
+      "memory": 1024,
+      "maxDuration": 60
+    },
+    "api/trial/status.ts": {
+      "memory": 512,
+      "maxDuration": 15
     }
   }
 }

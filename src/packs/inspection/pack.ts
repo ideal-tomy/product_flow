@@ -367,7 +367,7 @@ export const inspectionPack: KnowledgePack = {
     "Answer in Japanese. Use ONLY the provided chunks. Cite documentName and clauseId.",
   context: {
     topic:
-      "東浜モビリティ・出荷検査場の検査手順改定（INS-出荷-03 Rev.B→Rev.C）",
+      "ミナトテック・出荷検査場の検査手順改定（INS-出荷-03 Rev.B→Rev.C）",
     sources:
       "旧/新検査手順・判定基準・不適合記録・校正記録・教育チェック・承認ゲートなど",
     actions:
@@ -401,7 +401,7 @@ export const inspectionPack: KnowledgePack = {
     stats: {
       documents: new Set(chunks.map((c) => c.documentId)).size,
       chunks: chunks.length,
-      company: "東浜モビリティシステムズ株式会社",
+      company: "株式会社ミナトテック",
       product: "出荷検査場 · INS-出荷-03",
     },
     initialDocId: "INS-NEW",

@@ -81,7 +81,7 @@ export const knowledgeStats = {
   documents: new Set(knowledgeChunks.map((c) => c.documentId)).size,
   chunks: knowledgeChunks.length,
   categories: new Set(knowledgeChunks.map((c) => c.category)).size,
-  company: "東浜モビリティシステムズ株式会社",
+  company: "株式会社ミナトテック",
   product: "TCU-480",
 };
 

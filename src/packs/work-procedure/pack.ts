@@ -373,7 +373,7 @@ export const workProcedurePack: KnowledgePack = {
     "Answer in Japanese. Use ONLY the provided chunks. Cite documentName and clauseId.",
   context: {
     topic:
-      "東浜モビリティ・組立ラインAの標準作業手順書改定（SOP-組立-07 v2.1→v3.0）",
+      "ミナトテック・組立ラインAの標準作業手順書改定（SOP-組立-07 v2.1→v3.0）",
     sources:
       "旧/新SOP・改訂通知・教育記録・ヒヤリハット・チェックリスト・承認ゲート・品質要求など",
     actions:
@@ -407,7 +407,7 @@ export const workProcedurePack: KnowledgePack = {
     stats: {
       documents: new Set(chunks.map((c) => c.documentId)).size,
       chunks: chunks.length,
-      company: "東浜モビリティシステムズ株式会社",
+      company: "株式会社ミナトテック",
       product: "組立ラインA · SOP-組立-07",
     },
     initialDocId: "SOP-NEW",

@@ -56,7 +56,7 @@ export const tcuPack: KnowledgePack = {
     "Answer in Japanese. Use ONLY the provided chunks.",
   context: {
     topic:
-      "東浜モビリティ・車載温度制御ユニット（TCU-480）の制御仕様書改訂（v3.2→v3.4）",
+      "ミナトテック・車載温度制御ユニット（TCU-480）の制御仕様書改訂（v3.2→v3.4）",
     sources:
       "制御仕様・センサー・試験・FMEA・不具合・DR・サプライヤー・監査・承認WFなど13文書",
     actions:

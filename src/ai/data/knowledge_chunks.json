@@ -2,17 +2,17 @@
   {
     "chunkId": "COMPANY-001:1",
     "documentId": "COMPANY-001",
-    "documentName": "東浜モビリティシステムズ株式会社 — 会社・製品概要",
+    "documentName": "株式会社ミナトテック — 会社・製品概要",
     "version": "1.0",
     "category": "company_profile",
     "clauseId": "会社概要",
     "page": null,
-    "text": "会社概要\n東浜モビリティシステムズ株式会社。従業員4,800名、国内6工場、海外3拠点。主要製品は車載ECU、温度制御ユニット（TCUシリーズ）、バッテリー監視ユニット、モーター制御装置。品質方針: 仕様変更時の影響範囲と根拠条項を追跡可能な状態で管理する。"
+    "text": "会社概要\n株式会社ミナトテック。従業員4,800名、国内6工場、海外3拠点。主要製品は車載ECU、温度制御ユニット（TCUシリーズ）、バッテリー監視ユニット、モーター制御装置。品質方針: 仕様変更時の影響範囲と根拠条項を追跡可能な状態で管理する。"
   },
   {
     "chunkId": "COMPANY-001:2",
     "documentId": "COMPANY-001",
-    "documentName": "東浜モビリティシステムズ株式会社 — 会社・製品概要",
+    "documentName": "株式会社ミナトテック — 会社・製品概要",
     "version": "1.0",
     "category": "company_profile",
     "clauseId": "対象製品",
@@ -22,7 +22,7 @@
   {
     "chunkId": "COMPANY-001:3",
     "documentId": "COMPANY-001",
-    "documentName": "東浜モビリティシステムズ株式会社 — 会社・製品概要",
+    "documentName": "株式会社ミナトテック — 会社・製品概要",
     "version": "1.0",
     "category": "company_profile",
     "clauseId": "今回の仕様改訂",

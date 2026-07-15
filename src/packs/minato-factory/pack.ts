@@ -306,7 +306,7 @@ export const minatoFactoryPack: KnowledgePack = {
     stats: {
       documents: new Set(chunks.map((c) => c.documentId)).size,
       chunks: chunks.length,
-      company: "株式会社ミナトテック 厚木工場",
+      company: "株式会社ミナトテック",
       product: "センサー基板 SMT / QMS",
     },
     initialDocId: "MT-SOP",

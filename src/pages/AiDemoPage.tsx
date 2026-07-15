@@ -19,8 +19,34 @@ import { QueryComposer } from "../components/live/QueryComposer";
 import { SourceDrawer } from "../components/live/SourceDrawer";
 import { KnowledgeBrowser } from "../components/live/KnowledgeBrowser";
 import { scrollToLatestThreadAnchor } from "../components/live/scrollToLatestAnswer";
+import { AccessModePanel } from "../components/access/AccessModePanel";
+import { ExperienceModeBar } from "../components/access/ExperienceModeBar";
+import {
+  getApiKey,
+  getIsoAccessMode,
+  getIsoProvider,
+  getTrialCode,
+} from "../access/iso-settings";
+import type { IsoAccessMode } from "../access/access-mode";
+import {
+  buildTrialPortalUrl,
+  DEFAULT_TRIAL_PORTAL_BASE,
+  ISO_DEMO_CATALOG_ID,
+} from "../access/trial-portal";
 
 type CenterTab = "knowledge" | "answers";
+
+function getTrialPortalHref(): string {
+  const returnUrl =
+    typeof window !== "undefined"
+      ? `${window.location.origin}/ai`
+      : undefined;
+  return buildTrialPortalUrl({
+    baseUrl: DEFAULT_TRIAL_PORTAL_BASE,
+    demoId: ISO_DEMO_CATALOG_ID,
+    returnUrl,
+  });
+}
 
 function pickSource(
   sources: SourceReference[],
@@ -81,9 +107,9 @@ export function AiDemoPage() {
     () =>
       ai.documents.find((d) => d.id === ai.initialDocId) ?? ai.documents[0]!,
   );
-  const [centerTab, setCenterTab] = useState<CenterTab>("knowledge");
+  const [centerTab, setCenterTab] = useState<CenterTab>("answers");
   const [focusClauseId, setFocusClauseId] = useState<string | null>(null);
-  const [sidebarMode, setSidebarMode] = useState<SidebarMode>("docs");
+  const [sidebarMode, setSidebarMode] = useState<SidebarMode>("queries");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [input, setInput] = useState("");
   const [thread, setThread] = useState<ThreadItem[]>([]);
@@ -99,6 +125,21 @@ export function AiDemoPage() {
   const scrollRef = useRef<HTMLDivElement>(null);
   const idRef = useRef(0);
   const packBootKey = useRef<string | null>(null);
+  const [accessOpen, setAccessOpen] = useState(false);
+  const [accessMode, setAccessMode] = useState<IsoAccessMode>(() =>
+    getIsoAccessMode(),
+  );
+  const [trialPortalHref, setTrialPortalHref] = useState(
+    () =>
+      buildTrialPortalUrl({
+        baseUrl: DEFAULT_TRIAL_PORTAL_BASE,
+        demoId: ISO_DEMO_CATALOG_ID,
+      }),
+  );
+
+  useEffect(() => {
+    setTrialPortalHref(getTrialPortalHref());
+  }, []);
 
   useEffect(() => {
     const mq = window.matchMedia("(max-width: 1023px)");
@@ -244,7 +285,7 @@ export function AiDemoPage() {
     [loading, packId, ai.recommendedQueries, searchSteps],
   );
 
-  // パック切替時はナレッジ閲覧から開始（自動質問しない）
+  // パック切替時は回答タブから開始（ナレッジは必要なときだけ）
   useEffect(() => {
     if (packBootKey.current === packId) return;
     packBootKey.current = packId;
@@ -252,8 +293,8 @@ export function AiDemoPage() {
       ai.documents.find((d) => d.id === ai.initialDocId) ?? ai.documents[0]!;
     setActiveDoc(doc);
     setFocusClauseId(null);
-    setCenterTab("knowledge");
-    setSidebarMode("docs");
+    setCenterTab("answers");
+    setSidebarMode("queries");
     setThread([]);
     setLastMeta(null);
     setSourceOpen(false);
@@ -287,6 +328,21 @@ export function AiDemoPage() {
     },
   }));
 
+  const handleModeChange = useCallback((mode: IsoAccessMode) => {
+    setAccessMode(mode);
+  }, []);
+
+  const handleNeedSetup = useCallback((_mode: IsoAccessMode) => {
+    setAccessOpen(true);
+  }, []);
+
+  const setupHint =
+    accessMode === "byok-direct" && !getApiKey(getIsoProvider()).trim()
+      ? "APIキー未設定です。「詳細設定」からキーを入力してください。"
+      : accessMode === "managed-trial" && !getTrialCode().trim()
+        ? "体験コード未設定です。「詳細設定」から入力するか、発行画面へ進んでください。"
+        : null;
+
   return (
     <LiveShell
       onOpenDocs={() => openSidebar("docs")}
@@ -315,47 +371,73 @@ export function AiDemoPage() {
         />
 
         <div className="relative flex min-w-0 flex-1 flex-col">
-          <div className="border-b border-line bg-white px-4 py-2.5 sm:px-6">
-            <div className="mx-auto max-w-3xl space-y-3 lg:max-w-4xl">
+          <div className="border-b border-line bg-white px-4 py-3 sm:px-6">
+            <div className="mx-auto max-w-3xl space-y-4 lg:max-w-4xl">
+              <ExperienceModeBar
+                mode={accessMode}
+                onModeChange={handleModeChange}
+                onNeedSetup={handleNeedSetup}
+                trialPortalUrl={trialPortalHref}
+              />
+
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div>
-                  <p className="text-xs font-bold tracking-[0.12em] text-navy">
+                  <p className="text-sm font-bold tracking-wide text-navy">
                     {ai.stats.company}
                   </p>
                   <p className="mt-0.5 text-[11px] text-muted">
                     {ai.stats.product} · 根拠がある場合のみ回答
                   </p>
                 </div>
-                <Link
-                  to={`/?pack=${packId}`}
-                  className="rounded-md border border-line px-3 py-1.5 text-xs font-semibold text-navy transition-colors hover:border-navy/40"
-                >
-                  文書に戻る
-                </Link>
-              </div>
-              <div className="flex gap-1 rounded-md border border-line bg-surface/40 p-1">
-                {(
-                  [
-                    { id: "knowledge" as const, label: "登録ナレッジ" },
-                    { id: "answers" as const, label: "回答" },
-                  ] as const
-                ).map((tab) => (
+                <div className="flex flex-wrap items-center gap-2">
                   <button
-                    key={tab.id}
                     type="button"
-                    onClick={() => setCenterTab(tab.id)}
-                    className={`flex-1 rounded px-3 py-1.5 text-sm font-semibold transition-colors ${
-                      centerTab === tab.id
-                        ? "bg-navy text-white"
-                        : "text-navy-muted hover:text-navy"
-                    }`}
+                    onClick={() => setAccessOpen(true)}
+                    className="rounded-md border border-line px-3 py-1.5 text-xs font-semibold text-navy transition-colors hover:border-navy/40"
                   >
-                    {tab.label}
-                    {tab.id === "answers" && thread.length > 0
-                      ? ` (${thread.filter((t) => t.kind === "assistant").length})`
-                      : ""}
+                    詳細設定
                   </button>
-                ))}
+                  <Link
+                    to={`/?pack=${packId}`}
+                    className="rounded-md border border-line px-3 py-1.5 text-xs font-semibold text-navy transition-colors hover:border-navy/40"
+                  >
+                    文書に戻る
+                  </Link>
+                </div>
+              </div>
+
+              {setupHint ? (
+                <p className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-950">
+                  {setupHint}
+                </p>
+              ) : null}
+
+              <div className="flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => setCenterTab("answers")}
+                  className={`rounded-lg px-4 py-2 text-sm font-bold transition-colors ${
+                    centerTab === "answers"
+                      ? "bg-navy text-white"
+                      : "bg-surface/60 text-navy-muted hover:text-navy"
+                  }`}
+                >
+                  回答
+                  {thread.length > 0
+                    ? ` (${thread.filter((t) => t.kind === "assistant").length})`
+                    : ""}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setCenterTab("knowledge")}
+                  className={`text-xs font-semibold underline-offset-2 transition-colors ${
+                    centerTab === "knowledge"
+                      ? "text-navy underline"
+                      : "text-muted hover:text-navy hover:underline"
+                  }`}
+                >
+                  登録ナレッジを確認
+                </button>
               </div>
             </div>
           </div>
@@ -379,7 +461,7 @@ export function AiDemoPage() {
                 staggerMs={160}
                 countUpMs={600}
                 wide
-                emptyHint="登録ナレッジについて質問できます"
+                emptyHint="おすすめの質問を選ぶか、下の欄から聞いてください。根拠がある内容だけ答えます。"
               />
             )}
           </div>
@@ -407,6 +489,14 @@ export function AiDemoPage() {
           onBrowseDocument={browseDocument}
         />
       </div>
+      <AccessModePanel
+        open={accessOpen}
+        onClose={() => {
+          setAccessOpen(false);
+          setAccessMode(getIsoAccessMode());
+        }}
+        trialPortalUrl={trialPortalHref}
+      />
     </LiveShell>
   );
 }
