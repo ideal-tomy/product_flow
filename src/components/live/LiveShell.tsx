@@ -91,6 +91,14 @@ export function LiveShell({
     packLabel && packTitle ? `${packLabel} · ${packTitle}` : packTitle;
 
   const [menuOpen, setMenuOpen] = useState(false);
+  const [ddReturnUrl, setDdReturnUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    const qs = new URLSearchParams(window.location.search);
+    if (qs.get("from") !== "dd") return;
+    const ret = qs.get("return");
+    if (ret) setDdReturnUrl(ret);
+  }, []);
 
   useEffect(() => {
     if (!menuOpen) return;
@@ -107,6 +115,15 @@ export function LiveShell({
     closeMenu();
     fn?.();
   };
+
+  const DdReturnLink = ddReturnUrl ? (
+    <a
+      href={ddReturnUrl}
+      className="shrink-0 rounded-md border border-line bg-white px-3 py-1.5 text-xs font-semibold text-navy transition-colors hover:border-navy/40 sm:text-sm"
+    >
+      DD画面に戻る
+    </a>
+  ) : null;
 
   return (
     <div className="relative flex h-dvh flex-col overflow-hidden bg-surface/40">
@@ -156,11 +173,14 @@ export function LiveShell({
             戻る
           </button>
         ) : (
-          <WorkspaceNav
-            isAi={isAi}
-            sampleLink={sampleLink}
-            aiLink={aiLink}
-          />
+          <div className="flex shrink-0 items-center gap-2">
+            {DdReturnLink}
+            <WorkspaceNav
+              isAi={isAi}
+              sampleLink={sampleLink}
+              aiLink={aiLink}
+            />
+          </div>
         )}
       </header>
 
@@ -179,6 +199,8 @@ export function LiveShell({
             <span className="text-navy">{headerTitle}</span>
           )}
         </div>
+
+        {DdReturnLink}
 
         {autoplay && onExitVideo && (
           <button
@@ -282,6 +304,17 @@ export function LiveShell({
                   ナレッジ
                 </Link>
               </li>
+              {ddReturnUrl ? (
+                <li>
+                  <a
+                    href={ddReturnUrl}
+                    onClick={closeMenu}
+                    className="flex min-h-12 w-full items-center px-3 text-left text-sm font-medium text-navy"
+                  >
+                    DD画面に戻る
+                  </a>
+                </li>
+              ) : null}
             </ul>
           </div>
         </div>
