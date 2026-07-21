@@ -91,3 +91,43 @@
     animation: pulseDot 1.1s ease-in-out infinite;
   }
 }
+
+.roiPaybackCta {
+  margin-top: 0.5rem;
+  padding: 14px 16px;
+  border: 1px solid var(--color-line);
+  border-radius: 12px;
+  background: #fff;
+}
+
+.roiPaybackCtaTitle {
+  margin: 0;
+  font-size: 0.88rem;
+  font-weight: 600;
+  line-height: 1.5;
+  color: var(--color-ink);
+}
+
+.roiPaybackCtaLead {
+  margin: 6px 0 12px;
+  font-size: 0.78rem;
+  line-height: 1.6;
+  color: var(--color-muted);
+}
+
+.roiPaybackCtaButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 16px;
+  border-radius: 12px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #fff;
+  background: var(--color-navy);
+  text-decoration: none;
+}
+
+.roiPaybackCtaButton:hover {
+  filter: brightness(0.95);
+}

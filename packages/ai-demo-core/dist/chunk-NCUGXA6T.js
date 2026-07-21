@@ -1,10 +1,4 @@
 import {
-  checkAndIncrementRateLimit
-} from "./chunk-YXYG6IKU.js";
-import {
-  runServerProviderRequest
-} from "./chunk-PHQIV4PL.js";
-import {
   estimateMaxCostJpy,
   releaseReservation,
   reserveSpend,
@@ -23,6 +17,12 @@ import {
   acquireConcurrencyLock,
   releaseConcurrencyLock
 } from "./chunk-XZI6ZOZX.js";
+import {
+  checkAndIncrementRateLimit
+} from "./chunk-YXYG6IKU.js";
+import {
+  runServerProviderRequest
+} from "./chunk-DHCGXNOK.js";
 import {
   getTrialDefaultModel,
   getTrialDefaultProvider
@@ -170,7 +170,8 @@ async function executeTrialAsk(codeHash, body) {
         messages: body.messages,
         maxOutputTokens: maxOut,
         responseFormat: body.responseFormat,
-        temperature: body.temperature
+        temperature: body.temperature,
+        reasoningEffort: body.reasoningEffort
       });
     } catch (providerError) {
       const norm = normalizeError(provider, providerError);
@@ -245,4 +246,4 @@ export {
   getTrialStatusForCode,
   executeTrialAsk
 };
-//# sourceMappingURL=chunk-JKVGF7QA.js.map
+//# sourceMappingURL=chunk-NCUGXA6T.js.map

@@ -32,6 +32,7 @@ import {
 } from "@axeon/ai-demo-core/demo-core";
 import type { AiProvider } from "@axeon/ai-demo-core/types/access-mode";
 import type { TrialPublicStatus } from "@axeon/ai-demo-core/types/trial";
+import { RoiPaybackCta } from "../RoiPaybackCta";
 
 type Props = {
   open: boolean;
@@ -365,6 +366,8 @@ export function AccessModePanel({ open, onClose, trialPortalUrl }: Props) {
           >
             設定をすべてクリア
           </button>
+
+          <RoiPaybackCta />
         </div>
       </div>
     </div>

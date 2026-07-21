@@ -3,29 +3,29 @@ import {
   createTrial,
   listTrials,
   revokeTrial
-} from "./chunk-AQV4HXPG.js";
+} from "./chunk-6HIKOD63.js";
 import {
   codeHashFromBearer,
   extractBearer,
   trialErrorPayload
-} from "./chunk-BXZT2CRJ.js";
+} from "./chunk-3XBFVA5A.js";
 import {
   TrialGatewayError,
   executeTrialAsk,
   getTrialStatusForCode
-} from "./chunk-JKVGF7QA.js";
-import "./chunk-YXYG6IKU.js";
-import "./chunk-PHQIV4PL.js";
+} from "./chunk-NCUGXA6T.js";
 import "./chunk-TTPM5RV3.js";
 import "./chunk-R6DXPPGN.js";
 import "./chunk-3ZYPPO5O.js";
 import "./chunk-XZI6ZOZX.js";
-import "./chunk-CDUF3WGH.js";
 import {
   generateTrialCode,
   hashTrialCode,
   shortHash
 } from "./chunk-N4UV5OCM.js";
+import "./chunk-YXYG6IKU.js";
+import "./chunk-CDUF3WGH.js";
+import "./chunk-DHCGXNOK.js";
 import {
   getTrialDefaultModel,
   getTrialDefaultProvider,
@@ -47,7 +47,7 @@ import {
   sendAiRequest,
   testConnection,
   testTrialConnection
-} from "./chunk-BLGC3MES.js";
+} from "./chunk-X4KC3VGN.js";
 import {
   calculateCost,
   connectionStatusFromError,
@@ -63,7 +63,7 @@ import {
 import {
   openaiAdapter,
   openaiConnectionTest
-} from "./chunk-D5NX4H3Q.js";
+} from "./chunk-NCMH5WC2.js";
 import {
   normalizeUsage
 } from "./chunk-XOUQUE6R.js";

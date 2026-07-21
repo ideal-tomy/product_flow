@@ -21,6 +21,7 @@ import { KnowledgeBrowser } from "../components/live/KnowledgeBrowser";
 import { scrollToLatestThreadAnchor } from "../components/live/scrollToLatestAnswer";
 import { AccessModePanel } from "../components/access/AccessModePanel";
 import { ExperienceModeBar } from "../components/access/ExperienceModeBar";
+import { RoiPaybackCta } from "../components/RoiPaybackCta";
 import {
   getApiKey,
   getIsoAccessMode,
@@ -346,6 +347,8 @@ export function AiDemoPage() {
         ? "体験コード未設定です。「詳細設定」から入力するか、発行画面へ進んでください。"
         : null;
 
+  const hasAssistantAnswer = thread.some((t) => t.kind === "assistant");
+
   return (
     <LiveShell
       onOpenDocs={() => openSidebar("docs")}
@@ -468,6 +471,8 @@ export function AiDemoPage() {
               />
             )}
           </div>
+
+          {hasAssistantAnswer && centerTab === "answers" ? <RoiPaybackCta /> : null}
 
           <QueryComposer
             value={input}
