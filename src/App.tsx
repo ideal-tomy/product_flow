@@ -14,7 +14,7 @@ export default function App() {
         <Route path="/ai" element={<AiDemoPage />} />
         <Route path="/lp" element={<LandingPage />} />
         <Route path="/manufacturing" element={<ManufacturingHubPage />} />
-        <Route path="*" element={<Navigate to="/" replace />} />
+        <Route path="*" element={<Navigate to="/manufacturing" replace />} />
       </Routes>
     </BrowserRouter>
   );

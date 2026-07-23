@@ -6,6 +6,7 @@ import type {
 import {
   unmatchedSuggestions,
 } from "../data/question-aliases";
+import { brandConfig } from "../config/brand.config";
 import { sampleEngine } from "../engines";
 import type { QueryCatalogItem } from "../data/query-catalog";
 import { usePresentationMode } from "../hooks/usePresentationMode";
@@ -554,7 +555,9 @@ export function LiveDemoPage() {
                 <p className="text-xl font-semibold tracking-tight text-navy sm:text-2xl">
                   {activeTagline}
                 </p>
-                <p className="mt-3 text-sm text-navy-muted">ConformSystem</p>
+                <p className="mt-3 text-sm text-navy-muted">
+                  {brandConfig.headerBrand}
+                </p>
               </div>
             )}
           </div>

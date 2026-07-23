@@ -1,6 +1,7 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { Link } from "react-router-dom";
 import type { KnowledgePackId } from "../../packs/types";
+import { brandConfig } from "../../config/brand.config";
 import { PackSwitcher } from "./PackSwitcher";
 
 interface LiveShellProps {
@@ -153,7 +154,7 @@ export function LiveShell({
 
         <div className="min-w-0 flex-1">
           <p className="truncate text-sm font-semibold tracking-wide text-navy">
-            ConformSystem
+            {brandConfig.headerBrand}
           </p>
           <p className="truncate text-[11px] text-muted">
             {presentation || autoplay
@@ -193,7 +194,7 @@ export function LiveShell({
       {/* —— Desktop header (lg+) —— */}
       <header className="hidden h-12 shrink-0 items-center gap-2 border-b border-line bg-white px-3 sm:gap-3 sm:px-4 lg:flex">
         <span className="text-sm font-semibold tracking-wide text-navy">
-          ConformSystem
+          {brandConfig.headerBrand}
         </span>
         <span className="hidden h-4 w-px bg-line sm:block" aria-hidden="true" />
         <div className="min-w-0 flex-1 truncate text-sm text-navy-muted">

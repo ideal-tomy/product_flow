@@ -1,12 +1,11 @@
 import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
+import { BrandMark } from "../brand/BrandMark";
 
 type Props = {
   brandSub?: string;
-  /** ヘッダー右側（ステータス・リンク） */
   headerEnd?: ReactNode;
   children: ReactNode;
-  /** メイン下の sticky 領域（聞くバー等） */
   stickyFooter?: ReactNode;
   maxWidthClass?: string;
 };
@@ -28,13 +27,9 @@ export function PlayShell({
           className={`mx-auto flex h-12 min-h-11 items-center justify-between gap-3 px-4 sm:h-14 sm:px-6 ${maxWidthClass}`}
         >
           <div className="min-w-0">
-            <p className="text-sm font-semibold tracking-tight text-navy">
-              ConformSystem
-            </p>
+            <BrandMark showProduct={!brandSub} />
             {brandSub ? (
-              <p className="hidden truncate text-[11px] text-muted sm:block">
-                {brandSub}
-              </p>
+              <p className="truncate text-[11px] text-muted">{brandSub}</p>
             ) : null}
           </div>
           <div className="flex shrink-0 items-center gap-2 sm:gap-3">

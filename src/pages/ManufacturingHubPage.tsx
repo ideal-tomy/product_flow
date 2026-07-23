@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { PlayShell } from "../components/play/PlayShell";
+import { brandConfig } from "../config/brand.config";
 import { getContactUrl } from "../lib/contactLink";
 import { getRoiSimulatorUrl } from "../lib/roiLink";
 
@@ -48,14 +49,16 @@ export function ManufacturingHubPage() {
       brandSub="製造 · 判断デモ"
       maxWidthClass="max-w-3xl"
       headerEnd={
-        <a
-          href="/lp"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex min-h-11 items-center px-1 text-xs font-medium text-navy-muted hover:text-navy"
-        >
-          製品説明
-        </a>
+        brandConfig.productInfoHref ? (
+          <a
+            href={brandConfig.productInfoHref}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex min-h-11 items-center px-1 text-xs font-medium text-navy-muted hover:text-navy"
+          >
+            {brandConfig.productInfoLabel}
+          </a>
+        ) : undefined
       }
     >
       <div>

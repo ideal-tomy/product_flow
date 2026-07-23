@@ -1,5 +1,6 @@
 import type { DemoAnswer } from "../../data/ConformSystem-demo";
 import type { SourceReference } from "../../data/ConformSystem-demo";
+import { brandConfig } from "../../config/brand.config";
 
 interface AnswerCardProps {
   answer: DemoAnswer;
@@ -39,7 +40,9 @@ export function AnswerCard({
       )}
 
       <div className="fade-in rounded-md border border-line bg-white p-4 sm:p-5">
-        <p className="text-xs font-medium tracking-wide text-success">ConformSystem</p>
+        <p className="text-xs font-medium tracking-wide text-success">
+          {brandConfig.assistantLabel}
+        </p>
         <p className="mt-2 text-[1.05rem] font-semibold leading-relaxed text-navy">
           {answer.summary}
         </p>
