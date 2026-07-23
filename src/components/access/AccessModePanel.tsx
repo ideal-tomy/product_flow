@@ -152,7 +152,7 @@ export function AccessModePanel({ open, onClose, trialPortalUrl }: Props) {
 
   return (
     <div
-      className="fixed inset-0 z-[80] flex items-start justify-end bg-black/30 p-3 sm:p-6"
+      className="fixed inset-0 z-[80] flex items-end justify-center bg-black/30 p-0 sm:items-start sm:justify-end sm:p-6"
       onClick={onClose}
       onKeyDown={(e) => {
         if (e.key === "Escape") onClose();
@@ -162,7 +162,7 @@ export function AccessModePanel({ open, onClose, trialPortalUrl }: Props) {
       <div
         role="dialog"
         aria-label="接続モード設定"
-        className="flex max-h-[92vh] w-full max-w-md flex-col overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-xl"
+        className="flex max-h-[90dvh] w-full max-w-md flex-col overflow-hidden rounded-t-xl border border-zinc-200 bg-white shadow-xl sm:max-h-[92vh] sm:rounded-xl"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between border-b border-zinc-100 px-4 py-3">

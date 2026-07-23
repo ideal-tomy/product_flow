@@ -1,13 +1,20 @@
-import { useCallback, useMemo, useState, type FormEvent } from "react";
-import { Link, Navigate, useParams } from "react-router-dom";
-import type { DemoAnswer } from "../data/demo-types";
-import { aiEngine, sampleEngine } from "../engines";
 import {
-  getPack,
-  isKnowledgePackId,
-} from "../packs";
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type FormEvent,
+} from "react";
+import { Link, Navigate, useParams } from "react-router-dom";
+import { aiEngine, sampleEngine } from "../engines";
+import { getPack, isKnowledgePackId } from "../packs";
 import { AccessModePanel } from "../components/access/AccessModePanel";
 import { UserDocUploadStrip } from "../components/access/UserDocUploadStrip";
+import { PlayAnswerCard } from "../components/play/PlayAnswerCard";
+import { PlayHeaderLink, PlayShell } from "../components/play/PlayShell";
+import { StatusChip } from "../components/play/StatusChip";
+import { StepRail } from "../components/play/StepRail";
 import { getContactUrl } from "../lib/contactLink";
 import { getRoiSimulatorUrl } from "../lib/roiLink";
 import {
@@ -15,8 +22,8 @@ import {
   getUserDocumentText,
 } from "../access/iso-settings";
 import type { IsoAccessMode } from "../access/access-mode";
+import type { DemoAnswer } from "../data/demo-types";
 
-/** サンプルで「こう聞ける」型を見せるチップ（自由記述の代わりの促し） */
 const SAMPLE_TEASER_CHIPS: Record<string, string[]> = {
   "minato-factory": [
     "合格品の中に塗装剥がれあったがどうする？",
@@ -37,60 +44,6 @@ const SAMPLE_TEASER_CHIPS: Record<string, string[]> = {
   ],
 };
 
-function AnswerBlock({ answer }: { answer: DemoAnswer }) {
-  return (
-    <div className="rounded-lg border border-line bg-white p-4 sm:p-5">
-      <p className="text-[11px] font-medium tracking-wide text-success">
-        根拠付き回答
-      </p>
-      <p className="mt-2 text-base font-semibold leading-relaxed text-navy">
-        {answer.summary}
-      </p>
-
-      {(answer.before || answer.after) && (
-        <div className="mt-4 grid gap-2 sm:grid-cols-2">
-          {answer.before && (
-            <div className="rounded-md border border-line bg-surface/50 px-3 py-2">
-              <p className="text-[11px] text-muted">
-                {answer.comparisonLabel ?? "比較"} · 一方
-              </p>
-              <p className="mt-1 text-sm text-muted line-through decoration-muted/40">
-                {answer.before}
-              </p>
-            </div>
-          )}
-          {answer.after && (
-            <div className="rounded-md border border-navy/25 bg-navy/5 px-3 py-2">
-              <p className="text-[11px] text-navy-muted">優先側</p>
-              <p className="mt-1 text-sm font-semibold text-navy">{answer.after}</p>
-            </div>
-          )}
-        </div>
-      )}
-
-      {answer.sources.length > 0 && (
-        <ul className="mt-4 space-y-2 border-t border-line pt-3">
-          {answer.sources.map((s) => (
-            <li
-              key={`${s.documentId ?? s.documentName}-${s.clauseId}-${s.page}`}
-              className="text-sm"
-            >
-              <p className="font-medium text-navy">
-                {s.documentName}
-                {s.clauseId ? ` · ${s.clauseId}` : ""}
-                {s.version ? ` · ${s.version}` : ""}
-              </p>
-              <p className="mt-0.5 text-xs leading-relaxed text-muted">
-                {s.excerpt}
-              </p>
-            </li>
-          ))}
-        </ul>
-      )}
-    </div>
-  );
-}
-
 export function ExperiencePlayerPage() {
   const { packId: packIdParam } = useParams<{ packId: string }>();
   if (!isKnowledgePackId(packIdParam)) {
@@ -98,8 +51,7 @@ export function ExperiencePlayerPage() {
   }
 
   const pack = getPack(packIdParam);
-  const tour = pack.guidedTour;
-  if (!tour) {
+  if (!pack.guidedTour) {
     return (
       <Navigate
         to={`/?pack=${encodeURIComponent(packIdParam)}&packs=1`}
@@ -115,6 +67,7 @@ function ExperiencePlayerInner({ packId }: { packId: string }) {
   const pack = getPack(packId);
   const tour = pack.guidedTour!;
   const teaserChips = SAMPLE_TEASER_CHIPS[packId] ?? [];
+  const answerRef = useRef<HTMLElement | null>(null);
 
   const [answeredIds, setAnsweredIds] = useState<Set<string>>(() => new Set());
   const [activeQuestionId, setActiveQuestionId] = useState<string | null>(null);
@@ -125,6 +78,7 @@ function ExperiencePlayerInner({ packId }: { packId: string }) {
   const [fieldText, setFieldText] = useState("");
   const [nextOpen, setNextOpen] = useState(false);
   const [accessOpen, setAccessOpen] = useState(false);
+  const [justUnlocked, setJustUnlocked] = useState(false);
   const [accessMode, setAccessMode] = useState<IsoAccessMode>(() =>
     getIsoAccessMode(),
   );
@@ -138,13 +92,20 @@ function ExperiencePlayerInner({ packId }: { packId: string }) {
   const doneCount = tour.steps.filter((s) =>
     answeredIds.has(s.questionId),
   ).length;
-  const started = doneCount > 0;
   const complete = doneCount >= tour.steps.length && tour.steps.length > 0;
-  const showField = started || complete;
   const liveEnabled =
     accessMode === "byok-direct" || accessMode === "managed-trial";
-  /** 自由記述の本回答はライブ＋自社ナレッジ投入後のみ */
   const freeAskReady = liveEnabled && userDocLen > 0;
+  const wasReady = useRef(freeAskReady);
+
+  useEffect(() => {
+    if (freeAskReady && !wasReady.current) {
+      setJustUnlocked(true);
+      const t = window.setTimeout(() => setJustUnlocked(false), 600);
+      return () => window.clearTimeout(t);
+    }
+    wasReady.current = freeAskReady;
+  }, [freeAskReady]);
 
   const refreshAccessState = useCallback(() => {
     setAccessMode(getIsoAccessMode());
@@ -152,17 +113,17 @@ function ExperiencePlayerInner({ packId }: { packId: string }) {
   }, []);
 
   const themeLine = useMemo(() => {
-    if (packId === "minato-factory") {
-      return "製造① 現場判断 — 文書に聞いて、その場で動く";
-    }
-    if (packId === "work-procedure") {
-      return "製造② 手順改定・教育 — 差分から現場適用まで";
-    }
-    if (packId === "tcu-480") {
-      return "製造③ 変更影響 — 版上げの波及を漏らさない";
-    }
+    if (packId === "minato-factory") return "製造① 現場判断";
+    if (packId === "work-procedure") return "製造② 手順改定・教育";
+    if (packId === "tcu-480") return "製造③ 変更影響";
     return pack.sample.intro.title;
   }, [packId, pack.sample.intro.title]);
+
+  const scrollToAnswer = useCallback(() => {
+    window.requestAnimationFrame(() => {
+      answerRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    });
+  }, []);
 
   const runSampleAsk = useCallback(
     async (text: string, questionId?: string) => {
@@ -189,17 +150,15 @@ function ExperiencePlayerInner({ packId }: { packId: string }) {
             return next;
           });
         }
+        scrollToAnswer();
       } catch {
-        setAnswer({
-          summary: "回答の取得に失敗しました。",
-          sources: [],
-        });
+        setAnswer({ summary: "回答の取得に失敗しました。", sources: [] });
         setRefused(true);
       } finally {
         setLoading(false);
       }
     },
-    [loading, packId],
+    [loading, packId, scrollToAnswer],
   );
 
   const runLiveAsk = useCallback(
@@ -216,6 +175,7 @@ function ExperiencePlayerInner({ packId }: { packId: string }) {
         });
         setAnswer(result.answer);
         setRefused(Boolean(result.meta.refused));
+        scrollToAnswer();
       } catch {
         setAnswer({
           summary:
@@ -227,7 +187,7 @@ function ExperiencePlayerInner({ packId }: { packId: string }) {
         setLoading(false);
       }
     },
-    [loading, packId],
+    [loading, packId, scrollToAnswer],
   );
 
   const onAskStep = (questionId: string) => {
@@ -236,20 +196,23 @@ function ExperiencePlayerInner({ packId }: { packId: string }) {
     void runSampleAsk(q.question, questionId);
   };
 
+  const openSetup = () => {
+    setNextOpen(true);
+    setAccessOpen(true);
+  };
+
   const onFieldSubmit = (e: FormEvent) => {
     e.preventDefault();
     if (!freeAskReady) {
-      setNextOpen(true);
-      setAccessOpen(true);
+      openSetup();
       return;
     }
     void runLiveAsk(fieldText);
     setFieldText("");
   };
 
-  const openLiveSetup = () => {
-    setNextOpen(true);
-    setAccessOpen(true);
+  const onLockedFieldActivate = () => {
+    if (!freeAskReady) openSetup();
   };
 
   const roiHref = getRoiSimulatorUrl();
@@ -257,306 +220,192 @@ function ExperiencePlayerInner({ packId }: { packId: string }) {
   const siblings =
     tour.siblingDemos?.filter((s) => !s.href.includes("/manufacturing")) ?? [];
 
+  const stickyFooter = (
+    <div className="fixed inset-x-0 bottom-0 z-30 border-t border-line bg-white/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-sm">
+      <form
+        onSubmit={onFieldSubmit}
+        className="mx-auto flex max-w-2xl gap-2 px-3 py-2.5 sm:px-6"
+      >
+        <input
+          type="text"
+          value={fieldText}
+          onChange={(e) => setFieldText(e.target.value)}
+          onFocus={onLockedFieldActivate}
+          onClick={onLockedFieldActivate}
+          readOnly={!freeAskReady}
+          placeholder={
+            freeAskReady
+              ? "現場の言い方のまま…"
+              : "自社の規程で聞くには接続が必要"
+          }
+          className={`min-h-11 min-w-0 flex-1 rounded-lg border px-3 text-sm text-ink placeholder:text-muted/70 focus:outline-none focus:ring-2 focus:ring-navy/20 ${
+            justUnlocked ? "fade-in border-success/40" : "border-line"
+          } ${!freeAskReady ? "cursor-pointer bg-surface/60" : "bg-white"}`}
+          disabled={loading}
+          aria-label={freeAskReady ? "自由記述" : "接続が必要です"}
+        />
+        <button
+          type="submit"
+          disabled={loading || (freeAskReady && !fieldText.trim())}
+          className="min-h-11 shrink-0 rounded-lg bg-navy px-4 text-sm font-semibold text-white hover:bg-navy-soft disabled:opacity-50"
+        >
+          {freeAskReady ? "聞く" : "接続"}
+        </button>
+      </form>
+    </div>
+  );
+
   return (
-    <div className="min-h-dvh bg-surface/40 text-ink">
-      <header className="border-b border-line bg-white">
-        <div className="mx-auto flex h-14 max-w-2xl items-center justify-between gap-3 px-4 sm:px-6">
-          <div className="min-w-0">
-            <p className="text-sm font-semibold text-navy">ConformSystem</p>
-            <p className="truncate text-[11px] text-muted">{themeLine}</p>
-          </div>
-          <Link
-            to="/manufacturing"
-            className="shrink-0 text-xs font-medium text-navy-muted hover:text-navy"
-          >
-            ハブへ戻る
-          </Link>
+    <PlayShell
+      brandSub={themeLine}
+      stickyFooter={stickyFooter}
+      headerEnd={
+        <>
+          <StatusChip live={liveEnabled} hasUserDoc={userDocLen > 0} />
+          <PlayHeaderLink to="/manufacturing">ハブ</PlayHeaderLink>
+        </>
+      }
+    >
+      <section>
+        <h1 className="text-lg font-semibold tracking-tight text-navy sm:text-xl">
+          {themeLine}
+        </h1>
+        <div className="mt-4">
+          <StepRail
+            steps={tour.steps}
+            answeredIds={answeredIds}
+            activeQuestionId={activeQuestionId}
+            loading={loading}
+            climaxStepId={tour.climaxStepId}
+            onAskStep={onAskStep}
+          />
         </div>
-      </header>
+      </section>
 
-      <main className="mx-auto max-w-2xl space-y-6 px-4 py-6 sm:px-6 sm:py-8">
-        {/* 1. ガイド */}
+      <section ref={answerRef} aria-live="polite">
+        <PlayAnswerCard
+          answer={answer}
+          loading={loading}
+          lastQuestion={lastQuestion}
+          refused={refused}
+        />
+      </section>
+
+      {teaserChips.length > 0 && (
         <section>
-          <p className="text-[11px] font-medium tracking-wide text-navy-muted">
-            サンプル体験 · {tour.roleLabel}
+          <p className="text-[11px] font-medium text-navy-muted">
+            よくある聞き方
           </p>
-          <h1 className="mt-1 text-lg font-semibold tracking-tight text-navy sm:text-xl">
-            {tour.headline}
-          </h1>
-          <p className="mt-1.5 text-sm leading-relaxed text-muted">{tour.lead}</p>
+          <div className="-mx-1 mt-2 flex gap-1.5 overflow-x-auto px-1 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            {teaserChips.map((chip) => (
+              <button
+                key={chip}
+                type="button"
+                disabled={loading}
+                onClick={() => void runSampleAsk(chip)}
+                className="shrink-0 rounded-lg border border-line bg-surface/50 px-3 py-2 text-left text-xs font-medium text-navy hover:border-navy/35 disabled:opacity-50"
+              >
+                {chip}
+              </button>
+            ))}
+          </div>
+        </section>
+      )}
 
-          <ol className="mt-4 flex flex-col gap-1.5 sm:flex-row sm:flex-wrap">
-            {tour.steps.map((step, index) => {
-              const answered = answeredIds.has(step.questionId);
-              const active = activeQuestionId === step.questionId;
-              const climax = step.id === tour.climaxStepId;
-              return (
-                <li key={step.id} className="sm:min-w-[9rem] sm:flex-1">
+      <section>
+        <button
+          type="button"
+          onClick={() => setNextOpen((v) => !v)}
+          className="flex min-h-11 w-full items-center justify-between rounded-lg border border-line bg-surface/30 px-3 text-left text-sm font-semibold text-navy hover:border-navy/25"
+        >
+          <span>接続・資料・次へ{complete ? " · ガイド完了" : ""}</span>
+          <span className="text-xs font-medium text-muted">
+            {nextOpen ? "閉じる" : "開く"}
+          </span>
+        </button>
+
+        {nextOpen && (
+          <div className="mt-2 space-y-4 rounded-lg border border-line bg-white px-3 py-3">
+            <ol className="space-y-3">
+              <li className="flex items-start gap-3">
+                <span
+                  className={`mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[11px] font-semibold ${
+                    liveEnabled
+                      ? "bg-success/20 text-success"
+                      : "bg-surface text-navy-muted"
+                  }`}
+                >
+                  {liveEnabled ? "✓" : "1"}
+                </span>
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-semibold text-navy">Connect</p>
                   <button
                     type="button"
-                    disabled={loading}
-                    onClick={() => onAskStep(step.questionId)}
-                    className={`flex w-full items-start gap-2 rounded-md border px-2.5 py-2 text-left transition-colors disabled:opacity-50 ${
-                      active
-                        ? "border-navy bg-navy text-white"
-                        : answered
-                          ? "border-success/40 bg-success/5 text-navy"
-                          : climax
-                            ? "border-danger/35 bg-danger/5 text-navy hover:border-danger/50"
-                            : "border-line bg-white text-navy hover:border-navy/30"
-                    }`}
+                    onClick={() => setAccessOpen(true)}
+                    className="mt-1.5 inline-flex min-h-10 rounded-md border border-line bg-surface/60 px-3 py-2 text-xs font-semibold text-navy hover:border-navy/40"
                   >
-                    <span
-                      className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[11px] font-semibold ${
-                        active
-                          ? "bg-white/20 text-white"
-                          : answered
-                            ? "bg-success/20 text-success"
-                            : "bg-surface text-navy-muted"
-                      }`}
-                    >
-                      {answered ? "✓" : index + 1}
-                    </span>
-                    <span className="min-w-0">
-                      <span className="block text-[11px] opacity-80">
-                        {climax && packId === "minato-factory"
-                          ? "ガイド本命"
-                          : `ステップ ${index + 1}`}
-                      </span>
-                      <span className="block text-sm font-medium leading-snug">
-                        {step.shortLabel}
-                      </span>
-                    </span>
+                    APIキー / 体験コード
                   </button>
-                </li>
-              );
-            })}
-          </ol>
-          <p className="mt-2 text-[11px] text-muted">
-            進捗 {doneCount}/{tour.steps.length}
-            {!started && " — 番号を押すとサンプル回答が出ます"}
-          </p>
-        </section>
-
-        {/* 2. 回答 */}
-        <section aria-live="polite">
-          {loading && (
-            <p className="rounded-lg border border-line bg-white px-4 py-6 text-sm text-muted">
-              文書を照合しています…
-            </p>
-          )}
-          {!loading && answer && (
-            <>
-              {lastQuestion && (
-                <p className="mb-2 text-sm text-muted">
-                  Q. {lastQuestion}
-                  {refused && (
-                    <span className="ml-2 text-xs text-danger">
-                      （回答を控えました）
-                    </span>
-                  )}
-                </p>
-              )}
-              <AnswerBlock answer={answer} />
-            </>
-          )}
-          {!loading && !answer && (
-            <p className="rounded-lg border border-dashed border-line bg-white/80 px-4 py-8 text-center text-sm text-muted">
-              上の番号を押すと、ここに回答と根拠が表示されます。
-            </p>
-          )}
-        </section>
-
-        {/* 3. 現場の言葉 — サンプル促し / ライブ＋自社で自由記述 */}
-        {showField && (
-          <section className="rounded-lg border border-navy/20 bg-white p-4 sm:p-5">
-            <p className="text-[11px] font-semibold tracking-wide text-navy">
-              {freeAskReady
-                ? "本命 · 現場の言葉で聞く"
-                : "次へ · 自社ルールで自由に聞く"}
-            </p>
-            <h2 className="mt-1 text-base font-semibold text-navy">
-              {freeAskReady
-                ? "現場の言い方のまま聞ける。根拠がある範囲だけ答えます"
-                : "自由記述は、ライブ接続＋自社ナレッジ投入のあとで使えます"}
-            </h2>
-            <p className="mt-1 text-sm leading-relaxed text-muted">
-              {freeAskReady
-                ? "いまの設定では、投入した自社資料を優先して答えます。"
-                : "いまはサンプル文書の固定回答です。下の例で「こう聞ける」感を掴み、本番は自社の規程で試してください。"}
-            </p>
-
-            {!freeAskReady && teaserChips.length > 0 && (
-              <>
-                <p className="mt-3 text-[11px] font-medium text-navy-muted">
-                  サンプルで型を見る（固定回答）
-                </p>
-                <div className="mt-1.5 flex flex-wrap gap-1.5">
-                  {teaserChips.map((chip) => (
-                    <button
-                      key={chip}
-                      type="button"
-                      disabled={loading}
-                      onClick={() => void runSampleAsk(chip)}
-                      className="rounded-md border border-line bg-surface/60 px-2.5 py-1.5 text-left text-xs font-medium text-navy hover:border-navy/35 disabled:opacity-50"
-                    >
-                      {chip}
-                    </button>
-                  ))}
                 </div>
-              </>
-            )}
-
-            {freeAskReady ? (
-              <form onSubmit={onFieldSubmit} className="mt-3 flex gap-2">
-                <input
-                  type="text"
-                  value={fieldText}
-                  onChange={(e) => setFieldText(e.target.value)}
-                  placeholder="現場の言い方のまま入力…"
-                  className="min-w-0 flex-1 rounded-md border border-line bg-white px-3 py-2 text-sm text-ink placeholder:text-muted/70 focus:border-navy/40 focus:outline-none"
-                  disabled={loading}
-                />
-                <button
-                  type="submit"
-                  disabled={loading || !fieldText.trim()}
-                  className="shrink-0 rounded-md bg-navy px-3 py-2 text-sm font-semibold text-white hover:bg-navy-soft disabled:opacity-50"
+              </li>
+              <li className="flex items-start gap-3">
+                <span
+                  className={`mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[11px] font-semibold ${
+                    userDocLen > 0
+                      ? "bg-success/20 text-success"
+                      : "bg-surface text-navy-muted"
+                  }`}
                 >
-                  聞く
-                </button>
-              </form>
-            ) : (
-              <div className="mt-4 rounded-md border border-dashed border-navy/25 bg-navy/5 px-3 py-3">
-                <p className="text-sm font-semibold text-navy">
-                  自由記述を使うには
-                </p>
-                <ol className="mt-1.5 list-decimal space-y-0.5 pl-4 text-xs leading-relaxed text-muted">
-                  <li>ライブ接続（APIキーまたは体験コード）</li>
-                  <li>自社ナレッジ（規程・SOPなど）を1ファイル投入</li>
-                </ol>
-                <button
-                  type="button"
-                  onClick={openLiveSetup}
-                  className="mt-3 inline-flex rounded-md bg-navy px-3 py-2 text-xs font-semibold text-white hover:bg-navy-soft"
-                >
-                  ライブ接続と自社資料を設定する
-                </button>
-              </div>
-            )}
-          </section>
-        )}
-
-        {/* 4. 次の一歩 */}
-        <section>
-          <button
-            type="button"
-            onClick={() => setNextOpen((v) => !v)}
-            className="flex w-full items-center justify-between rounded-md border border-line bg-white px-3 py-2.5 text-left text-sm font-semibold text-navy hover:border-navy/30"
-          >
-            <span>
-              次の一歩
-              {complete ? " · ガイド完了" : ""}
-              （ライブ・自社文書・ROI）
-            </span>
-            <span className="text-xs font-medium text-muted">
-              {nextOpen || complete ? "閉じる" : "開く"}
-            </span>
-          </button>
-
-          {(nextOpen || complete) && (
-            <div className="mt-2 space-y-3 rounded-md border border-navy/15 bg-white px-3 py-3">
-              {tour.afterTourNote && (
-                <p className="text-sm leading-relaxed text-ink">
-                  {tour.afterTourNote}
-                </p>
-              )}
-
-              <div>
-                <p className="text-xs font-semibold text-navy">ライブ接続</p>
-                <p className="mt-1 text-[11px] text-muted">
-                  いま:{" "}
-                  {accessMode === "sample"
-                    ? "サンプル（固定回答）"
-                    : accessMode}
-                  {liveEnabled && userDocLen > 0
-                    ? " · 自社ナレッジ投入済 → 自由記述OK"
-                    : liveEnabled
-                      ? " · 自社ナレッジ未投入"
-                      : ""}
-                </p>
-                <button
-                  type="button"
-                  onClick={() => setAccessOpen(true)}
-                  className="mt-2 inline-flex rounded-md border border-line bg-surface/60 px-3 py-2 text-xs font-semibold text-navy hover:border-navy/40"
-                >
-                  サンプル / APIキー / 体験コードを設定
-                </button>
-              </div>
-
-              <div>
-                <p className="text-xs font-semibold text-navy">
-                  自社のルールで試す
-                </p>
-                <p className="mt-1 text-[11px] text-muted">
-                  1ファイルを足すと、自由記述の本回答が使えるようになります。
-                </p>
-                <div className="mt-2">
-                  <UserDocUploadStrip
-                    enabled={liveEnabled}
-                    showSetupLink={false}
-                    onOpenLiveSetup={() => setAccessOpen(true)}
-                    onUserDocChange={(n) => setUserDocLen(n)}
-                  />
+                  {userDocLen > 0 ? "✓" : "2"}
+                </span>
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-semibold text-navy">Upload</p>
+                  <div className="mt-1.5">
+                    <UserDocUploadStrip
+                      enabled={liveEnabled}
+                      showSetupLink={false}
+                      onOpenLiveSetup={() => setAccessOpen(true)}
+                      onUserDocChange={(n) => setUserDocLen(n)}
+                    />
+                  </div>
                 </div>
-              </div>
+              </li>
+            </ol>
 
-              <div className="flex flex-wrap gap-2 border-t border-line pt-3">
-                {siblings.map((sib) => (
-                  <Link
-                    key={sib.href + sib.label}
-                    to={sib.href}
-                    className="inline-flex rounded-md border border-line bg-white px-3 py-2 text-xs font-semibold text-navy hover:border-navy/40"
-                  >
-                    {sib.label}
-                  </Link>
-                ))}
+            <div className="flex flex-wrap gap-2 border-t border-line pt-3">
+              {siblings.map((sib) => (
                 <Link
-                  to="/manufacturing"
-                  className="inline-flex rounded-md border border-line bg-white px-3 py-2 text-xs font-semibold text-navy hover:border-navy/40"
+                  key={sib.href + sib.label}
+                  to={sib.href}
+                  className="inline-flex min-h-10 items-center rounded-md border border-line px-3 text-xs font-semibold text-navy hover:border-navy/40"
                 >
-                  製造ハブへ
+                  {sib.label}
                 </Link>
-                {roiHref && (
-                  <a
-                    href={roiHref}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex rounded-md bg-navy px-3 py-2 text-xs font-semibold text-white hover:bg-navy-soft"
-                  >
-                    投資回収の目安
-                  </a>
-                )}
-                {contactHref && (
-                  <a
-                    href={contactHref}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex rounded-md border border-navy/30 bg-white px-3 py-2 text-xs font-semibold text-navy hover:border-navy/50"
-                  >
-                    導入を相談する
-                  </a>
-                )}
-                <Link
-                  to={`/?pack=${encodeURIComponent(packId)}&packs=1`}
-                  className="inline-flex rounded-md border border-dashed border-line px-3 py-2 text-xs text-muted hover:text-navy"
+              ))}
+              {roiHref && (
+                <a
+                  href={roiHref}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex min-h-10 items-center rounded-md bg-navy px-3 text-xs font-semibold text-white hover:bg-navy-soft"
                 >
-                  開発用シェル
-                </Link>
-              </div>
+                  投資回収
+                </a>
+              )}
+              {contactHref && (
+                <a
+                  href={contactHref}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex min-h-10 items-center rounded-md border border-navy/30 px-3 text-xs font-semibold text-navy"
+                >
+                  相談
+                </a>
+              )}
             </div>
-          )}
-        </section>
-      </main>
+          </div>
+        )}
+      </section>
 
       <AccessModePanel
         open={accessOpen}
@@ -566,6 +415,6 @@ function ExperiencePlayerInner({ packId }: { packId: string }) {
         }}
         trialPortalUrl={trialPortalHref || undefined}
       />
-    </div>
+    </PlayShell>
   );
 }
