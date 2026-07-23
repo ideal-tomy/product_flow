@@ -26,6 +26,9 @@ type Props = {
   onNeedSetup: (mode: IsoAccessMode) => void;
   /** Studio /admin/trial URL (with demo + return params) */
   trialPortalUrl?: string;
+  /** ツアー後ステップとしての見出し上書き */
+  title?: string;
+  subtitle?: string;
 };
 
 function needsSetup(mode: IsoAccessMode): boolean {
@@ -43,6 +46,8 @@ export function ExperienceModeBar({
   onModeChange,
   onNeedSetup,
   trialPortalUrl,
+  title = "体験の始め方",
+  subtitle = "まず下のどれか一つを選んでから、質問してください",
 }: Props) {
   const activePrimary =
     mode === "byok-direct" || mode === "managed-trial" || mode === "sample"
@@ -54,18 +59,16 @@ export function ExperienceModeBar({
       <div className="flex flex-wrap items-end justify-between gap-2">
         <div>
           <p className="text-[11px] font-bold tracking-[0.14em] text-navy/70">
-            体験の始め方
+            {title}
           </p>
-          <p className="mt-0.5 text-xs text-muted">
-            まず下のどれか一つを選んでから、質問してください
-          </p>
+          <p className="mt-0.5 text-xs text-muted">{subtitle}</p>
         </div>
         {trialPortalUrl ? (
           <a
             href={trialPortalUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-xs font-semibold text-teal-800 underline-offset-2 hover:underline"
+            className="text-xs font-semibold text-navy underline-offset-2 hover:underline"
           >
             体験コードを取得 →
           </a>

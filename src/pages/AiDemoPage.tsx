@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import type { DemoDocument, SourceReference } from "../data/ConformSystem-demo";
 import type { QueryCatalogItem } from "../data/query-catalog";
 import type { KnowledgeChunk } from "../ai/knowledge";
@@ -21,12 +21,15 @@ import { KnowledgeBrowser } from "../components/live/KnowledgeBrowser";
 import { scrollToLatestThreadAnchor } from "../components/live/scrollToLatestAnswer";
 import { AccessModePanel } from "../components/access/AccessModePanel";
 import { ExperienceModeBar } from "../components/access/ExperienceModeBar";
+import { UserDocUploadStrip } from "../components/access/UserDocUploadStrip";
+import { GuidedTourPanel } from "../components/live/GuidedTourPanel";
 import { RoiPaybackCta } from "../components/RoiPaybackCta";
 import {
   getApiKey,
   getIsoAccessMode,
   getIsoProvider,
   getTrialCode,
+  setIsoAccessMode,
 } from "../access/iso-settings";
 import type { IsoAccessMode } from "../access/access-mode";
 import {
@@ -94,7 +97,12 @@ function pickSource(
 
 export function AiDemoPage() {
   const { pack, packId, setPackId } = usePack();
+  const [searchParams] = useSearchParams();
   const ai = pack.ai;
+  const guidedTour = pack.guidedTour;
+  const guidedMode = Boolean(guidedTour);
+  const showPackSwitcher =
+    searchParams.get("packs") === "1" || !guidedMode;
 
   const searchSteps = useMemo(
     () =>
@@ -124,6 +132,10 @@ export function AiDemoPage() {
     null,
   );
   const [activeQueryId, setActiveQueryId] = useState<string | null>(null);
+  const [answeredQuestionIds, setAnsweredQuestionIds] = useState<Set<string>>(
+    () => new Set(),
+  );
+  const [freeInputOpen, setFreeInputOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [lastMeta, setLastMeta] = useState<AskMeta | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -144,6 +156,13 @@ export function AiDemoPage() {
   useEffect(() => {
     setTrialPortalHref(getTrialPortalHref());
   }, []);
+
+  // ガイド付きパックはサンプル先行を強制（前回BYOKが残っていても入口はサンプル）
+  useEffect(() => {
+    if (!guidedMode) return;
+    setIsoAccessMode("sample");
+    setAccessMode("sample");
+  }, [guidedMode, packId]);
 
   useEffect(() => {
     const mq = window.matchMedia("(max-width: 1023px)");
@@ -245,6 +264,16 @@ export function AiDemoPage() {
 
         setLastMeta(result.meta);
         const scenarioId = intentToScenarioId(result.meta.intent, packId);
+        const answeredId = queryId ?? scenarioId;
+        if (answeredId) {
+          setAnsweredQuestionIds((prev) => {
+            if (prev.has(answeredId)) return prev;
+            const next = new Set(prev);
+            next.add(answeredId);
+            return next;
+          });
+          setActiveQueryId(answeredId);
+        }
 
         setThread((prev) => {
           const withoutSearching = prev.filter((i) => i.id !== loadingId);
@@ -303,12 +332,23 @@ export function AiDemoPage() {
     setLastMeta(null);
     setSourceOpen(false);
     setActiveQueryId(null);
+    setAnsweredQuestionIds(new Set());
+    setFreeInputOpen(false);
     setInput("");
   }, [packId, ai]);
 
   const handlePickQuery = (item: QueryCatalogItem) => {
     setActiveQueryId(item.id);
     void runQuery(item.question, item.id);
+  };
+
+  const askGuidedStep = (questionId: string) => {
+    const fromAi = ai.recommendedQueries.find((item) => item.id === questionId);
+    const fromSample = pack.sample.questions.find((item) => item.id === questionId);
+    const question = fromAi?.question ?? fromSample?.question;
+    if (!question) return;
+    setActiveQueryId(questionId);
+    void runQuery(question, questionId);
   };
 
   const openSidebar = (mode: SidebarMode) => {
@@ -324,7 +364,17 @@ export function AiDemoPage() {
     [runQuery],
   );
 
-  const quickItems = ai.recommendedQueries.slice(0, 4).map((s) => ({
+  const guidedCatalog = useMemo(() => {
+    if (!guidedMode || !guidedTour) return ai.recommendedQueries;
+    const ordered = guidedTour.steps
+      .map((s) => ai.recommendedQueries.find((c) => c.id === s.questionId))
+      .filter((c): c is QueryCatalogItem => Boolean(c));
+    return ordered.length > 0 ? ordered : ai.recommendedQueries;
+  }, [guidedMode, guidedTour, ai.recommendedQueries]);
+
+  const quickItems = (
+    guidedMode ? guidedCatalog : ai.recommendedQueries.slice(0, 4)
+  ).map((s) => ({
     label: s.label,
     onSelect: () => {
       setActiveQueryId(s.id);
@@ -348,16 +398,27 @@ export function AiDemoPage() {
         : null;
 
   const hasAssistantAnswer = thread.some((t) => t.kind === "assistant");
+  const liveEnabled =
+    accessMode === "byok-direct" || accessMode === "managed-trial";
+  const showComposer = !guidedMode || freeInputOpen;
+
+  const packLabelForShell =
+    guidedMode && guidedTour
+      ? `製造 · ${guidedTour.roleLabel}`
+      : pack.label;
+  const packTitleForShell =
+    guidedMode && guidedTour ? "同じガイドをAIで" : pack.title;
 
   return (
     <LiveShell
       onOpenDocs={() => openSidebar("docs")}
       onOpenQueries={() => openSidebar("queries")}
       mode="ai"
-      packTitle={pack.title}
-      packLabel={pack.label}
+      packTitle={packTitleForShell}
+      packLabel={packLabelForShell}
       packId={packId}
       onPackChange={setPackId}
+      hidePackSwitcher={!showPackSwitcher}
       versionLabel={pack.sample.versionLabel}
     >
       <div className="relative flex min-h-0 flex-1">
@@ -373,52 +434,131 @@ export function AiDemoPage() {
           onCloseMobile={() => setSidebarOpen(false)}
           documents={ai.documents}
           docsStatLabel={`${ai.stats.documents}文書 · ${ai.stats.chunks}チャンク`}
-          queries={ai.recommendedQueries}
+          queries={guidedCatalog}
         />
 
         <div className="relative flex min-w-0 flex-1 flex-col">
-          <div className="border-b border-line bg-white px-4 py-3 sm:px-6">
-            <div className="mx-auto max-w-3xl space-y-4 lg:max-w-4xl">
-              <ExperienceModeBar
-                mode={accessMode}
-                onModeChange={handleModeChange}
-                onNeedSetup={handleNeedSetup}
-                trialPortalUrl={trialPortalHref}
-              />
-
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <div>
-                  <p className="text-sm font-bold tracking-wide text-navy">
-                    {ai.stats.company}
-                  </p>
-                  <p className="mt-0.5 text-[11px] text-muted">
-                    {ai.stats.product} · 根拠がある場合のみ回答
-                  </p>
+          {guidedMode && guidedTour ? (
+            <GuidedTourPanel
+              tour={guidedTour}
+              packId={packId}
+              answeredQuestionIds={answeredQuestionIds}
+              activeQuestionId={activeQueryId}
+              loading={loading}
+              onAskStep={askGuidedStep}
+              freeInputOpen={freeInputOpen}
+              onToggleFreeInput={() => setFreeInputOpen((v) => !v)}
+              variant="ai"
+              afterProgressSlot={
+                <>
+                  <ExperienceModeBar
+                    mode={accessMode}
+                    onModeChange={handleModeChange}
+                    onNeedSetup={handleNeedSetup}
+                    trialPortalUrl={trialPortalHref}
+                    title="ステップ2 · ライブ接続（任意）"
+                    subtitle="サンプルのまま続けても構いません。自社キーや体験コードで同じ質問をライブ実行できます。"
+                  />
+                  <UserDocUploadStrip
+                    enabled={liveEnabled}
+                    onOpenLiveSetup={() => setAccessOpen(true)}
+                  />
+                  <div className="flex flex-wrap items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setAccessOpen(true)}
+                      className="rounded-md border border-line px-3 py-1.5 text-xs font-semibold text-navy transition-colors hover:border-navy/40"
+                    >
+                      詳細設定
+                    </button>
+                    <Link
+                      to={`/?pack=${packId}`}
+                      className="rounded-md border border-line px-3 py-1.5 text-xs font-semibold text-navy transition-colors hover:border-navy/40"
+                    >
+                      文書サンプルに戻る
+                    </Link>
+                  </div>
+                  {setupHint ? (
+                    <p className="rounded-lg border border-danger/25 bg-danger/5 px-3 py-2 text-xs text-navy">
+                      {setupHint}
+                    </p>
+                  ) : null}
+                </>
+              }
+            />
+          ) : (
+            <div className="border-b border-line bg-white px-4 py-3 sm:px-6">
+              <div className="mx-auto max-w-3xl space-y-4 lg:max-w-4xl">
+                <ExperienceModeBar
+                  mode={accessMode}
+                  onModeChange={handleModeChange}
+                  onNeedSetup={handleNeedSetup}
+                  trialPortalUrl={trialPortalHref}
+                />
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div>
+                    <p className="text-sm font-bold tracking-wide text-navy">
+                      {ai.stats.company}
+                    </p>
+                    <p className="mt-0.5 text-[11px] text-muted">
+                      {ai.stats.product} · 根拠がある場合のみ回答
+                    </p>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setAccessOpen(true)}
+                      className="rounded-md border border-line px-3 py-1.5 text-xs font-semibold text-navy transition-colors hover:border-navy/40"
+                    >
+                      詳細設定
+                    </button>
+                    <Link
+                      to={`/?pack=${packId}`}
+                      className="rounded-md border border-line px-3 py-1.5 text-xs font-semibold text-navy transition-colors hover:border-navy/40"
+                    >
+                      文書に戻る
+                    </Link>
+                  </div>
                 </div>
-                <div className="flex flex-wrap items-center gap-2">
+                {setupHint ? (
+                  <p className="rounded-lg border border-danger/25 bg-danger/5 px-3 py-2 text-xs text-navy">
+                    {setupHint}
+                  </p>
+                ) : null}
+                <div className="flex items-center gap-3">
                   <button
                     type="button"
-                    onClick={() => setAccessOpen(true)}
-                    className="rounded-md border border-line px-3 py-1.5 text-xs font-semibold text-navy transition-colors hover:border-navy/40"
+                    onClick={() => setCenterTab("answers")}
+                    className={`rounded-lg px-4 py-2 text-sm font-bold transition-colors ${
+                      centerTab === "answers"
+                        ? "bg-navy text-white"
+                        : "bg-surface/60 text-navy-muted hover:text-navy"
+                    }`}
                   >
-                    詳細設定
+                    回答
+                    {thread.length > 0
+                      ? ` (${thread.filter((t) => t.kind === "assistant").length})`
+                      : ""}
                   </button>
-                  <Link
-                    to={`/?pack=${packId}`}
-                    className="rounded-md border border-line px-3 py-1.5 text-xs font-semibold text-navy transition-colors hover:border-navy/40"
+                  <button
+                    type="button"
+                    onClick={() => setCenterTab("knowledge")}
+                    className={`text-xs font-semibold underline-offset-2 transition-colors ${
+                      centerTab === "knowledge"
+                        ? "text-navy underline"
+                        : "text-muted hover:text-navy hover:underline"
+                    }`}
                   >
-                    文書に戻る
-                  </Link>
+                    登録ナレッジを確認
+                  </button>
                 </div>
               </div>
+            </div>
+          )}
 
-              {setupHint ? (
-                <p className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-950">
-                  {setupHint}
-                </p>
-              ) : null}
-
-              <div className="flex items-center gap-3">
+          {guidedMode ? (
+            <div className="border-b border-line bg-white px-4 py-2 sm:px-6">
+              <div className="mx-auto flex max-w-3xl items-center gap-3 lg:max-w-4xl">
                 <button
                   type="button"
                   onClick={() => setCenterTab("answers")}
@@ -446,7 +586,7 @@ export function AiDemoPage() {
                 </button>
               </div>
             </div>
-          </div>
+          ) : null}
 
           <div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto">
             {centerTab === "knowledge" ? (
@@ -462,28 +602,37 @@ export function AiDemoPage() {
                 onOpenSources={openSources}
                 onSuggest={(text) => {
                   if (loading) return;
-                  void runQuery(text);
+                  const hit = guidedCatalog.find(
+                    (c) => c.label === text || c.question === text,
+                  );
+                  void runQuery(hit?.question ?? text, hit?.id);
                 }}
                 staggerMs={160}
                 countUpMs={600}
                 wide
-                emptyHint="おすすめの質問を選ぶか、下の欄から聞いてください。根拠がある内容だけ答えます。"
+                emptyHint={
+                  guidedMode
+                    ? "上のガイド番号を押すか、自由入力を開いて質問してください。根拠がある内容だけ答えます。"
+                    : "おすすめの質問を選ぶか、下の欄から聞いてください。根拠がある内容だけ答えます。"
+                }
               />
             )}
           </div>
 
           {hasAssistantAnswer && centerTab === "answers" ? <RoiPaybackCta /> : null}
 
-          <QueryComposer
-            value={input}
-            onChange={setInput}
-            onSubmit={() => void runQuery(input)}
-            onOpenQueries={() => openSidebar("queries")}
-            disabled={loading}
-            loading={loading}
-            quickItems={quickItems}
-            prominent
-          />
+          {showComposer && (
+            <QueryComposer
+              value={input}
+              onChange={setInput}
+              onSubmit={() => void runQuery(input)}
+              onOpenQueries={() => openSidebar("queries")}
+              disabled={loading}
+              loading={loading}
+              quickItems={guidedMode ? undefined : quickItems}
+              prominent
+            />
+          )}
         </div>
 
         <SourceDrawer

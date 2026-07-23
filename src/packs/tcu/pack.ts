@@ -1,6 +1,5 @@
 import {
   demoDocuments,
-  demoIntro,
   demoQuestions,
   scaleStats,
   sidebarDocuments,
@@ -68,8 +67,8 @@ export const tcuPack: KnowledgePack = {
     sidebarDocuments,
     questions: demoQuestions as DemoQuestion[],
     intro: {
-      title: demoIntro.title,
-      subtitle: "TCU-480 · 制御仕様 v3.2 → v3.4",
+      title: "変更影響デモ — 版上げの波及を漏らさない。",
+      subtitle: "製造③ · 制御仕様 v3.2 → v3.4",
     },
     stats: { ...scaleStats },
     catalog,
@@ -103,5 +102,40 @@ export const tcuPack: KnowledgePack = {
       pagesLabel: "pages",
       clausesLabel: "clauses",
     },
+  },
+  guidedTour: {
+    roleLabel: "設計・品質向け（経営は要約）",
+    headline: "4手で、仕様変更の影響を体験する",
+    lead: "製品仕様の版変更が、どこまで波及するかを確認します。本命は「影響範囲」です。サンプルは車載制御ユニットですが、「版を上げたときの漏れ」は他製品でも同じ型です。",
+    climaxStepId: "step-impact",
+    afterTourNote:
+      "変更の影響を試験・FMEAまで含めて見られました。現場の即答は①、手順改定の落とし込みは②で体験できます。",
+    steps: [
+      {
+        id: "step-diff",
+        shortLabel: "何が変わった？",
+        questionId: "version-diff",
+      },
+      {
+        id: "step-impact",
+        shortLabel: "影響範囲は？",
+        questionId: "impact-scope",
+      },
+      {
+        id: "step-retest",
+        shortLabel: "再試験は？",
+        questionId: "retest",
+      },
+      {
+        id: "step-exec",
+        shortLabel: "経営向けに3行",
+        questionId: "exec-summary",
+      },
+    ],
+    siblingDemos: [
+      { label: "製造ハブへ", href: "/manufacturing" },
+      { label: "① 現場判断", href: "/?pack=minato-factory" },
+      { label: "② 手順改定・教育", href: "/?pack=work-procedure" },
+    ],
   },
 };

@@ -145,7 +145,13 @@ function AnswerBody({
     );
   }
 
-  if (!answer.changes && answer.before && answer.after) {
+  // 矛盾カードがあるときは版比較テーブル（v3.2/v3.4固定）を出さず、食い違いUIに任せる
+  if (
+    !answer.changes &&
+    answer.before &&
+    answer.after &&
+    !(answer.contradictions && answer.contradictions.length > 0)
+  ) {
     detailBlocks.push(
       <div key="ba" className="min-w-0">
         <div className="rounded-md border border-line bg-white px-3 py-3 lg:hidden">
@@ -306,10 +312,16 @@ function AnswerBody({
 
   if (answer.contradictions && answer.contradictions.length > 0) {
     detailBlocks.push(
-      <div key="cx" className="space-y-2">
+      <div key="cx" className="space-y-3">
+        <p className="text-xs font-semibold tracking-wide text-danger">
+          文書が食い違っています
+        </p>
         {answer.contradictions.map((c) => (
-          <div key={c.id} className="rounded-md border border-line px-3 py-3">
-            <div className="flex items-center justify-between gap-2">
+          <div
+            key={c.id}
+            className="rounded-md border border-danger/30 bg-danger/5 px-3 py-3"
+          >
+            <div className="flex flex-wrap items-center justify-between gap-2">
               <p className="text-sm font-semibold text-navy">{c.title}</p>
               <span
                 className={`rounded px-1.5 py-0.5 text-[11px] font-medium ${severityClass[c.severity]}`}
@@ -317,20 +329,34 @@ function AnswerBody({
                 重要度: {severityLabel[c.severity]}
               </span>
             </div>
-            <div className="mt-2 grid gap-1.5 text-sm sm:grid-cols-2">
-              <p className="rounded bg-surface px-2.5 py-2 text-ink">
-                <span className="block text-[11px] text-muted">
-                  {c.left.documentName} {c.left.version}
+            <div className="mt-3 grid gap-2 text-sm sm:grid-cols-2">
+              <div className="rounded-md border border-line bg-white px-2.5 py-2.5">
+                <span className="text-[10px] font-medium uppercase tracking-wide text-muted">
+                  文書A（下位になりがち）
                 </span>
-                <span className="mt-0.5 font-semibold text-navy">{c.left.value}</span>
-              </p>
-              <p className="rounded bg-surface px-2.5 py-2 text-ink">
-                <span className="block text-[11px] text-muted">
-                  {c.right.documentName} {c.right.version}
+                <span className="mt-1 block text-[11px] text-muted">
+                  {c.left.documentName} · {c.left.version}
                 </span>
-                <span className="mt-0.5 font-semibold text-navy">{c.right.value}</span>
-              </p>
+                <span className="mt-1 block text-base font-semibold text-navy line-through decoration-muted/50">
+                  {c.left.value}
+                </span>
+              </div>
+              <div className="rounded-md border border-success/35 bg-white px-2.5 py-2.5 shadow-[0_0_0_1px_rgba(15,107,76,0.08)]">
+                <span className="text-[10px] font-medium uppercase tracking-wide text-success">
+                  文書B（優先側）
+                </span>
+                <span className="mt-1 block text-[11px] text-muted">
+                  {c.right.documentName} · {c.right.version}
+                </span>
+                <span className="mt-1 block text-base font-semibold text-success">
+                  {c.right.value}
+                </span>
+              </div>
             </div>
+            <p className="mt-3 rounded-md bg-white/80 px-2.5 py-2 text-xs leading-relaxed text-ink">
+              優先順位は <strong className="text-navy">規定 &gt; 標準 &gt; 手順</strong>
+              。食い違いは品質保証部へ報告してください。
+            </p>
           </div>
         ))}
       </div>,

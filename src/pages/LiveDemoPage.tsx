@@ -24,6 +24,8 @@ import { SourceCue } from "../components/presentation/SourceCue";
 import { ScaleIntro } from "../components/presentation/ScaleIntro";
 import { AutoplayController } from "../components/presentation/AutoplayController";
 import { scrollToLatestThreadAnchor } from "../components/live/scrollToLatestAnswer";
+import { GuidedTourPanel } from "../components/live/GuidedTourPanel";
+import { useSearchParams } from "react-router-dom";
 
 function defaultSearchSteps(docCount: number): string[] {
   return [
@@ -90,7 +92,13 @@ export function LiveDemoPage() {
   } = usePresentationMode();
 
   const { pack, packId, setPackId } = usePack();
+  const [searchParams] = useSearchParams();
   const sample = pack.sample;
+  const guidedTour = pack.guidedTour;
+  const guidedMode =
+    Boolean(guidedTour) && !presentation && !autoplay;
+  const showPackSwitcher =
+    searchParams.get("packs") === "1" || !guidedMode;
   const presentationConfig = pack.presentation;
   const activeSearchSteps =
     presentationConfig?.searchSteps ?? defaultSearchSteps(sample.stats.documents);
@@ -123,6 +131,10 @@ export function LiveDemoPage() {
     null,
   );
   const [activeQueryId, setActiveQueryId] = useState<string | null>(null);
+  const [answeredQuestionIds, setAnsweredQuestionIds] = useState<Set<string>>(
+    () => new Set(),
+  );
+  const [freeInputOpen, setFreeInputOpen] = useState(false);
   const [focusActive, setFocusActive] = useState(false);
   const [sourceCueActive, setSourceCueActive] = useState(false);
   const [showIntro, setShowIntro] = useState(false);
@@ -144,6 +156,8 @@ export function LiveDemoPage() {
     setActiveDoc(doc);
     setThread([]);
     setActiveQueryId(null);
+    setAnsweredQuestionIds(new Set());
+    setFreeInputOpen(false);
     setInput("");
     setSourceOpen(false);
     setLoading(false);
@@ -294,6 +308,14 @@ export function LiveDemoPage() {
           .then((result) => {
             const matchedId = result.scenarioId ?? null;
             setActiveQueryId(matchedId);
+            if (matchedId) {
+              setAnsweredQuestionIds((prev) => {
+                if (prev.has(matchedId)) return prev;
+                const next = new Set(prev);
+                next.add(matchedId);
+                return next;
+              });
+            }
             setThread((prev) => {
               const withoutLoading = prev.filter((i) => i.id !== loadingId);
               if (!matchedId) {
@@ -367,12 +389,29 @@ export function LiveDemoPage() {
     runQuery(item.question);
   };
 
+  const askGuidedStep = (questionId: string) => {
+    const q = sample.questions.find((item) => item.id === questionId);
+    if (!q) return;
+    setActiveQueryId(questionId);
+    runQuery(q.question);
+  };
+
   const openSidebar = (mode: SidebarMode) => {
     setSidebarMode(mode);
     setSidebarOpen(true);
   };
 
-  const quickItems = sample.catalog.slice(0, 4).map((s) => ({
+  const guidedCatalog = useMemo(() => {
+    if (!guidedMode || !guidedTour) return sample.catalog;
+    const ordered = guidedTour.steps
+      .map((s) => sample.catalog.find((c) => c.id === s.questionId))
+      .filter((c): c is QueryCatalogItem => Boolean(c));
+    return ordered.length > 0 ? ordered : sample.catalog;
+  }, [guidedMode, guidedTour, sample.catalog]);
+
+  const quickItems = (
+    guidedMode ? guidedCatalog : sample.catalog.slice(0, 4)
+  ).map((s) => ({
     label: s.label,
     onSelect: () => {
       setActiveQueryId(s.id);
@@ -381,6 +420,8 @@ export function LiveDemoPage() {
   }));
 
   const hideSidebarOnDesktop = presentation;
+  const showComposer =
+    !autoplay && (!guidedMode || freeInputOpen || presentation);
 
   const exitVideo = () => setPresentation(false);
 
@@ -394,10 +435,19 @@ export function LiveDemoPage() {
       onTogglePresentation={() => setPresentation(!presentation)}
       onExitVideo={exitVideo}
       hideChrome={presentation && autoplay}
-      packTitle={pack.title}
-      packLabel={pack.label}
+      packTitle={
+        guidedMode && guidedTour
+          ? guidedTour.headline
+          : pack.title
+      }
+      packLabel={
+        guidedMode && guidedTour
+          ? `製造① · ${guidedTour.roleLabel}`
+          : pack.label
+      }
       packId={packId}
       onPackChange={setPackId}
+      hidePackSwitcher={!showPackSwitcher}
       versionLabel={sample.versionLabel}
       aiSubtitle={
         presentation
@@ -455,7 +505,7 @@ export function LiveDemoPage() {
             onCloseMobile={() => setSidebarOpen(false)}
             documents={sample.sidebarDocuments}
             docsStatLabel={`${sample.stats.documents}文書 · ${sample.stats.pages.toLocaleString()}ページ`}
-            queries={sample.catalog}
+            queries={guidedCatalog}
           />
         </div>
 
@@ -509,7 +559,20 @@ export function LiveDemoPage() {
             )}
           </div>
 
-          {!autoplay && (
+          {!autoplay && guidedMode && guidedTour && (
+            <GuidedTourPanel
+              tour={guidedTour}
+              packId={packId}
+              answeredQuestionIds={answeredQuestionIds}
+              activeQuestionId={activeQueryId}
+              loading={loading}
+              onAskStep={askGuidedStep}
+              freeInputOpen={freeInputOpen}
+              onToggleFreeInput={() => setFreeInputOpen((v) => !v)}
+            />
+          )}
+
+          {showComposer && (
             <div
               className={
                 presentation && focusActive
@@ -524,7 +587,9 @@ export function LiveDemoPage() {
                 onOpenQueries={() => openSidebar("queries")}
                 disabled={loading}
                 loading={loading}
-                quickItems={presentation ? undefined : quickItems}
+                quickItems={
+                  presentation || guidedMode ? undefined : quickItems
+                }
                 prominent={presentation}
               />
             </div>

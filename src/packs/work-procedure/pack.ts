@@ -385,8 +385,8 @@ export const workProcedurePack: KnowledgePack = {
     sidebarDocuments: documents,
     questions,
     intro: {
-      title: "作業のやり方が変わったとき、すぐ確認できます。",
-      subtitle: "SOP-組立-07 · v2.1 → v3.0",
+      title: "手順改定デモ — 現場に落ちるまで見通す。",
+      subtitle: "製造② · SOP-組立-07 · v2.1 → v3.0",
     },
     stats: {
       documents: documents.length,
@@ -411,5 +411,40 @@ export const workProcedurePack: KnowledgePack = {
       product: "組立ラインA · SOP-組立-07",
     },
     initialDocId: "SOP-NEW",
+  },
+  guidedTour: {
+    roleLabel: "管理職向け（製造・品質・教育）",
+    headline: "4手で、手順改定の落とし込みを体験する",
+    lead: "改定を出したあと、誰に効き、教育は足りるか、現場適用してよいかまで確認します。本命は「適用して大丈夫？」です。",
+    climaxStepId: "step-approval",
+    afterTourNote:
+      "改定の次に見るべきは教育完了と旧版の撤去です。現場のその場判断は①、設計変更の波及は③で体験できます。",
+    steps: [
+      {
+        id: "step-diff",
+        shortLabel: "何が変わった？",
+        questionId: "version-diff",
+      },
+      {
+        id: "step-impact",
+        shortLabel: "誰に影響？",
+        questionId: "impact-scope",
+      },
+      {
+        id: "step-retrain",
+        shortLabel: "再教育は必要？",
+        questionId: "retest",
+      },
+      {
+        id: "step-approval",
+        shortLabel: "適用して大丈夫？",
+        questionId: "approval",
+      },
+    ],
+    siblingDemos: [
+      { label: "製造ハブへ", href: "/manufacturing" },
+      { label: "① 現場判断", href: "/?pack=minato-factory" },
+      { label: "③ 変更影響", href: "/?pack=tcu-480" },
+    ],
   },
 };

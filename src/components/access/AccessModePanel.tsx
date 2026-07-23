@@ -309,11 +309,16 @@ export function AccessModePanel({ open, onClose, trialPortalUrl }: Props) {
             </div>
           )}
 
-          {(mode === "byok-direct" || mode === "managed-trial") && (
+          {(mode === "byok-direct" ||
+            mode === "managed-trial" ||
+            mode === "sample") && (
             <div className="space-y-2 rounded-lg border border-dashed border-zinc-200 p-3">
               <p className="text-xs font-medium text-zinc-800">自社の資料を追加</p>
               <p className="text-xs text-zinc-500">
                 PDF(テキスト層) / TXT / MD などを読み込み、質問時の参照に追加します。
+                {mode === "sample"
+                  ? " ライブ（APIキー／体験コード）接続時に参照されます。"
+                  : ""}
               </p>
               <input
                 type="file"

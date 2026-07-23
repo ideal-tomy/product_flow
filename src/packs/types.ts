@@ -64,6 +64,28 @@ export type PackPresentation = {
   scaleIntro?: PackScaleIntro;
 };
 
+/** 公開体験用ガイド（1デモ1テーマ）。表にパック切替を出さない入口向け */
+export type PackGuidedTourStep = {
+  id: string;
+  /** ボタン短ラベル */
+  shortLabel: string;
+  /** sample.questions / catalog の id */
+  questionId: string;
+};
+
+export type PackGuidedTour = {
+  /** 例: 現場スタッフ向け */
+  roleLabel: string;
+  headline: string;
+  lead: string;
+  steps: PackGuidedTourStep[];
+  /** クライマックス step id（視覚強調） */
+  climaxStepId?: string;
+  afterTourNote?: string;
+  /** ツアー完了後の兄弟デモ（②③など） */
+  siblingDemos?: { label: string; href: string }[];
+};
+
 export type KnowledgePack = {
   id: KnowledgePackId;
   label: string;
@@ -79,6 +101,8 @@ export type KnowledgePack = {
   llmSystemPrompt?: string;
   /** Presentation Mode 用。無い場合は Sample 統計からフォールバック */
   presentation?: PackPresentation;
+  /** 公開ガイドツアー。あるパックは Live でガイドUIを優先 */
+  guidedTour?: PackGuidedTour;
 };
 
 /** ショーケース既定。テンプレ化後は starter に差し替わる */

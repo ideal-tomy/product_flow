@@ -6,7 +6,15 @@
 - **`/?presentation=1&autoplay=1`** — 約30秒の自動再生（録画用）
 - **`/lp`** — LP（価値説明・資料用）
 
-パック切替: `/?pack=starter` / `work-procedure` / `inspection` / `tcu-480` / `standardization`
+パック切替: `/?pack=starter` / `work-procedure` / `inspection` / `tcu-480` / `standardization` / `minato-factory`
+
+公開向け製造ハブ: `/manufacturing`  
+個別: `/?pack=minato-factory`（①） / `work-procedure`（②） / `tcu-480`（③）  
+AI（ガイド＋ツアー後にライブ）: `/ai?pack=minato-factory` など  
+パックバーを出すとき: `&packs=1`  
+相談CTA: `VITE_CONTACT_URL`（未設定なら非表示）
+
+
 
 ## 開発
 

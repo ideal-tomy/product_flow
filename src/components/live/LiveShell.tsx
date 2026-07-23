@@ -17,6 +17,8 @@ interface LiveShellProps {
   packLabel?: string;
   packId?: KnowledgePackId;
   onPackChange?: (id: KnowledgePackId) => void;
+  /** true のときパック切替バーを出さない（公開ガイド入口） */
+  hidePackSwitcher?: boolean;
   versionLabel?: string;
   aiSubtitle?: string;
   children: ReactNode;
@@ -76,13 +78,17 @@ export function LiveShell({
   packLabel,
   packId,
   onPackChange,
+  hidePackSwitcher = false,
   versionLabel,
   aiSubtitle,
   children,
 }: LiveShellProps) {
   const isAi = mode === "ai";
   const showPackSwitcher =
-    Boolean(packId && onPackChange) && !presentation && !autoplay;
+    Boolean(packId && onPackChange) &&
+    !hidePackSwitcher &&
+    !presentation &&
+    !autoplay;
 
   const sampleLink = packId ? `/?pack=${packId}` : "/";
   const aiLink = packId ? `/ai?pack=${packId}` : "/ai";

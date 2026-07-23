@@ -284,8 +284,8 @@ export const minatoFactoryPack: KnowledgePack = {
     sidebarDocuments: documents,
     questions,
     intro: {
-      title: "現場の文書に、そのまま質問できます。",
-      subtitle: "株式会社ミナトテック · 厚木工場セット",
+      title: "現場判断デモ — 文書に聞いて、その場で動く。",
+      subtitle: "株式会社ミナトテック · 厚木工場 · 製造①",
     },
     stats: {
       documents: documents.length,
@@ -337,5 +337,54 @@ export const minatoFactoryPack: KnowledgePack = {
       pagesLabel: "pages",
       clausesLabel: "clauses",
     },
+  },
+  guidedTour: {
+    roleLabel: "現場スタッフ向け",
+    headline: "5手で、現場の判断を体験する",
+    lead: "サンプル文書への質問です。番号順に押すだけで進められます。本命は「保持時間が食い違うとき」です。",
+    climaxStepId: "step-hold",
+    afterTourNote:
+      "版が食い違ったとき、優先ルールと報告先まで答えられました。同じ型で、改定の落とし込み（②）や設計変更の影響（③）も体験できます。",
+    steps: [
+      {
+        id: "step-peak",
+        shortLabel: "ピーク温度は？",
+        questionId: "reflow-peak",
+      },
+      {
+        id: "step-nc",
+        shortLabel: "不良を見つけたら",
+        questionId: "nc-handling",
+      },
+      {
+        id: "step-qcqa",
+        shortLabel: "QCとQAどっち？",
+        questionId: "qc-vs-qa",
+      },
+      {
+        id: "step-hold",
+        shortLabel: "保持時間のどっち？",
+        questionId: "hold-time-conflict",
+      },
+      {
+        id: "step-cal",
+        shortLabel: "校正切れを使った",
+        questionId: "calibration-expire",
+      },
+    ],
+    siblingDemos: [
+      {
+        label: "製造ハブへ",
+        href: "/manufacturing",
+      },
+      {
+        label: "② 手順改定・教育",
+        href: "/?pack=work-procedure",
+      },
+      {
+        label: "③ 変更影響",
+        href: "/?pack=tcu-480",
+      },
+    ],
   },
 };
