@@ -1,7 +1,7 @@
 import { useCallback, useMemo, useState, type FormEvent } from "react";
 import { Link, Navigate, useParams } from "react-router-dom";
 import type { DemoAnswer } from "../data/demo-types";
-import { aiEngine } from "../engines";
+import { aiEngine, sampleEngine } from "../engines";
 import {
   getPack,
   isKnowledgePackId,
@@ -12,10 +12,12 @@ import { getContactUrl } from "../lib/contactLink";
 import { getRoiSimulatorUrl } from "../lib/roiLink";
 import {
   getIsoAccessMode,
+  getUserDocumentText,
 } from "../access/iso-settings";
 import type { IsoAccessMode } from "../access/access-mode";
 
-const FIELD_CHIPS: Record<string, string[]> = {
+/** サンプルで「こう聞ける」型を見せるチップ（自由記述の代わりの促し） */
+const SAMPLE_TEASER_CHIPS: Record<string, string[]> = {
   "minato-factory": [
     "合格品の中に塗装剥がれあったがどうする？",
     "自分でヤスリかけて直していい？",
@@ -112,7 +114,7 @@ export function ExperiencePlayerPage() {
 function ExperiencePlayerInner({ packId }: { packId: string }) {
   const pack = getPack(packId);
   const tour = pack.guidedTour!;
-  const chips = FIELD_CHIPS[packId] ?? [];
+  const teaserChips = SAMPLE_TEASER_CHIPS[packId] ?? [];
 
   const [answeredIds, setAnsweredIds] = useState<Set<string>>(() => new Set());
   const [activeQuestionId, setActiveQuestionId] = useState<string | null>(null);
@@ -126,6 +128,9 @@ function ExperiencePlayerInner({ packId }: { packId: string }) {
   const [accessMode, setAccessMode] = useState<IsoAccessMode>(() =>
     getIsoAccessMode(),
   );
+  const [userDocLen, setUserDocLen] = useState(
+    () => getUserDocumentText().trim().length,
+  );
   const [trialPortalHref] = useState(
     () => import.meta.env.VITE_TRIAL_PORTAL_URL?.trim() ?? "",
   );
@@ -138,6 +143,13 @@ function ExperiencePlayerInner({ packId }: { packId: string }) {
   const showField = started || complete;
   const liveEnabled =
     accessMode === "byok-direct" || accessMode === "managed-trial";
+  /** 自由記述の本回答はライブ＋自社ナレッジ投入後のみ */
+  const freeAskReady = liveEnabled && userDocLen > 0;
+
+  const refreshAccessState = useCallback(() => {
+    setAccessMode(getIsoAccessMode());
+    setUserDocLen(getUserDocumentText().trim().length);
+  }, []);
 
   const themeLine = useMemo(() => {
     if (packId === "minato-factory") {
@@ -152,7 +164,7 @@ function ExperiencePlayerInner({ packId }: { packId: string }) {
     return pack.sample.intro.title;
   }, [packId, pack.sample.intro.title]);
 
-  const runAsk = useCallback(
+  const runSampleAsk = useCallback(
     async (text: string, questionId?: string) => {
       const trimmed = text.trim();
       if (!trimmed || loading) return;
@@ -160,9 +172,9 @@ function ExperiencePlayerInner({ packId }: { packId: string }) {
       setLastQuestion(trimmed);
       if (questionId) setActiveQuestionId(questionId);
       try {
-        const result = await aiEngine.ask({
+        const result = await sampleEngine.ask({
           question: trimmed,
-          mode: "ai",
+          mode: "sample",
           packId,
         });
         setAnswer(result.answer);
@@ -177,6 +189,33 @@ function ExperiencePlayerInner({ packId }: { packId: string }) {
             return next;
           });
         }
+      } catch {
+        setAnswer({
+          summary: "回答の取得に失敗しました。",
+          sources: [],
+        });
+        setRefused(true);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [loading, packId],
+  );
+
+  const runLiveAsk = useCallback(
+    async (text: string) => {
+      const trimmed = text.trim();
+      if (!trimmed || loading) return;
+      setLoading(true);
+      setLastQuestion(trimmed);
+      try {
+        const result = await aiEngine.ask({
+          question: trimmed,
+          mode: "ai",
+          packId,
+        });
+        setAnswer(result.answer);
+        setRefused(Boolean(result.meta.refused));
       } catch {
         setAnswer({
           summary:
@@ -194,13 +233,23 @@ function ExperiencePlayerInner({ packId }: { packId: string }) {
   const onAskStep = (questionId: string) => {
     const q = pack.sample.questions.find((item) => item.id === questionId);
     if (!q) return;
-    void runAsk(q.question, questionId);
+    void runSampleAsk(q.question, questionId);
   };
 
   const onFieldSubmit = (e: FormEvent) => {
     e.preventDefault();
-    void runAsk(fieldText);
+    if (!freeAskReady) {
+      setNextOpen(true);
+      setAccessOpen(true);
+      return;
+    }
+    void runLiveAsk(fieldText);
     setFieldText("");
+  };
+
+  const openLiveSetup = () => {
+    setNextOpen(true);
+    setAccessOpen(true);
   };
 
   const roiHref = getRoiSimulatorUrl();
@@ -229,7 +278,7 @@ function ExperiencePlayerInner({ packId }: { packId: string }) {
         {/* 1. ガイド */}
         <section>
           <p className="text-[11px] font-medium tracking-wide text-navy-muted">
-            体験の始め方 · {tour.roleLabel}
+            サンプル体験 · {tour.roleLabel}
           </p>
           <h1 className="mt-1 text-lg font-semibold tracking-tight text-navy sm:text-xl">
             {tour.headline}
@@ -285,7 +334,7 @@ function ExperiencePlayerInner({ packId }: { packId: string }) {
           </ol>
           <p className="mt-2 text-[11px] text-muted">
             進捗 {doneCount}/{tour.steps.length}
-            {!started && " — 番号を押すと回答が出ます"}
+            {!started && " — 番号を押すとサンプル回答が出ます"}
           </p>
         </section>
 
@@ -302,7 +351,9 @@ function ExperiencePlayerInner({ packId }: { packId: string }) {
                 <p className="mb-2 text-sm text-muted">
                   Q. {lastQuestion}
                   {refused && (
-                    <span className="ml-2 text-xs text-danger">（回答を控えました）</span>
+                    <span className="ml-2 text-xs text-danger">
+                      （回答を控えました）
+                    </span>
                   )}
                 </p>
               )}
@@ -316,50 +367,82 @@ function ExperiencePlayerInner({ packId }: { packId: string }) {
           )}
         </section>
 
-        {/* 3. 現場の言葉で聞く */}
+        {/* 3. 現場の言葉 — サンプル促し / ライブ＋自社で自由記述 */}
         {showField && (
           <section className="rounded-lg border border-navy/20 bg-white p-4 sm:p-5">
             <p className="text-[11px] font-semibold tracking-wide text-navy">
-              本命 · 現場の言葉で聞く
+              {freeAskReady
+                ? "本命 · 現場の言葉で聞く"
+                : "次へ · 自社ルールで自由に聞く"}
             </p>
             <h2 className="mt-1 text-base font-semibold text-navy">
-              現場の言い方のまま聞ける。根拠がある範囲だけ答えます
+              {freeAskReady
+                ? "現場の言い方のまま聞ける。根拠がある範囲だけ答えます"
+                : "自由記述は、ライブ接続＋自社ナレッジ投入のあとで使えます"}
             </h2>
             <p className="mt-1 text-sm leading-relaxed text-muted">
-              社内ボットのように、俗語や短い一言でも規程の意図に写して答えます。
+              {freeAskReady
+                ? "いまの設定では、投入した自社資料を優先して答えます。"
+                : "いまはサンプル文書の固定回答です。下の例で「こう聞ける」感を掴み、本番は自社の規程で試してください。"}
             </p>
-            {chips.length > 0 && (
-              <div className="mt-3 flex flex-wrap gap-1.5">
-                {chips.map((chip) => (
-                  <button
-                    key={chip}
-                    type="button"
-                    disabled={loading}
-                    onClick={() => void runAsk(chip)}
-                    className="rounded-md border border-line bg-surface/60 px-2.5 py-1.5 text-left text-xs font-medium text-navy hover:border-navy/35 disabled:opacity-50"
-                  >
-                    {chip}
-                  </button>
-                ))}
+
+            {!freeAskReady && teaserChips.length > 0 && (
+              <>
+                <p className="mt-3 text-[11px] font-medium text-navy-muted">
+                  サンプルで型を見る（固定回答）
+                </p>
+                <div className="mt-1.5 flex flex-wrap gap-1.5">
+                  {teaserChips.map((chip) => (
+                    <button
+                      key={chip}
+                      type="button"
+                      disabled={loading}
+                      onClick={() => void runSampleAsk(chip)}
+                      className="rounded-md border border-line bg-surface/60 px-2.5 py-1.5 text-left text-xs font-medium text-navy hover:border-navy/35 disabled:opacity-50"
+                    >
+                      {chip}
+                    </button>
+                  ))}
+                </div>
+              </>
+            )}
+
+            {freeAskReady ? (
+              <form onSubmit={onFieldSubmit} className="mt-3 flex gap-2">
+                <input
+                  type="text"
+                  value={fieldText}
+                  onChange={(e) => setFieldText(e.target.value)}
+                  placeholder="現場の言い方のまま入力…"
+                  className="min-w-0 flex-1 rounded-md border border-line bg-white px-3 py-2 text-sm text-ink placeholder:text-muted/70 focus:border-navy/40 focus:outline-none"
+                  disabled={loading}
+                />
+                <button
+                  type="submit"
+                  disabled={loading || !fieldText.trim()}
+                  className="shrink-0 rounded-md bg-navy px-3 py-2 text-sm font-semibold text-white hover:bg-navy-soft disabled:opacity-50"
+                >
+                  聞く
+                </button>
+              </form>
+            ) : (
+              <div className="mt-4 rounded-md border border-dashed border-navy/25 bg-navy/5 px-3 py-3">
+                <p className="text-sm font-semibold text-navy">
+                  自由記述を使うには
+                </p>
+                <ol className="mt-1.5 list-decimal space-y-0.5 pl-4 text-xs leading-relaxed text-muted">
+                  <li>ライブ接続（APIキーまたは体験コード）</li>
+                  <li>自社ナレッジ（規程・SOPなど）を1ファイル投入</li>
+                </ol>
+                <button
+                  type="button"
+                  onClick={openLiveSetup}
+                  className="mt-3 inline-flex rounded-md bg-navy px-3 py-2 text-xs font-semibold text-white hover:bg-navy-soft"
+                >
+                  ライブ接続と自社資料を設定する
+                </button>
               </div>
             )}
-            <form onSubmit={onFieldSubmit} className="mt-3 flex gap-2">
-              <input
-                type="text"
-                value={fieldText}
-                onChange={(e) => setFieldText(e.target.value)}
-                placeholder="例: 合格品に塗装剥がれあったがどうする？"
-                className="min-w-0 flex-1 rounded-md border border-line bg-white px-3 py-2 text-sm text-ink placeholder:text-muted/70 focus:border-navy/40 focus:outline-none"
-                disabled={loading}
-              />
-              <button
-                type="submit"
-                disabled={loading || !fieldText.trim()}
-                className="shrink-0 rounded-md bg-navy px-3 py-2 text-sm font-semibold text-white hover:bg-navy-soft disabled:opacity-50"
-              >
-                聞く
-              </button>
-            </form>
           </section>
         )}
 
@@ -391,7 +474,15 @@ function ExperiencePlayerInner({ packId }: { packId: string }) {
               <div>
                 <p className="text-xs font-semibold text-navy">ライブ接続</p>
                 <p className="mt-1 text-[11px] text-muted">
-                  いま: {accessMode === "sample" ? "サンプル（固定回答）" : accessMode}
+                  いま:{" "}
+                  {accessMode === "sample"
+                    ? "サンプル（固定回答）"
+                    : accessMode}
+                  {liveEnabled && userDocLen > 0
+                    ? " · 自社ナレッジ投入済 → 自由記述OK"
+                    : liveEnabled
+                      ? " · 自社ナレッジ未投入"
+                      : ""}
                 </p>
                 <button
                   type="button"
@@ -407,12 +498,14 @@ function ExperiencePlayerInner({ packId }: { packId: string }) {
                   自社のルールで試す
                 </p>
                 <p className="mt-1 text-[11px] text-muted">
-                  1ファイルを足すと、以降のライブ回答で優先参照します。
+                  1ファイルを足すと、自由記述の本回答が使えるようになります。
                 </p>
                 <div className="mt-2">
                   <UserDocUploadStrip
                     enabled={liveEnabled}
+                    showSetupLink={false}
                     onOpenLiveSetup={() => setAccessOpen(true)}
+                    onUserDocChange={(n) => setUserDocLen(n)}
                   />
                 </div>
               </div>
@@ -469,7 +562,7 @@ function ExperiencePlayerInner({ packId }: { packId: string }) {
         open={accessOpen}
         onClose={() => {
           setAccessOpen(false);
-          setAccessMode(getIsoAccessMode());
+          refreshAccessState();
         }}
         trialPortalUrl={trialPortalHref || undefined}
       />
