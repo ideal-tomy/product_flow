@@ -1,3 +1,5 @@
+import { brandId } from "../config/brand.config";
+
 const ROI_PARAMS = {
   kit: "chatbot",
   industry: "manufacturing",
@@ -12,5 +14,9 @@ export function getRoiSimulatorUrl(): string | null {
 
   const origin = raw.replace(/\/+$/, "");
   const q = new URLSearchParams(ROI_PARAMS);
+  // roi-simulator は brand 省略時 axeon。ideal デモだけ明示する
+  if (brandId === "ideal") {
+    q.set("brand", "ideal");
+  }
   return `${origin}/?${q.toString()}`;
 }

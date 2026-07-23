@@ -10,6 +10,7 @@ import { Link, Navigate, useParams } from "react-router-dom";
 import { aiEngine, sampleEngine } from "../engines";
 import { getPack, isKnowledgePackId } from "../packs";
 import { AccessModePanel } from "../components/access/AccessModePanel";
+import { UploadPrivacyModal } from "../components/access/UploadPrivacyModal";
 import { UserDocUploadStrip } from "../components/access/UserDocUploadStrip";
 import { PlayAnswerCard } from "../components/play/PlayAnswerCard";
 import { PlayHeaderLink, PlayShell } from "../components/play/PlayShell";
@@ -78,6 +79,7 @@ function ExperiencePlayerInner({ packId }: { packId: string }) {
   const [fieldText, setFieldText] = useState("");
   const [nextOpen, setNextOpen] = useState(false);
   const [accessOpen, setAccessOpen] = useState(false);
+  const [privacyOpen, setPrivacyOpen] = useState(false);
   const [justUnlocked, setJustUnlocked] = useState(false);
   const [accessMode, setAccessMode] = useState<IsoAccessMode>(() =>
     getIsoAccessMode(),
@@ -339,13 +341,22 @@ function ExperiencePlayerInner({ packId }: { packId: string }) {
                 </span>
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-semibold text-navy">Connect</p>
-                  <button
-                    type="button"
-                    onClick={() => setAccessOpen(true)}
-                    className="mt-1.5 inline-flex min-h-10 rounded-md border border-line bg-surface/60 px-3 py-2 text-xs font-semibold text-navy hover:border-navy/40"
-                  >
-                    APIキー / 体験コード
-                  </button>
+                  <div className="mt-1.5 flex flex-wrap items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setAccessOpen(true)}
+                      className="inline-flex min-h-10 rounded-md border border-line bg-surface/60 px-3 py-2 text-xs font-semibold text-navy hover:border-navy/40"
+                    >
+                      APIキー / 体験コード
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setPrivacyOpen(true)}
+                      className="inline-flex min-h-10 rounded-md px-2 py-2 text-xs font-medium text-muted underline-offset-2 hover:text-navy hover:underline"
+                    >
+                      投稿情報について
+                    </button>
+                  </div>
                 </div>
               </li>
               <li className="flex items-start gap-3">
@@ -372,36 +383,40 @@ function ExperiencePlayerInner({ packId }: { packId: string }) {
               </li>
             </ol>
 
-            <div className="flex flex-wrap gap-2 border-t border-line pt-3">
-              {siblings.map((sib) => (
-                <Link
-                  key={sib.href + sib.label}
-                  to={sib.href}
-                  className="inline-flex min-h-10 items-center rounded-md border border-line px-3 text-xs font-semibold text-navy hover:border-navy/40"
-                >
-                  {sib.label}
-                </Link>
-              ))}
-              {roiHref && (
-                <a
-                  href={roiHref}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex min-h-10 items-center rounded-md bg-navy px-3 text-xs font-semibold text-white hover:bg-navy-soft"
-                >
-                  投資回収
-                </a>
-              )}
-              {contactHref && (
-                <a
-                  href={contactHref}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex min-h-10 items-center rounded-md border border-navy/30 px-3 text-xs font-semibold text-navy"
-                >
-                  相談
-                </a>
-              )}
+            <div className="flex flex-wrap items-center gap-2 border-t border-line pt-3">
+              <div className="flex flex-wrap gap-2">
+                {siblings.map((sib) => (
+                  <Link
+                    key={sib.href + sib.label}
+                    to={sib.href}
+                    className="inline-flex min-h-10 items-center rounded-md border border-line px-3 text-xs font-semibold text-navy hover:border-navy/40"
+                  >
+                    {sib.label}
+                  </Link>
+                ))}
+              </div>
+              <div className="ml-auto flex flex-wrap justify-end gap-2">
+                {roiHref && (
+                  <a
+                    href={roiHref}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex min-h-10 items-center rounded-md bg-navy px-3 text-xs font-semibold text-white hover:bg-navy-soft"
+                  >
+                    投資回収の目安
+                  </a>
+                )}
+                {contactHref && (
+                  <a
+                    href={contactHref}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex min-h-10 items-center rounded-md border border-navy/30 px-3 text-xs font-semibold text-navy"
+                  >
+                    相談
+                  </a>
+                )}
+              </div>
             </div>
           </div>
         )}
@@ -414,6 +429,10 @@ function ExperiencePlayerInner({ packId }: { packId: string }) {
           refreshAccessState();
         }}
         trialPortalUrl={trialPortalHref || undefined}
+      />
+      <UploadPrivacyModal
+        open={privacyOpen}
+        onClose={() => setPrivacyOpen(false)}
       />
     </PlayShell>
   );
