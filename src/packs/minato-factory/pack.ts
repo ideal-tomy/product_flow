@@ -268,11 +268,80 @@ export const minatoFactoryPack: KnowledgePack = {
   llmSystemPrompt:
     "You are ConformSystem assisting 株式会社ミナトテック 厚木工場 with QMS documents. " +
     "Answer in Japanese using ONLY the provided chunks. " +
+    "Map shop-floor slang to procedure intent before answering: " +
+    "塗装剥がれ/傷/キズ/打痕/汚れ/不良っぽい/合格後に見つけた/出荷前/捨てていい/自分で直す/ヤスリ → 不適合疑い(第7条: 中断→赤票→赤棚→内線610→MT-QAポータル当日登録。自己手直し・廃棄禁止。判定は品質管理課長). " +
+    "温度ちょっと/搬送速度/勝手に変えたい → 4M変更(第9条). " +
+    "手順と標準どっち/数字違う → 規定>標準>手順(第4条)＋品質保証部内線620へ報告. " +
+    "品質に電話どっち → QC内線610(日常判定) vs QA内線620(承認・文書・顧客). " +
     "Document priority is 規定 > 標準 > 作業手順書 (品質管理規定 第4条). " +
     "When SOP and inspection standard conflict, follow the higher document and tell the user to report the inconsistency to 品質保証部(内線620). " +
     "Distinguish QC(品質管理課・内線610・工場の日常判定) from QA(品質保証部・内線620・承認・文書・顧客). " +
     "Never allow unsupervised process changes; 4M changes need MT-QAポータル approval. " +
+    "Structure answers as: やること → 連絡先 → 根拠(文書・条). " +
+    "Refuse costs, personal evaluations, or anything not in chunks; suggest 製造/設備/QC/QA as contact. " +
     "If evidence is insufficient, refuse rather than guessing.",
+  fieldLanguageAliases: [
+    {
+      questionId: "nc-handling",
+      patterns: [
+        "塗装剥がれ",
+        "合格品の中に塗装",
+        "傷",
+        "キズ",
+        "打痕",
+        "汚れ",
+        "不良っぽい",
+        "捨てていい",
+        "自分で直",
+        "ヤスリ",
+        "手直ししたい",
+        "出荷前にキズ",
+        "合格後",
+        "ライン止めて",
+      ],
+    },
+    {
+      questionId: "qc-vs-qa",
+      patterns: [
+        "品質に電話",
+        "どっちの番号",
+        "QCとQA",
+        "品質管理課と品質保証",
+      ],
+    },
+    {
+      questionId: "conveyor-change",
+      patterns: [
+        "温度ちょっと",
+        "温度上げたい",
+        "搬送速度",
+        "勝手にやって",
+        "条件変えたい",
+      ],
+    },
+    {
+      questionId: "hold-time-conflict",
+      patterns: [
+        "手順書と検査標準",
+        "数字違う",
+        "どっちが正しい",
+        "書いてること違う",
+        "保持時間",
+      ],
+    },
+    {
+      questionId: "calibration-expire",
+      patterns: ["校正切れ", "シール", "ノギス", "期限切れ"],
+    },
+    {
+      questionId: "certified-operator",
+      patterns: ["新人にリフロー", "新人にやらせ", "認定"],
+    },
+    {
+      questionId: "reflow-peak",
+      patterns: ["ピーク温度", "ピークっていくつ"],
+    },
+  ],
   context: {
     topic: "規定・標準・手順の3階層とQC/QAの使い分けを質問できる",
     sources: "品質管理規定 / 検査標準 / リフローSOP",
@@ -341,10 +410,10 @@ export const minatoFactoryPack: KnowledgePack = {
   guidedTour: {
     roleLabel: "現場スタッフ向け",
     headline: "5手で、現場の判断を体験する",
-    lead: "サンプル文書への質問です。番号順に押すだけで進められます。本命は「保持時間が食い違うとき」です。",
+    lead: "サンプル文書への質問です。番号順に押すだけで進められます。そのあと、現場の言い方のまま聞けるのが本命です。",
     climaxStepId: "step-hold",
     afterTourNote:
-      "版が食い違ったとき、優先ルールと報告先まで答えられました。同じ型で、改定の落とし込み（②）や設計変更の影響（③）も体験できます。",
+      "ガイドで型を掴んだら、下の「現場の言葉で聞く」で社内ボット体験へ。同じ型で②手順改定・③変更影響も体験できます。",
     steps: [
       {
         id: "step-peak",
@@ -379,11 +448,11 @@ export const minatoFactoryPack: KnowledgePack = {
       },
       {
         label: "② 手順改定・教育",
-        href: "/?pack=work-procedure",
+        href: "/play/work-procedure",
       },
       {
         label: "③ 変更影響",
-        href: "/?pack=tcu-480",
+        href: "/play/tcu-480",
       },
     ],
   },

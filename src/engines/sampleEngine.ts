@@ -2,11 +2,39 @@ import { getPack } from "../packs";
 import { matchScenario } from "../data/question-aliases";
 import type { AskRequest, AskResult, QueryEngine } from "./types";
 
+function normalizeFieldText(text: string): string {
+  return text
+    .toLowerCase()
+    .replace(/[？?！!。、．，,\s　]/g, "")
+    .replace(/ｖ/g, "v");
+}
+
+/** パック固有の現場言葉エイリアス → question id */
+export function matchFieldLanguageAlias(
+  question: string,
+  aliases: { patterns: string[]; questionId: string }[] | undefined,
+): string | null {
+  if (!aliases?.length) return null;
+  const q = normalizeFieldText(question);
+  if (!q) return null;
+  for (const entry of aliases) {
+    for (const pattern of entry.patterns) {
+      const p = normalizeFieldText(pattern);
+      if (p && (q.includes(p) || p.includes(q))) {
+        return entry.questionId;
+      }
+    }
+  }
+  return null;
+}
+
 export const sampleEngine: QueryEngine = {
   async ask(req: AskRequest): Promise<AskResult> {
     const pack = getPack(req.packId);
     const questions = pack.sample.questions;
-    const matchedId = matchScenario(req.question);
+    const matchedId =
+      matchFieldLanguageAlias(req.question, pack.fieldLanguageAliases) ??
+      matchScenario(req.question);
 
     const byId = matchedId
       ? questions.find((q) => q.id === matchedId)

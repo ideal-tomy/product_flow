@@ -64,7 +64,7 @@ export type PackPresentation = {
   scaleIntro?: PackScaleIntro;
 };
 
-/** 公開体験用ガイド（1デモ1テーマ）。表にパック切替を出さない入口向け */
+/** 公開ガイドツアー。あるパックは Live でガイドUIを優先 */
 export type PackGuidedTourStep = {
   id: string;
   /** ボタン短ラベル */
@@ -86,6 +86,13 @@ export type PackGuidedTour = {
   siblingDemos?: { label: string; href: string }[];
 };
 
+/** 現場言葉 → sample.questions id（部分一致・正規化後） */
+export type FieldLanguageAlias = {
+  /** 正規化前のキーワード／フレーズ（いずれかが質問に含まれる） */
+  patterns: string[];
+  questionId: string;
+};
+
 export type KnowledgePack = {
   id: KnowledgePackId;
   label: string;
@@ -103,6 +110,8 @@ export type KnowledgePack = {
   presentation?: PackPresentation;
   /** 公開ガイドツアー。あるパックは Live でガイドUIを優先 */
   guidedTour?: PackGuidedTour;
+  /** 自由記述の現場言葉 → 固定シナリオ */
+  fieldLanguageAliases?: FieldLanguageAlias[];
 };
 
 /** ショーケース既定。テンプレ化後は starter に差し替わる */

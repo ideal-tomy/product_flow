@@ -7,9 +7,9 @@ const demos = [
     badge: "製造①",
     role: "現場",
     title: "現場判断",
-    lead: "不良時の手順、QC/QAの窓口、文書の版ずれを、その場で聞いて動く。",
-    climax: "保持時間が食い違うとき、優先ルールと報告先まで",
-    href: "/?pack=minato-factory",
+    lead: "ガイドのあと、現場言葉で聞いて根拠付きで動く（社内ボット体験）。",
+    climax: "塗装剥がれ・手直しなど、現場一言が規程フローに着地する",
+    href: "/play/minato-factory",
     primary: true,
   },
   {
@@ -19,7 +19,7 @@ const demos = [
     title: "手順改定・教育",
     lead: "SOPの差分から、影響・再教育・現場適用の可否まで見通す。",
     climax: "この改定を現場適用して大丈夫か",
-    href: "/?pack=work-procedure",
+    href: "/play/work-procedure",
     primary: false,
   },
   {
@@ -29,7 +29,7 @@ const demos = [
     title: "変更影響",
     lead: "仕様の版上げが、制御・試験・FMEAのどこまで波及するかを一覧する。",
     climax: "この変更の影響範囲は？",
-    href: "/?pack=tcu-480",
+    href: "/play/tcu-480",
     primary: false,
   },
 ] as const;
@@ -64,7 +64,8 @@ export function ManufacturingHubPage() {
           製造の判断を、3テーマで体験する
         </h1>
         <p className="mt-3 max-w-xl text-sm leading-relaxed text-muted sm:text-base">
-          楔は「文書と現場判断の隙間」。ワークフロー画面は作りません。各デモで一点を実感し、つながった導入は頭の中で想像してください。
+          楔は「文書と現場判断の隙間」。各テーマはガイド →
+          現場言葉で社内ボット体験。ワークフロー画面は作りません。
         </p>
 
         <p className="mt-6 rounded-md border border-navy/15 bg-white px-4 py-3 text-sm leading-relaxed text-navy">
@@ -100,7 +101,7 @@ export function ManufacturingHubPage() {
                   {demo.lead}
                 </p>
                 <p className="mt-3 text-xs text-navy-muted">
-                  クライマックス: {demo.climax}
+                  本命: {demo.climax}
                 </p>
                 <p className="mt-3 text-sm font-semibold text-navy">
                   体験する →
@@ -126,7 +127,7 @@ export function ManufacturingHubPage() {
               </a>
             )}
             <Link
-              to="/?pack=minato-factory"
+              to="/play/minato-factory"
               className="inline-flex rounded-md border border-line bg-white px-4 py-2.5 text-sm font-semibold text-navy hover:border-navy/40"
             >
               ①から始める

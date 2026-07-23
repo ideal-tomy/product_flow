@@ -52,7 +52,30 @@ export const tcuPack: KnowledgePack = {
   synthesizer: "tcu",
   llmSystemPrompt:
     "You are ConformSystem, an industrial document reasoning assistant for Tohama Mobility TCU-480. " +
-    "Answer in Japanese. Use ONLY the provided chunks.",
+    "Answer in Japanese. Use ONLY the provided chunks. " +
+    "Map field language: 影響範囲/どこまで波及 → impact-scope; 再試験/試験は何 → retest; FMEA更新 → fmea-impact or related; 経営向け要約 → exec-summary.",
+  fieldLanguageAliases: [
+    {
+      questionId: "impact-scope",
+      patterns: ["影響範囲", "どこまで波及", "この変更の影響"],
+    },
+    {
+      questionId: "retest",
+      patterns: ["再試験", "試験は何"],
+    },
+    {
+      questionId: "fmea-impact",
+      patterns: ["FMEA", "エフエムイーエー"],
+    },
+    {
+      questionId: "exec-summary",
+      patterns: ["経営向け", "3行で", "要約"],
+    },
+    {
+      questionId: "version-diff",
+      patterns: ["何が変わった", "版差分"],
+    },
+  ],
   context: {
     topic:
       "ミナトテック・車載温度制御ユニット（TCU-480）の制御仕様書改訂（v3.2→v3.4）",
@@ -106,10 +129,10 @@ export const tcuPack: KnowledgePack = {
   guidedTour: {
     roleLabel: "設計・品質向け（経営は要約）",
     headline: "4手で、仕様変更の影響を体験する",
-    lead: "製品仕様の版変更が、どこまで波及するかを確認します。本命は「影響範囲」です。サンプルは車載制御ユニットですが、「版を上げたときの漏れ」は他製品でも同じ型です。",
+    lead: "番号でガイドを進め、そのあと現場言葉で聞けるのが本命です。版を上げたときの漏れを防ぎます。",
     climaxStepId: "step-impact",
     afterTourNote:
-      "変更の影響を試験・FMEAまで含めて見られました。現場の即答は①、手順改定の落とし込みは②で体験できます。",
+      "ガイドの型を掴んだら、下の「現場の言葉で聞く」へ。現場の即答は①、手順改定の落とし込みは②で体験できます。",
     steps: [
       {
         id: "step-diff",
@@ -134,8 +157,8 @@ export const tcuPack: KnowledgePack = {
     ],
     siblingDemos: [
       { label: "製造ハブへ", href: "/manufacturing" },
-      { label: "① 現場判断", href: "/?pack=minato-factory" },
-      { label: "② 手順改定・教育", href: "/?pack=work-procedure" },
+      { label: "① 現場判断", href: "/play/minato-factory" },
+      { label: "② 手順改定・教育", href: "/play/work-procedure" },
     ],
   },
 };

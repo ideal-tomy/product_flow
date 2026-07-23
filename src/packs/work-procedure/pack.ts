@@ -370,7 +370,30 @@ export const workProcedurePack: KnowledgePack = {
   synthesizer: "generic",
   llmSystemPrompt:
     "You are ConformSystem, an industrial document reasoning assistant for assembly SOP revisions. " +
-    "Answer in Japanese. Use ONLY the provided chunks. Cite documentName and clauseId.",
+    "Answer in Japanese. Use ONLY the provided chunks. Cite documentName and clauseId. " +
+    "Map field language: 適用して大丈夫/現場に落としていい → approval gate; 教育は誰/再教育 → retest/training; 旧版残していい → contradiction/old version withdrawal.",
+  fieldLanguageAliases: [
+    {
+      questionId: "approval",
+      patterns: ["適用して大丈夫", "現場に適用", "現場に落として"],
+    },
+    {
+      questionId: "retest",
+      patterns: ["教育は誰", "再教育", "教育は必要"],
+    },
+    {
+      questionId: "contradiction",
+      patterns: ["旧版", "古い手順", "残していい"],
+    },
+    {
+      questionId: "impact-scope",
+      patterns: ["誰に影響", "影響は誰"],
+    },
+    {
+      questionId: "version-diff",
+      patterns: ["何が変わった", "差分"],
+    },
+  ],
   context: {
     topic:
       "ミナトテック・組立ラインAの標準作業手順書改定（SOP-組立-07 v2.1→v3.0）",
@@ -415,10 +438,10 @@ export const workProcedurePack: KnowledgePack = {
   guidedTour: {
     roleLabel: "管理職向け（製造・品質・教育）",
     headline: "4手で、手順改定の落とし込みを体験する",
-    lead: "改定を出したあと、誰に効き、教育は足りるか、現場適用してよいかまで確認します。本命は「適用して大丈夫？」です。",
+    lead: "番号でガイドを進め、そのあと現場言葉で聞けるのが本命です。改定の次は教育と旧版撤去まで見ます。",
     climaxStepId: "step-approval",
     afterTourNote:
-      "改定の次に見るべきは教育完了と旧版の撤去です。現場のその場判断は①、設計変更の波及は③で体験できます。",
+      "ガイドの型を掴んだら、下の「現場の言葉で聞く」へ。現場のその場判断は①、設計変更の波及は③で体験できます。",
     steps: [
       {
         id: "step-diff",
@@ -443,8 +466,8 @@ export const workProcedurePack: KnowledgePack = {
     ],
     siblingDemos: [
       { label: "製造ハブへ", href: "/manufacturing" },
-      { label: "① 現場判断", href: "/?pack=minato-factory" },
-      { label: "③ 変更影響", href: "/?pack=tcu-480" },
+      { label: "① 現場判断", href: "/play/minato-factory" },
+      { label: "③ 変更影響", href: "/play/tcu-480" },
     ],
   },
 };
