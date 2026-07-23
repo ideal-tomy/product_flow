@@ -18,7 +18,10 @@ import {
   sendAiRequest,
 } from "@axeon/ai-demo-core/demo-core";
 import type { KnowledgeChunk } from "./knowledge";
-import { buildIsoAiRequest } from "./adapters/iso-input";
+import {
+  buildIsoAiRequest,
+  type KnowledgeAnswerMode,
+} from "./adapters/iso-input";
 import { parseIsoAiResult } from "./adapters/iso-output";
 import { detectIntent } from "./intent";
 import { knowledgeStats } from "./knowledge";
@@ -41,14 +44,11 @@ function userDocChunk(text: string): KnowledgeChunk {
   };
 }
 
-function mergeUserDocHits(
-  hits: ScoredChunk[],
-  userText: string,
-): ScoredChunk[] {
+/** 自社資料モード: アップロードのみ（デモ規程と混ぜない） */
+function userDocOnlyHits(userText: string): ScoredChunk[] {
   const trimmed = userText.trim();
-  if (!trimmed) return hits;
-  const extra: ScoredChunk = { ...userDocChunk(trimmed), score: 999 };
-  return [extra, ...hits].slice(0, 12);
+  if (!trimmed) return [];
+  return [{ ...userDocChunk(trimmed), score: 999 }];
 }
 
 export type AskClientLlmOptions = {
@@ -68,12 +68,21 @@ export async function askClientLlm(
   const intent = detectIntent(trimmed);
   if (intent === "refuse") return null;
 
-  const { hits: rawHits } = retrieveChunks(trimmed, {
-    intent,
-    topK: 10,
-    packId,
-  });
-  const hits = mergeUserDocHits(rawHits, getUserDocumentText());
+  const userText = getUserDocumentText();
+  const hasUserDoc = userText.trim().length > 0;
+  const knowledgeMode: KnowledgeAnswerMode = hasUserDoc ? "user-doc" : "pack";
+
+  let hits: ScoredChunk[];
+  if (hasUserDoc) {
+    hits = userDocOnlyHits(userText);
+  } else {
+    const { hits: rawHits } = retrieveChunks(trimmed, {
+      intent,
+      topK: 10,
+      packId,
+    });
+    hits = rawHits;
+  }
   if (hits.length === 0) return null;
 
   const provider = getIsoProvider();
@@ -84,9 +93,9 @@ export async function askClientLlm(
     hits,
     packId: pack.id,
     model,
+    knowledgeMode,
   });
 
-  // Override provider for BYOK multi-provider; Trial stays OpenAI via gateway allowlist
   request.provider = provider;
   request.accessMode = options.accessMode;
   if (options.accessMode === "byok-direct") {
@@ -95,9 +104,10 @@ export async function askClientLlm(
     request.apiKey = apiKey;
   }
 
-  const knowledgeText = getUserDocumentText() + hits.map((h) => h.text).join("\n");
-  const searchedDocuments =
-    pack.ai.stats.documents || knowledgeStats.documents;
+  const knowledgeText = hits.map((h) => h.text).join("\n");
+  const searchedDocuments = hasUserDoc
+    ? 1
+    : pack.ai.stats.documents || knowledgeStats.documents;
 
   try {
     const result = await sendAiRequest(request, {
@@ -120,16 +130,37 @@ export async function askClientLlm(
 
 /**
  * Full client ask with synthesize fallback.
+ * 自社資料モードではデモ合成に落とさず、不足時は拒否を返す。
  */
 export async function askWithAccessMode(
   question: string,
   options: AskClientLlmOptions,
 ): Promise<AskResult> {
+  const hasUserDoc = getUserDocumentText().trim().length > 0;
   const llm = await askClientLlm(question, options);
   if (llm) {
     return {
       ...llm,
       meta: { ...llm.meta, packId: options.packId },
+    };
+  }
+  if (hasUserDoc) {
+    return {
+      answer: {
+        summary:
+          "アップロード資料からは根拠を特定できませんでした。資料の該当箇所を確認するか、別の聞き方を試してください。",
+        sources: [],
+      },
+      meta: {
+        searchedDocuments: 1,
+        sourcesFound: 0,
+        confidence: "low",
+        refused: true,
+        engine: "llm",
+        scenarioId: null,
+        packId: options.packId,
+      },
+      scenarioId: null,
     };
   }
   return synthesizeAnswer(question, options.packId);
