@@ -56,6 +56,10 @@ export interface ImpactGroup {
 
 export interface DemoAnswer {
   summary: string;
+  /** 回答カード用の状況画像（例: /images/answer1_1.jpg） */
+  imageSrc?: string;
+  /** 画像の代替テキスト */
+  imageAlt?: string;
   before?: string;
   after?: string;
   comparisonLabel?: string;

@@ -440,6 +440,8 @@ export const demoQuestions: DemoQuestion[] = [
     answer: {
       summary:
         "v3.2からv3.4で、主要な仕様変更を 7件 検出しました。特に重要なのは、センサー許容範囲の厳格化（±5℃→±3℃）と、起動後5秒の判定保留の追加です。",
+      imageSrc: "/images/answer3_1.jpg",
+      imageAlt: "制御仕様 v3.2→v3.4 の主要変更（センサー許容・判定保留）",
       comparisonLabel: "温度センサー許容範囲",
       before: "±5℃",
       after: "±3℃",
@@ -745,6 +747,8 @@ export const demoQuestions: DemoQuestion[] = [
     answer: {
       summary:
         "1. センサー判定を厳格化し、誤検知・見逃しリスクを低減。\n2. 過去不具合を踏まえ、始動直後5秒の判定保留を追加。\n3. ただし試験条件・部品仕様との不整合が3件残っており、承認前に突合が必要。",
+      imageSrc: "/images/answer3_4.jpg",
+      imageAlt: "経営向け3行サマリー（厳格化・判定保留・不整合残）",
       sources: [src.tol34, src.hold, src.sensor],
     },
   },

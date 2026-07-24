@@ -49,6 +49,18 @@ export function PlayAnswerCard({
           {answer.summary}
         </p>
 
+        {answer.imageSrc && (
+          <figure className="mt-4 overflow-hidden rounded-lg border border-line/80 bg-surface/40">
+            <img
+              src={answer.imageSrc}
+              alt={answer.imageAlt ?? ""}
+              className="aspect-video w-full object-cover"
+              loading="lazy"
+              decoding="async"
+            />
+          </figure>
+        )}
+
         {(answer.before || answer.after) && (
           <div className="mt-4 grid gap-2 sm:grid-cols-2">
             {answer.before && (

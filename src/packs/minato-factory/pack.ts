@@ -143,6 +143,8 @@ const questions: DemoQuestion[] = [
     question: "リフローのピーク温度っていくつだっけ?",
     answer: {
       summary: "ピーク温度は240〜250℃です（炉内モニタで確認）。",
+      imageSrc: "/images/answer1_1.jpg",
+      imageAlt: "炉内モニタでピーク温度を確認している様子",
       sources: [src.peakTemp],
     },
   },
@@ -153,6 +155,8 @@ const questions: DemoQuestion[] = [
     answer: {
       summary:
         "自己判断で手直し・廃棄せず作業を中断し、赤色識別票を貼って赤棚へ隔離、品質管理課(内線610)へ連絡し、当日中にMT-QAポータルへ不適合報告してください。処置判定は品質管理課長です。",
+      imageSrc: "/images/answer1_2.jpg",
+      imageAlt: "不適合品に識別票を付け赤棚へ隔離する様子",
       sources: [src.ncRule],
     },
   },
@@ -184,6 +188,8 @@ const questions: DemoQuestion[] = [
     answer: {
       summary:
         "文書の優先順位は規定>標準>手順（品質管理規定 第4条）なので、検査標準の30〜60秒に従ってください。あわせて文書の不整合として品質保証部(内線620)へ報告が必要です。",
+      imageSrc: "/images/answer1_4.jpg",
+      imageAlt: "検査標準と作業手順書の保持時間を照合し文書不整合を報告する様子",
       comparisonLabel: "220℃以上の保持時間",
       before: "手順書 SOP-SMT-03: 40〜60秒",
       after: "検査標準 QC-STD-02: 30〜60秒（優先）",
@@ -214,6 +220,8 @@ const questions: DemoQuestion[] = [
     answer: {
       summary:
         "校正期限切れ機器は使用禁止です。使用が判明した場合、当該期間のロットが疑義品扱いとなり品質管理課が再検証するため、直ちに品質管理課(内線610)へ報告してください。",
+      imageSrc: "/images/answer1_5.jpg",
+      imageAlt: "校正期限切れのノギスと校正済シール",
       sources: [src.calibration],
     },
   },

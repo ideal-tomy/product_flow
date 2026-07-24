@@ -1,7 +1,8 @@
 # 公開用体験プレイヤー UX（正本）
 
 最終更新: 2026-07-24  
-対象: `product_flow` 製造デモ（`/manufacturing` · `/play/:packId`）
+対象: `product_flow` 製造デモ（`/manufacturing` · `/play/:packId`）  
+※ **製造専用。** 他業種はこの画面骨格を流用しない。横断原則は [`sites/ideal_official/docs/industry-demos/ux-saas-principles.md`](../../sites/ideal_official/docs/industry-demos/ux-saas-principles.md)
 
 関連: [`field-language-interpretation-rules.md`](./field-language-interpretation-rules.md)
 

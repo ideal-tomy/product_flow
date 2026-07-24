@@ -156,6 +156,8 @@ const questions: DemoQuestion[] = [
     answer: {
       summary:
         "主な変更は 3件です。保護具の必須化、トルク 8→10 N·m、リーダー確認印の追加です。",
+      imageSrc: "/images/answer2_1.jpg",
+      imageAlt: "作業手順書の改定差分（保護具・トルク・確認印）",
       comparisonLabel: "ボルトA 締付トルク",
       before: "8 N·m",
       after: "10 N·m",
@@ -221,6 +223,8 @@ const questions: DemoQuestion[] = [
     question: "再教育が必要な項目は？",
     answer: {
       summary: "再教育は必須です。保護具・トルク・二重確認の3テーマが対象です。",
+      imageSrc: "/images/answer2_3.jpg",
+      imageAlt: "再教育（保護具・トルク・リーダー確認）の実施風景",
       retests: [
         {
           id: "TR-保護具",
@@ -312,6 +316,8 @@ const questions: DemoQuestion[] = [
     answer: {
       summary:
         "現時点では条件付き不可です。夜勤3名の再教育未完了と旧チェックリスト残存リスクがあります。完了後に適用してください。",
+      imageSrc: "/images/answer2_4.jpg",
+      imageAlt: "適用ゲート未充足（再教育・旧帳票）で保留となっている様子",
       impactAreas: ["再教育未完了（夜勤3名）", "旧帳票の撤去確認", "保護具配備"],
       exceptionNote: "GATE-A 未充足のため量産適用は保留。",
       sources: [src.gate, src.train],
